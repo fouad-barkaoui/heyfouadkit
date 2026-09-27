@@ -1,4 +1,4 @@
-import { Instagram, LogOut, Moon, Sun } from 'lucide-react';
+import { Instagram, LogOut, Moon, Orbit, Sparkles, Sun, Waves, Wind } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
@@ -9,6 +9,14 @@ import { useTheme } from '@/state/themeStore';
 import { useLanguage, type Language } from '@/state/languageStore';
 import { MAX_TOTAL_CLOUD_BYTES, totalCloudBytes } from '@/data/attachments';
 import { useWorkspace } from '@/state/workspaceStore';
+import { useUI, type BgStyle } from '@/state/uiStore';
+
+const BG_OPTIONS: { id: BgStyle; label: string; hint: string; icon: typeof Waves }[] = [
+  { id: 'waves', label: 'Waves', hint: 'A rolling dot sea — your cursor makes ripples', icon: Waves },
+  { id: 'starfield', label: 'Starfield', hint: 'Stars stream past — hold to warp', icon: Sparkles },
+  { id: 'flow', label: 'Flow', hint: 'Drifting dust — your cursor stirs a vortex', icon: Wind },
+  { id: 'orbit', label: 'Orbit', hint: 'Each page forms its own shape', icon: Orbit },
+];
 
 const INSTAGRAM_URL = 'https://www.instagram.com/heyfouad/';
 
@@ -22,6 +30,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps): JSX.E
   const { preference, setPreference } = useTheme();
   const { language, setLanguage, t } = useLanguage();
   const { workspace } = useWorkspace();
+  const { bgStyle, setBgStyle } = useUI();
   const storageUsed = totalCloudBytes(workspace.attachments);
   const storageLimitBytes = MAX_TOTAL_CLOUD_BYTES;
   const [signingOut, setSigningOut] = useState(false);
@@ -95,6 +104,41 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps): JSX.E
               <Moon size={13} strokeWidth={2} />
               {t('theme.dark')}
             </button>
+          </div>
+        </div>
+
+        {/* Background Section */}
+        <div>
+          <p className="mb-2.5 text-[11px] font-medium uppercase tracking-[0.08em] text-ash">Background</p>
+          <div role="radiogroup" aria-label="Background style" className="grid grid-cols-2 gap-2">
+            {BG_OPTIONS.map(({ id, label, hint, icon: Icon }) => (
+              <button
+                key={id}
+                type="button"
+                role="radio"
+                aria-checked={bgStyle === id}
+                onClick={() => setBgStyle(id)}
+                className={cn(
+                  'bg-style-card flex flex-col items-start gap-2 rounded-[12px] p-3 text-start transition-[background-color,box-shadow] duration-150',
+                  bgStyle === id
+                    ? 'bg-[color-mix(in_oklab,var(--color-acid)_10%,transparent)] shadow-[inset_0_0_0_1.5px_var(--color-acid)]'
+                    : 'bg-[rgb(var(--tint-rgb)/0.03)] shadow-[inset_0_0_0_1px_var(--color-graphite)] hover:bg-[rgb(var(--tint-rgb)/0.06)]',
+                )}
+              >
+                <span
+                  className={cn(
+                    'flex h-8 w-8 items-center justify-center rounded-[9px]',
+                    bgStyle === id ? 'bg-acid text-[#08090a]' : 'bg-[rgb(var(--tint-rgb)/0.06)] text-fog',
+                  )}
+                >
+                  <Icon size={15} strokeWidth={1.8} aria-hidden />
+                </span>
+                <span>
+                  <span className="block text-[13px] font-medium text-paper">{label}</span>
+                  <span className="mt-0.5 block text-[11.5px] leading-[1.4] text-ash">{hint}</span>
+                </span>
+              </button>
+            ))}
           </div>
         </div>
 

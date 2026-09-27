@@ -10,6 +10,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { IconButton } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
+import { ScrollIndex } from '@/components/motion/ScrollIndex';
 
 interface TextMatch {
   page: number;
@@ -215,6 +216,7 @@ export function PdfViewer({ src, className }: { src: string; className?: string 
       ) : null}
 
       <div className="scroll-y min-h-0 flex-1 rounded-[8px] bg-obsidian p-4 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
+        <ScrollIndex />
         {loading ? (
           <div className="flex h-[320px] items-center justify-center gap-2 text-[13px] text-ash">
             <Loader2 size={15} className="animate-spin" aria-hidden />

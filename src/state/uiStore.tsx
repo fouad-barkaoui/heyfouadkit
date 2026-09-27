@@ -30,6 +30,8 @@ interface UIContextValue {
   setAccountOpen: (open: boolean) => void;
   /** Theme / language / storage / contact panel, opened from the rail's gear icon. */
   settingsOpen: boolean;
+  bgStyle: BgStyle;
+  setBgStyle: (style: BgStyle) => void;
   setSettingsOpen: (open: boolean) => void;
   /** Cross-module deep link: set by search, consumed by the target module. */
   focusRequest: { module: ModuleId; id: string } | null;
@@ -38,6 +40,19 @@ interface UIContextValue {
 }
 
 const UIContext = createContext<UIContextValue | null>(null);
+
+/** Full-screen background styles for the WebGL field. */
+export type BgStyle = 'waves' | 'starfield' | 'flow' | 'orbit';
+export const BG_STYLES: BgStyle[] = ['waves', 'starfield', 'flow', 'orbit'];
+const BG_KEY = 'heyfouad.bgStyle.v1';
+function readBgStyle(): BgStyle {
+  try {
+    const raw = window.localStorage.getItem(BG_KEY);
+    return (BG_STYLES as string[]).includes(raw ?? '') ? (raw as BgStyle) : 'waves';
+  } catch {
+    return 'waves';
+  }
+}
 
 const VALID: ModuleId[] = [
   'home',
@@ -76,6 +91,15 @@ export function UIProvider({ children }: { children: ReactNode }): JSX.Element {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [bgStyle, setBgStyleState] = useState<BgStyle>(() => (typeof window === 'undefined' ? 'waves' : readBgStyle()));
+  const setBgStyle = useCallback((next: BgStyle) => {
+    setBgStyleState(next);
+    try {
+      window.localStorage.setItem(BG_KEY, next);
+    } catch {
+      /* ignore */
+    }
+  }, []);
   const [focusRequest, setFocusRequest] = useState<{ module: ModuleId; id: string } | null>(null);
 
   const setModule = useCallback((next: ModuleId) => {
@@ -143,6 +167,8 @@ export function UIProvider({ children }: { children: ReactNode }): JSX.Element {
       setAccountOpen,
       settingsOpen,
       setSettingsOpen,
+      bgStyle,
+      setBgStyle,
       focusRequest,
       requestFocus,
       clearFocus: () => setFocusRequest(null),
@@ -157,6 +183,8 @@ export function UIProvider({ children }: { children: ReactNode }): JSX.Element {
       mobileNavOpen,
       accountOpen,
       settingsOpen,
+      bgStyle,
+      setBgStyle,
       focusRequest,
       requestFocus,
     ],

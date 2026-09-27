@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { ScrollIndex } from '@/components/motion/ScrollIndex';
 
 interface ToolItem {
   id: string;
@@ -109,6 +110,7 @@ export function RichEditor({
         className="scroll-y min-h-0 flex-1 rounded-[6px] bg-[rgb(var(--tint-rgb)/0.015)] px-4 py-3.5 shadow-[inset_0_0_0_1px_var(--color-graphite)]"
         style={{ minHeight }}
       >
+        <ScrollIndex />
         <EditorContent editor={editor} />
       </div>
     </div>

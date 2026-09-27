@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button';
 import { FieldRow, Label, TextInput, TextArea } from '@/components/ui/Field';
 import { useAuth } from '@/state/authStore';
 import { useLanguage } from '@/state/languageStore';
+import { ScrollIndex } from '@/components/motion/ScrollIndex';
 
 export function ContactPage(): JSX.Element {
   const { user } = useAuth();
@@ -63,6 +64,7 @@ export function ContactPage(): JSX.Element {
       </header>
 
       <div className="scroll-y min-h-0 flex-1 px-4 py-5 md:px-7 md:py-6">
+        <ScrollIndex />
         <div className="mx-auto max-w-[480px]">
           {submitted ? (
             <div className="rounded-[8px] bg-acid/10 p-4 text-center">

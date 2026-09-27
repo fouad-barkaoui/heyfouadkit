@@ -1,4 +1,5 @@
-import { Eye, EyeOff, Lock, Loader2, Mail, type LucideIcon, Sparkles, User, X } from 'lucide-react';
+import { Eye, EyeOff, Lock, Loader2, Mail, type LucideIcon, User, X } from 'lucide-react';
+import { AVATAR_SRC } from '@/components/ui/BrandMark';
 import { useEffect, useState, type InputHTMLAttributes, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
@@ -140,12 +141,12 @@ export function AuthOverlay({
         </button>
 
         <div className="relative overflow-visible rounded-[20px] bg-[#111214] px-7 pb-7 pt-10 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07),0_24px_70px_rgba(0,0,0,0.6)]">
-          <span className="absolute -top-7 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-gradient-to-br from-[#e4f222] to-[#9db300] shadow-[0_10px_26px_rgba(228,242,34,0.32),0_0_0_5px_#111214]">
-            <Sparkles size={22} strokeWidth={2} className="text-[#0a0a0a]" aria-hidden />
+          <span className="absolute -top-7 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center overflow-hidden rounded-full bg-[#f4f3f1] shadow-[0_10px_26px_rgba(228,242,34,0.28),0_0_0_3px_#e4f222,0_0_0_7px_#111214]">
+            <img src={AVATAR_SRC} alt="" width={56} height={56} className="h-full w-full object-cover" aria-hidden />
           </span>
 
           <div className="text-center">
-            <p className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#7a7a80]">Barkaoui's Kit</p>
+            <p className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#7a7a80]">Heyfouad Library</p>
             <h1 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-white">{heading}</h1>
             <p className="mt-1 text-[13px] text-[#9a9aa0]">{subtitle}</p>
           </div>

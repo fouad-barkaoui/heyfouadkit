@@ -20,6 +20,7 @@ import { cn, formatDate, relativeTime } from '@/lib/utils';
 import { useAuth } from '@/state/authStore';
 import { useTeam } from '@/state/teamStore';
 import { MenuButton } from '@/components/shell/MenuButton';
+import { ScrollIndex } from '@/components/motion/ScrollIndex';
 
 const ROLE_LABEL: Record<TeamRole, string> = {
   owner: 'Owner',
@@ -364,6 +365,7 @@ export function TeamModule(): JSX.Element {
           </header>
 
           <div className="scroll-y min-h-0 flex-1 px-4 py-5 md:px-7 md:py-6">
+        <ScrollIndex />
             <div className="mx-auto max-w-[760px] space-y-5">
               <div className="flex items-start gap-2.5 rounded-[8px] bg-[rgb(var(--tint-rgb)/0.03)] px-3 py-2.5 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
                 <Clock size={14} strokeWidth={1.8} className="mt-[1px] shrink-0 text-accent" aria-hidden />

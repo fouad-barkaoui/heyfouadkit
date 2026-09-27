@@ -18,6 +18,7 @@ import type { CollectionKey } from '@/lib/types';
 import { relativeTime, stripHtml } from '@/lib/utils';
 import { useLanguage } from '@/state/languageStore';
 import { useWorkspace } from '@/state/workspaceStore';
+import { ScrollIndex } from '@/components/motion/ScrollIndex';
 
 type TrashKind = 'note' | 'task' | 'article' | 'doc' | 'course' | 'news' | 'medicine' | 'plan';
 
@@ -169,6 +170,7 @@ export function TrashPage(): JSX.Element {
       </header>
 
       <div className="scroll-y min-h-0 flex-1 px-4 py-5 md:px-7 md:py-6">
+        <ScrollIndex />
         {trashedItems.length === 0 ? (
           <div className="flex h-full items-center justify-center">
             <EmptyState

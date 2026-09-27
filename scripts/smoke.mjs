@@ -430,9 +430,51 @@ check('pwa: manifest and icons resolve', manifestOk);
     return { overflow: sc ? sc.scrollHeight - sc.clientHeight : -1, trashVisible: !!r && r.bottom <= window.innerHeight && r.height > 0 };
   });
   check('rail: collapsed rail fits every destination without scrolling', fit.overflow <= 1 && fit.trashVisible, JSON.stringify(fit));
-  check('rail: brand mark shows the B monogram', (await zpage.locator('.brand-mark svg path').count()) > 0);
+  check('rail: brand mark shows the avatar', (await zpage.locator('.brand-mark img').count()) > 0);
   check('sticky notes: feature removed', (await zpage.locator('[aria-label*="sticky" i]').count()) === 0);
   await zctx.close();
+}
+
+/* — Reading-progress pill appears on a long note and its index jumps — */
+{
+  const sctx = await browser.newContext({ viewport: { width: 1440, height: 800 } });
+  const spage = await newPage(sctx);
+  await spage.goto(BASE, { waitUntil: 'networkidle' });
+  await spage.waitForTimeout(900);
+  await dismissCookieConsent(spage);
+  await spage.getByRole('button', { name: 'Notebook', exact: true }).click();
+  await spage.waitForTimeout(500);
+  await spage.getByRole('button', { name: 'New note', exact: true }).first().click();
+  await spage.waitForTimeout(400);
+  await spage.getByLabel('Note title').fill('Long read');
+  await spage.waitForTimeout(200);
+  await spage.locator('.tiptap').first().click();
+  const para = 'Interaction design is the craft of defining how people engage with an interface, considering behaviour, feedback and outcomes. ';
+  for (const h of ['Alpha section', 'Beta section', 'Gamma section']) {
+    await spage.keyboard.type('## ' + h);
+    await spage.keyboard.press('Enter');
+    for (let i = 0; i < 4; i++) {
+      await spage.keyboard.insertText(para + para);
+      await spage.keyboard.press('Enter');
+    }
+  }
+  await spage.waitForTimeout(600);
+  await spage.evaluate(() => {
+    const el = [...document.querySelectorAll('main .scroll-y')].find((e) => e.scrollHeight > e.clientHeight + 64);
+    if (el) el.scrollTop = 0.3 * (el.scrollHeight - el.clientHeight);
+  });
+  await spage.waitForTimeout(700);
+  await spage.screenshot({ path: 'screenshots/scroll-pill.png' });
+  check('scroll pill: appears after scrolling', await spage.locator('.scroll-index[data-visible="true"]').first().isVisible().catch(() => false));
+  const pctText = await spage.locator('.scroll-index-pct').first().textContent().catch(() => '');
+  check('scroll pill: shows a live percentage', /^\d{1,3}%$/.test((pctText ?? '').trim()), pctText ?? '');
+  await spage.getByRole('button', { name: 'Page index' }).first().click();
+  await spage.waitForTimeout(400);
+  check('scroll pill: index lists the headings', (await spage.getByRole('menuitem', { name: /Gamma section/ }).count()) === 1);
+  await spage.getByRole('menuitem', { name: /Gamma section/ }).click();
+  await spage.waitForTimeout(1300);
+  check('scroll pill: index jumps to the section', ((await spage.locator('.scroll-index-current').first().textContent().catch(() => '')) ?? '').includes('Gamma'));
+  await sctx.close();
 }
 
 /* — No horizontal overflow on desktop — */

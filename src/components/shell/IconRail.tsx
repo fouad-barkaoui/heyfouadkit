@@ -2,7 +2,7 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { Check, ChevronDown, ChevronLeft, CloudOff, LibraryBig, Search, Settings, UserRound } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import { BrandMark } from '@/components/ui/BrandMark';
+import { BRAND_NAME, BRAND_TAGLINE, BrandMark } from '@/components/ui/BrandMark';
 import type { ModuleId } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { DOCS_GROUP, ESSENTIALS, INSIGHT, MODULE_MAP, type ModuleMeta } from '@/modules/registry';
@@ -48,9 +48,9 @@ function Logo({ expanded }: { expanded: boolean }): JSX.Element {
       {expanded ? (
         <span className="anim-fade min-w-0">
           <span className="block truncate text-[14px] font-medium leading-tight tracking-[-0.014em] text-paper">
-            Barkaoui&apos;s Kit
+            {BRAND_NAME}
           </span>
-          <span className="mono block truncate text-[9.5px] uppercase tracking-[0.12em] text-ash">Workspace</span>
+          <span className="mono block truncate text-[9.5px] uppercase tracking-[0.12em] text-ash">{BRAND_TAGLINE}</span>
         </span>
       ) : null}
     </div>

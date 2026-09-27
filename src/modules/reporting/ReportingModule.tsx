@@ -6,6 +6,7 @@ import { cn, formatDate } from '@/lib/utils';
 import { useTeam } from '@/state/teamStore';
 import { useWorkspace } from '@/state/workspaceStore';
 import { MenuButton } from '@/components/shell/MenuButton';
+import { ScrollIndex } from '@/components/motion/ScrollIndex';
 
 type RangeId = '7' | '30' | '90' | 'all';
 
@@ -155,6 +156,7 @@ export function ReportingModule(): JSX.Element {
       </div>
 
       <div className="scroll-y min-h-0 flex-1 px-4 py-5 md:px-7 md:py-6">
+        <ScrollIndex />
         <article className="mx-auto max-w-[720px] rounded-[10px] bg-[rgb(var(--tint-rgb)/0.02)] p-6 shadow-[inset_0_0_0_1px_var(--color-graphite)] md:p-8">
           <p className="mono text-[10.5px] uppercase tracking-[0.08em] text-ash">
             {activeTeam?.name ?? 'Personal workspace'} · {formatDate(new Date().toISOString())}

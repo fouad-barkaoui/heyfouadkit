@@ -72,6 +72,7 @@ export function AppShell(): JSX.Element {
     setAccountOpen,
     settingsOpen,
     setSettingsOpen,
+    bgStyle,
   } = useUI();
 
   // Wide screens dock the labelled sidebar beside the content; laptops and
@@ -150,7 +151,7 @@ export function AppShell(): JSX.Element {
     <div className="relative flex h-[100dvh] w-full overflow-hidden bg-void">
       {fieldReady ? (
         <Suspense fallback={null}>
-          <SpatialField module={module} energized={mobileNavOpen || paletteOpen} />
+          <SpatialField module={module} energized={mobileNavOpen || paletteOpen} style={bgStyle} />
         </Suspense>
       ) : null}
 

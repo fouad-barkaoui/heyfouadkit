@@ -3,6 +3,8 @@ import gsap from 'gsap';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import type { ModuleId } from '@/lib/types';
+import type { BgStyle } from '@/state/uiStore';
+import { AmbientField, type PointerState } from './AmbientField';
 import { useTheme } from '@/state/themeStore';
 import { buildSeeds, buildShape, MODULE_SHAPE, MODULE_TINT } from './shapes';
 
@@ -90,7 +92,17 @@ const FRAG = /* glsl */ `
   }
 `;
 
-function Field({ module, reduced, energized }: { module: ModuleId; reduced: boolean; energized: boolean }): JSX.Element {
+function Field({
+  module,
+  reduced,
+  energized,
+  pointer,
+}: {
+  module: ModuleId;
+  reduced: boolean;
+  energized: boolean;
+  pointer: React.MutableRefObject<PointerState>;
+}): JSX.Element {
   const points = useRef<THREE.Points>(null);
   const { size } = useThree();
   const { preference } = useTheme();
@@ -99,21 +111,6 @@ function Field({ module, reduced, energized }: { module: ModuleId; reduced: bool
   const seeds = useMemo(() => buildSeeds(COUNT), [COUNT]);
   const initial = useMemo(() => buildShape(MODULE_SHAPE[module], COUNT), [COUNT]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Pointer tracked on window — the canvas itself is pointer-events: none.
-  const pointer = useRef({ x: 0, y: 0, tx: 0, ty: 0, last: -1e9 });
-  useEffect(() => {
-    const on = (e: PointerEvent): void => {
-      pointer.current.tx = (e.clientX / window.innerWidth) * 2 - 1;
-      pointer.current.ty = -((e.clientY / window.innerHeight) * 2 - 1);
-      pointer.current.last = performance.now();
-    };
-    window.addEventListener('pointermove', on, { passive: true });
-    window.addEventListener('pointerdown', on, { passive: true });
-    return () => {
-      window.removeEventListener('pointermove', on);
-      window.removeEventListener('pointerdown', on);
-    };
-  }, []);
 
   const geometry = useMemo(() => {
     const g = new THREE.BufferGeometry();
@@ -235,9 +232,6 @@ function Field({ module, reduced, energized }: { module: ModuleId; reduced: bool
     u.uAspect!.value = size.width / Math.max(1, size.height);
     if (!reduced) {
       const pt = pointer.current;
-      const k = 1 - Math.exp(-delta * 7);
-      pt.x += (pt.tx - pt.x) * k;
-      pt.y += (pt.ty - pt.y) * k;
       (u.uPointer!.value as THREE.Vector2).set(pt.x, pt.y);
       // the well is strong while the pointer moves, and relaxes when it rests
       const idle = (performance.now() - pt.last) / 1000;
@@ -268,7 +262,59 @@ function webglAvailable(): boolean {
   }
 }
 
-export function SpatialField({ module, energized = false }: { module: ModuleId; energized?: boolean }): JSX.Element {
+/** Window-level pointer (the canvas itself is pointer-events: none), eased per frame. */
+function usePointer(): React.MutableRefObject<PointerState> {
+  const pointer = useRef<PointerState>({ x: 0, y: 0, tx: 0, ty: 0, last: -1e9, down: false });
+  useEffect(() => {
+    const move = (e: PointerEvent): void => {
+      const p = pointer.current;
+      p.tx = (e.clientX / window.innerWidth) * 2 - 1;
+      p.ty = -((e.clientY / window.innerHeight) * 2 - 1);
+      p.last = performance.now();
+    };
+    const down = (e: PointerEvent): void => {
+      move(e);
+      pointer.current.down = true;
+    };
+    const up = (): void => {
+      pointer.current.down = false;
+    };
+    window.addEventListener('pointermove', move, { passive: true });
+    window.addEventListener('pointerdown', down, { passive: true });
+    window.addEventListener('pointerup', up, { passive: true });
+    window.addEventListener('pointercancel', up, { passive: true });
+    window.addEventListener('blur', up);
+    return () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerdown', down);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+      window.removeEventListener('blur', up);
+    };
+  }, []);
+  return pointer;
+}
+
+function PointerEase({ pointer }: { pointer: React.MutableRefObject<PointerState> }): null {
+  useFrame((_, delta) => {
+    const pt = pointer.current;
+    const k = 1 - Math.exp(-delta * 7);
+    pt.x += (pt.tx - pt.x) * k;
+    pt.y += (pt.ty - pt.y) * k;
+  });
+  return null;
+}
+
+export function SpatialField({
+  module,
+  energized = false,
+  style = 'waves',
+}: {
+  module: ModuleId;
+  energized?: boolean;
+  style?: BgStyle;
+}): JSX.Element {
+  const pointer = usePointer();
   const reduced =
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -297,7 +343,9 @@ export function SpatialField({ module, energized = false }: { module: ModuleId; 
         camera={{ position: [0, 0, 15.5], fov: 52 }}
         frameloop={reduced ? 'demand' : 'always'}
       >
-        <Field module={module} reduced={reduced} energized={energized} />
+        <PointerEase pointer={pointer} />
+        <AmbientField module={module} style={style} energized={energized} reduced={reduced} pointer={pointer} />
+        {style === 'orbit' ? <Field module={module} reduced={reduced} energized={energized} pointer={pointer} /> : null}
       </Canvas>
       {/* Atmospheric floor — the one place a gradient is allowed */}
       <div

@@ -21,6 +21,7 @@ import { useUI } from '@/state/uiStore';
 import { useWorkspace } from '@/state/workspaceStore';
 import { dueInfo } from '@/modules/todo/taskMeta';
 import { MenuButton } from '@/components/shell/MenuButton';
+import { ScrollIndex } from '@/components/motion/ScrollIndex';
 
 function collectTimestamps(ws: Workspace): { id: string; title: string; when: string; kind: string; module: ModuleId }[] {
   return [
@@ -109,6 +110,7 @@ export function HomeModule(): JSX.Element {
       </header>
 
       <div className="scroll-y min-h-0 flex-1 px-4 py-5 md:px-7 md:py-6">
+        <ScrollIndex />
         <div ref={gridRef} className="mx-auto max-w-[1080px] space-y-4">
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <StatTile

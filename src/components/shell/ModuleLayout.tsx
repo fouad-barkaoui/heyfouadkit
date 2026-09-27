@@ -2,6 +2,7 @@ import { ChevronLeft, PanelLeftClose, PanelLeftOpen, Search } from 'lucide-react
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { useUI } from '@/state/uiStore';
+import { ScrollIndex } from '@/components/motion/ScrollIndex';
 import { MenuButton } from './MenuButton';
 
 /**
@@ -139,6 +140,7 @@ export function ModuleLayout({
         ) : null}
 
         <div className={cn('scroll-y min-h-0 flex-1', contentPadding && 'px-4 py-5 md:px-7 md:py-6')}>
+          <ScrollIndex />
           {children}
         </div>
       </section>
