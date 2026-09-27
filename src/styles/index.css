@@ -1,0 +1,1321 @@
+@import 'tailwindcss';
+
+/* ────────────────────────────────────────────────────────────────────────────
+   HEYFOUAD — Linear "midnight precision instrument" design system
+   Darkness is the substrate. Elevation comes from hairline borders, never
+   from ambient shadow. One chromatic accent (acid lime) signals action.
+   ──────────────────────────────────────────────────────────────────────── */
+
+@theme {
+  /* Surfaces & greys */
+  --color-void: #08090a;
+  --color-carbon: #0f1011;
+  --color-obsidian: #161718;
+  --color-graphite: #23252a;
+  --color-smoke: #383b3f;
+  --color-ash: #62666d;
+  --color-fog: #8a8f98;
+  --color-mist: #d0d6e0;
+  --color-bone: #e5e5e6;
+  --color-paper: #ffffff;
+
+  /* Accents */
+  --color-acid: #e4f222;
+  --color-pulse: #27a644;
+  --color-coral: #eb5757;
+  --color-teal: #02b8cc;
+  --color-iris: #6366f1;
+  --color-lavender: #8b5cf6;
+
+  /* Theme-aware helpers — see the light-mode override block below */
+  --color-accent: #e4f222;
+  --ink-fixed: #08090a;
+
+  /* Type */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --text-micro: 10px;
+  --text-micro--line-height: 1.5;
+  --text-label: 11px;
+  --text-label--line-height: 1.4;
+  --text-tag: 12px;
+  --text-tag--line-height: 1.4;
+  --text-caption: 13px;
+  --text-caption--line-height: 1.2;
+  --text-ui: 14px;
+  --text-ui--line-height: 1.45;
+  --text-body-sm: 15px;
+  --text-body-sm--line-height: 1.6;
+  --text-body-sm--letter-spacing: -0.011em;
+  --text-body: 16px;
+  --text-body--line-height: 1.5;
+  --text-body-lg: 20px;
+  --text-body-lg--line-height: 1.33;
+  --text-body-lg--letter-spacing: -0.012em;
+  --text-subheading: 24px;
+  --text-subheading--line-height: 1.33;
+  --text-subheading--letter-spacing: -0.012em;
+  --text-heading-sm: 32px;
+  --text-heading-sm--line-height: 1.13;
+  --text-heading-sm--letter-spacing: -0.022em;
+  --text-heading: 48px;
+  --text-heading--line-height: 1;
+  --text-heading--letter-spacing: -0.022em;
+  --text-display: 64px;
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.022em;
+
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 510;
+  --font-weight-semibold: 590;
+
+  /* Radii — the entire vocabulary */
+  --radius-xs: 2px;
+  --radius-badge: 4px;
+  --radius-ctl: 6px;
+  --radius-card: 12px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px 0 rgb(0 0 0 / 0.4);
+  --shadow-inset-hair: inset 0 0 0 1px var(--color-graphite);
+  --shadow-xl: 0 4px 32px 0 rgb(8 9 10 / 0.6);
+  --shadow-lift:
+    inset 0 0 0 1px rgb(var(--tint-rgb) / 0.03), inset 0 1px 0 0 rgb(var(--tint-rgb) / 0.04),
+    0 0 0 1px rgb(0 0 0 / 0.6), 0 4px 4px 0 rgb(0 0 0 / 0.1);
+
+  /* Motion — one easing family so the whole app moves as one instrument */
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-snap: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+:root {
+  /* RGB-component list (not a Tailwind color token) so surface tints can flip
+     between "lighten to raise" (dark theme) and "darken to raise" (light
+     theme) while keeping each hand-tuned opacity value untouched. */
+  --tint-rgb: 255 255 255;
+}
+
+/* ── Light theme ────────────────────────────────────────────────────────────
+   Dark is this app's native default (base :root above). These two blocks
+   cover the three states a person can land in: OS prefers light with no
+   explicit in-app choice, and an explicit in-app choice either way. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    --color-void: #fbfbfa;
+    --color-carbon: #f3f3f1;
+    --color-obsidian: #e9e9e6;
+    --color-graphite: #dcdcd8;
+    --color-smoke: #c5c5c0;
+    --color-ash: #6f7278;
+    --color-fog: #55585e;
+    --color-mist: #24262b;
+    --color-bone: #101113;
+    --color-paper: #08090a;
+    --color-accent: #636a06;
+    --tint-rgb: 0 0 0;
+    /* Keeps native controls (selects, checkboxes, scrollbars) in sync with
+       the OS-preference fallback path — the explicit [data-theme] rules
+       below cover the in-app toggle. */
+    color-scheme: light;
+  }
+}
+
+:root[data-theme='light'] {
+  --color-void: #fbfbfa;
+  --color-carbon: #f3f3f1;
+  --color-obsidian: #e9e9e6;
+  --color-graphite: #dcdcd8;
+  --color-smoke: #c5c5c0;
+  --color-ash: #6f7278;
+  --color-fog: #55585e;
+  --color-mist: #24262b;
+  --color-bone: #101113;
+  --color-paper: #08090a;
+  --color-accent: #636a06;
+  --tint-rgb: 0 0 0;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-graphite);
+  }
+
+  html {
+    background: var(--color-void);
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    background: var(--color-void);
+    color: var(--color-mist);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.45;
+    letter-spacing: -0.011em;
+    font-feature-settings: 'cv01' on, 'ss03' on, 'zero' on, 'cv11' on;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--color-paper);
+    font-weight: 510;
+    letter-spacing: -0.022em;
+    margin: 0;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-acid) 28%, transparent);
+    color: var(--color-paper);
+  }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 1px var(--color-void), 0 0 0 2.5px color-mix(in oklab, var(--color-acid) 70%, transparent);
+    border-radius: var(--radius-ctl);
+  }
+
+  /* Scrollbars — hairline, never chrome */
+  ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-graphite);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-smoke);
+    background-clip: content-box;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* ── Surfaces ───────────────────────────────────────────────────────── */
+  .surface-card {
+    background: var(--color-carbon);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-inset-hair);
+  }
+
+  .surface-sunken {
+    background: rgb(var(--tint-rgb) / 0.02);
+    border-radius: var(--radius-ctl);
+    box-shadow: inset 0 0 0 1px rgb(var(--tint-rgb) / 0.04);
+  }
+
+  .hairline {
+    border: 1px solid var(--color-graphite);
+  }
+
+  /* ── Buttons ────────────────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: var(--radius-ctl);
+    padding: 7px 12px;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color 120ms var(--ease-snap),
+      color 120ms var(--ease-snap),
+      box-shadow 120ms var(--ease-snap),
+      opacity 120ms var(--ease-snap);
+    user-select: none;
+  }
+
+  .btn-primary {
+    background: var(--color-acid);
+    color: var(--ink-fixed);
+    font-weight: 510;
+    font-size: 13px;
+    letter-spacing: -0.011em;
+    padding: 8px 14px;
+    box-shadow:
+      0 5px 2px 0 rgb(0 0 0 / 0.01),
+      0 3px 2px 0 rgb(0 0 0 / 0.04),
+      0 1px 1px 0 rgb(0 0 0 / 0.07);
+  }
+  .btn-primary:hover {
+    background: color-mix(in oklab, var(--color-acid) 88%, white);
+  }
+  .btn-primary:active {
+    background: color-mix(in oklab, var(--color-acid) 86%, black);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--color-mist);
+    box-shadow: inset 0 0 0 1px var(--color-graphite);
+  }
+  .btn-ghost:hover {
+    background: rgb(var(--tint-rgb) / 0.04);
+    color: var(--color-paper);
+    box-shadow: inset 0 0 0 1px var(--color-smoke);
+  }
+
+  .btn-quiet {
+    background: transparent;
+    color: var(--color-fog);
+  }
+  .btn-quiet:hover {
+    background: rgb(var(--tint-rgb) / 0.045);
+    color: var(--color-mist);
+  }
+
+  .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: var(--radius-ctl);
+    color: var(--color-fog);
+    background: transparent;
+    cursor: pointer;
+    transition:
+      background-color 120ms var(--ease-snap),
+      color 120ms var(--ease-snap);
+  }
+  .btn-icon:hover {
+    background: rgb(var(--tint-rgb) / 0.06);
+    color: var(--color-paper);
+  }
+  .btn-icon-danger:hover {
+    background: color-mix(in oklab, var(--color-coral) 16%, transparent);
+    color: var(--color-coral);
+  }
+
+  /* ── Inputs ─────────────────────────────────────────────────────────── */
+  .field {
+    width: 100%;
+    background: rgb(var(--tint-rgb) / 0.02);
+    border: 1px solid rgb(var(--tint-rgb) / 0.08);
+    border-radius: var(--radius-ctl);
+    padding: 9px 12px;
+    color: var(--color-mist);
+    font-size: 14px;
+    transition:
+      border-color 120ms var(--ease-snap),
+      background-color 120ms var(--ease-snap);
+  }
+  .field::placeholder {
+    color: var(--color-ash);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-smoke);
+    background: rgb(var(--tint-rgb) / 0.035);
+    box-shadow: none;
+  }
+  .field:focus-visible {
+    box-shadow: none;
+  }
+
+  /* ── Badges & pills ─────────────────────────────────────────────────── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: var(--radius-badge);
+    padding: 2px 7px;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 9999px;
+    padding: 4px 12px;
+    font-size: 12px;
+    background: rgb(var(--tint-rgb) / 0.05);
+    color: var(--color-mist);
+    cursor: pointer;
+    transition:
+      background-color 120ms var(--ease-snap),
+      color 120ms var(--ease-snap),
+      box-shadow 120ms var(--ease-snap);
+  }
+  .pill:hover {
+    background: rgb(var(--tint-rgb) / 0.09);
+  }
+  .pill[data-active='true'] {
+    background: color-mix(in oklab, var(--color-acid) 14%, transparent);
+    color: var(--color-accent);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-acid) 34%, transparent);
+  }
+
+  .mono {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: -0.013em;
+    font-feature-settings: 'zero' on;
+  }
+
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Nav rows (per dark-sidebar reference) ──────────────────────────── */
+  .nav-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 36px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    color: var(--color-fog);
+    font-size: 13px;
+    cursor: pointer;
+    transition:
+      background-color 150ms var(--ease-snap),
+      color 150ms var(--ease-snap),
+      box-shadow 150ms var(--ease-snap),
+      transform 150ms var(--ease-snap);
+  }
+  /* Icon-only collapsed rail: every row becomes a uniform square chip so
+     nothing reads as a mismatched width/height next to its neighbours. */
+  .nav-row.is-compact {
+    width: 38px;
+    height: 38px;
+    min-height: 0;
+    padding: 0;
+    gap: 0;
+    justify-content: center;
+    margin-inline: auto;
+  }
+  .nav-row:hover {
+    background: rgb(var(--tint-rgb) / 0.05);
+    color: var(--color-mist);
+  }
+  .nav-row:active {
+    transform: scale(0.97);
+  }
+  /* Active row reads as a bright, lifted chip — not a tinted row — so it
+     reads instantly even in the icon-only collapsed rail. Same radius as
+     the resting state so the shape never shifts, only the color does. */
+  .nav-row[data-active='true'] {
+    background: var(--color-paper);
+    color: var(--color-void);
+    box-shadow:
+      0 1px 2px rgba(8, 9, 10, 0.18),
+      0 8px 20px rgba(8, 9, 10, 0.24);
+  }
+
+  /* ── Navigation rail (IconRail.tsx) ────────────────────────────────── */
+  .rail {
+    padding-block: 14px 12px;
+    background: color-mix(in oklab, var(--color-void) 84%, transparent);
+    -webkit-backdrop-filter: blur(22px) saturate(1.25);
+    backdrop-filter: blur(22px) saturate(1.25);
+    border-inline-end: 1px solid var(--color-graphite);
+    transition:
+      width 300ms var(--ease-snap),
+      padding 300ms var(--ease-snap),
+      box-shadow 300ms var(--ease-snap),
+      background-color 300ms var(--ease-snap);
+  }
+  .rail[data-overlay='true'] {
+    background: color-mix(in oklab, var(--color-carbon) 94%, transparent);
+    box-shadow:
+      1px 0 0 0 rgb(var(--tint-rgb) / 0.04),
+      28px 0 70px -24px rgba(0, 0, 0, 0.7);
+  }
+  .rail-head {
+    display: flex;
+    align-items: center;
+    min-height: 36px;
+    margin-bottom: 14px;
+  }
+  .rail-edge-toggle {
+    position: absolute;
+    inset-inline-end: -12px;
+    top: 68px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 9999px;
+    color: var(--color-fog);
+    background: var(--color-carbon);
+    box-shadow:
+      inset 0 0 0 1px var(--color-graphite),
+      0 2px 10px rgba(0, 0, 0, 0.35);
+    opacity: 0.55;
+    cursor: pointer;
+    transition:
+      opacity 180ms var(--ease-snap),
+      color 180ms var(--ease-snap),
+      box-shadow 180ms var(--ease-snap),
+      transform 180ms var(--ease-snap);
+  }
+  .rail-edge-toggle::after {
+    content: '';
+    position: absolute;
+    inset: -9px;
+  }
+  .rail:hover .rail-edge-toggle,
+  .rail-edge-toggle:focus-visible {
+    opacity: 1;
+  }
+  .rail-edge-toggle:hover {
+    color: var(--color-void);
+    background: var(--color-acid);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-acid) 18%, transparent), 0 4px 14px rgba(0, 0, 0, 0.35);
+    transform: scale(1.08);
+  }
+  .rail-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 36px;
+    margin-bottom: 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--color-ash);
+    background: rgb(var(--tint-rgb) / 0.025);
+    box-shadow: inset 0 0 0 1px var(--color-graphite);
+    transition:
+      color 150ms var(--ease-snap),
+      box-shadow 150ms var(--ease-snap),
+      background-color 150ms var(--ease-snap);
+  }
+  .rail-search.is-compact {
+    width: 38px;
+    height: 38px;
+    justify-content: center;
+    margin-inline: auto;
+    padding: 0;
+  }
+  .rail-search:hover {
+    color: var(--color-mist);
+    background: rgb(var(--tint-rgb) / 0.045);
+    box-shadow: inset 0 0 0 1px var(--color-smoke);
+  }
+  .rail-kbd {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1;
+    padding: 3px 5px;
+    border-radius: 5px;
+    color: var(--color-ash);
+    box-shadow: inset 0 0 0 1px var(--color-graphite);
+  }
+  .rail-scroll {
+    --ft: 0px;
+    --fb: 0px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--ft), #000 calc(100% - var(--fb)), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 var(--ft), #000 calc(100% - var(--fb)), transparent 100%);
+  }
+  .rail-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  .rail-scroll.fade-top {
+    --ft: 18px;
+  }
+  .rail-scroll.fade-bottom {
+    --fb: 24px;
+  }
+  .rail-section {
+    margin-bottom: 14px;
+  }
+  .rail-section:last-child {
+    margin-bottom: 2px;
+  }
+  .rail-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .rail-divider {
+    width: 20px;
+    height: 1px;
+    margin: 2px auto 10px;
+    background: var(--color-graphite);
+  }
+  .rail-list .nav-row {
+    z-index: 1;
+  }
+  /* The sliding chip paints the active state; the row just flips its ink. */
+  .rail-list.has-indicator .nav-row[data-active='true'],
+  .rail-list.has-indicator .nav-row[data-active='true']:hover {
+    background: transparent;
+    box-shadow: none;
+    color: var(--color-void);
+  }
+  .rail-indicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 0;
+    border-radius: 10px;
+    pointer-events: none;
+    background: var(--color-paper);
+    box-shadow:
+      0 1px 2px rgba(8, 9, 10, 0.2),
+      0 10px 24px -6px rgba(8, 9, 10, 0.4),
+      inset 0 -1px 0 rgb(0 0 0 / 0.08);
+    will-change: transform;
+    transition:
+      transform 440ms var(--ease-snap),
+      width 300ms var(--ease-snap),
+      height 300ms var(--ease-snap),
+      opacity 200ms var(--ease-snap);
+  }
+  /* Acid notch on the outer edge — a little glowing tell of where you are. */
+  .rail-indicator::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: -8px;
+    top: 50%;
+    width: 3px;
+    height: 16px;
+    margin-top: -8px;
+    border-radius: 3px;
+    background: var(--color-accent);
+    box-shadow: 0 0 10px color-mix(in oklab, var(--color-acid) 70%, transparent);
+  }
+  .rail-flyout-caret {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+    width: 5px;
+    height: 5px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    border-bottom-right-radius: 1px;
+    opacity: 0.55;
+  }
+  .nav-row[data-open='true']:not([data-active='true']) {
+    background: rgb(var(--tint-rgb) / 0.07);
+    color: var(--color-paper);
+  }
+  .rail-flyout {
+    background: color-mix(in oklab, var(--color-carbon) 92%, transparent);
+    -webkit-backdrop-filter: blur(20px) saturate(1.3);
+    backdrop-filter: blur(20px) saturate(1.3);
+    box-shadow:
+      inset 0 0 0 1px var(--color-graphite),
+      0 18px 50px -12px rgba(0, 0, 0, 0.7);
+    transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+  }
+  .rail-flyout[data-state='open'] {
+    animation: nx-flyout-in 240ms var(--ease-out-quint) both;
+  }
+  .rail-flyout[data-state='open'] .rail-flyout-item {
+    animation: nx-tile-in 360ms var(--ease-out-quint) calc(40ms + var(--i, 0) * 28ms) backwards;
+  }
+  .rail-foot {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--color-graphite);
+  }
+  .rail-account {
+    min-height: 44px;
+  }
+  .rail-scrim {
+    background: rgb(8 9 10 / 0.42);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    animation: nx-fade 220ms var(--ease-out-quint) both;
+  }
+
+  /* Short screens (laptops at 125% zoom, landscape tablets): tighten the
+     rhythm so every destination still fits without scrolling. */
+  @media (max-height: 920px) {
+    .rail .nav-row:not(.is-compact) {
+      min-height: 32px;
+      padding-block: 6px;
+    }
+    .rail[data-expanded='true'] .rail-stack {
+      gap: 2px;
+    }
+    .rail[data-expanded='true'] .rail-section {
+      margin-bottom: 10px;
+    }
+  }
+  @media (max-height: 780px) {
+    .rail .nav-row.is-compact,
+    .rail .rail-search.is-compact {
+      width: 34px;
+      height: 34px;
+    }
+    .rail-stack,
+    .rail-foot {
+      gap: 2px;
+    }
+    .rail-section {
+      margin-bottom: 8px;
+    }
+    .rail-head,
+    .rail-search {
+      margin-bottom: 10px;
+    }
+    .rail-divider {
+      margin: 1px auto 6px;
+    }
+  }
+  /* Touch tablets: bigger targets, toggle always visible. */
+  @media (pointer: coarse) {
+    .rail .nav-row.is-compact,
+    .rail .rail-search.is-compact {
+      width: 40px;
+      height: 40px;
+    }
+    .rail-edge-toggle {
+      opacity: 1;
+    }
+  }
+
+  /* ── Brand mark ─────────────────────────────────────────────────────── */
+  .brand-mark {
+    box-shadow:
+      0 2px 10px rgba(228, 242, 34, 0.26),
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+  }
+  .brand-mark::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.6) 50%, transparent 70%);
+    transform: translateX(-130%);
+    pointer-events: none;
+  }
+  .brand-mark:hover::after,
+  .rail-head:hover .brand-mark::after {
+    transform: translateX(130%);
+    transition: transform 900ms var(--ease-out-quint);
+  }
+
+  /* ── Morphing hamburger (MenuButton.tsx) ─────────────────────────────── */
+  .menu-btn {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    color: var(--color-mist);
+    background: rgb(var(--tint-rgb) / 0.035);
+    box-shadow: inset 0 0 0 1px var(--color-graphite);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color 160ms var(--ease-snap),
+      box-shadow 160ms var(--ease-snap),
+      transform 160ms var(--ease-snap);
+  }
+  .menu-btn:hover {
+    background: rgb(var(--tint-rgb) / 0.06);
+    box-shadow: inset 0 0 0 1px var(--color-smoke);
+  }
+  .menu-btn:active {
+    transform: scale(0.94);
+  }
+  .menu-btn-bars {
+    position: relative;
+    width: 18px;
+    height: 12px;
+  }
+  .menu-btn-bars i {
+    position: absolute;
+    inset-inline-start: 0;
+    height: 1.75px;
+    border-radius: 2px;
+    background: currentColor;
+    transform-origin: center;
+    transition:
+      transform 420ms var(--ease-snap),
+      width 320ms var(--ease-snap),
+      opacity 220ms var(--ease-snap),
+      background-color 220ms var(--ease-snap),
+      top 320ms var(--ease-snap);
+  }
+  .menu-btn-bars i:nth-child(1) {
+    top: 0;
+    width: 18px;
+  }
+  .menu-btn-bars i:nth-child(2) {
+    top: 5.1px;
+    width: 10px;
+    background: var(--color-accent);
+  }
+  .menu-btn-bars i:nth-child(3) {
+    top: 10.25px;
+    width: 14px;
+  }
+  .menu-btn:hover .menu-btn-bars i:nth-child(2) {
+    width: 18px;
+  }
+  .menu-btn:hover .menu-btn-bars i:nth-child(3) {
+    width: 18px;
+  }
+  .menu-btn[data-open='true'] .menu-btn-bars i:nth-child(1) {
+    top: 5.1px;
+    width: 18px;
+    transform: rotate(45deg);
+  }
+  .menu-btn[data-open='true'] .menu-btn-bars i:nth-child(2) {
+    width: 0;
+    opacity: 0;
+  }
+  .menu-btn[data-open='true'] .menu-btn-bars i:nth-child(3) {
+    top: 5.1px;
+    width: 18px;
+    transform: rotate(-45deg);
+  }
+
+  /* ── Phone menu sheet (MobileMenu.tsx) ───────────────────────────────── */
+  .mobile-menu {
+    --mx: 28px;
+    --my: 28px;
+    --mr: 150vmax;
+    background: color-mix(in oklab, var(--color-void) 88%, transparent);
+    -webkit-backdrop-filter: blur(26px) saturate(1.35);
+    backdrop-filter: blur(26px) saturate(1.35);
+    outline: none;
+  }
+  .mobile-menu[data-state='open'] {
+    animation: nx-menu-reveal 620ms var(--ease-out-quint) both;
+  }
+  .mobile-menu[data-state='closed'] {
+    animation: nx-menu-conceal 380ms var(--ease-in-out-quart) both;
+  }
+  .mobile-menu-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(60vmax 60vmax at var(--mx) var(--my), color-mix(in oklab, var(--color-acid) 9%, transparent), transparent 60%),
+      radial-gradient(80% 50% at 50% 110%, rgb(var(--tint-rgb) / 0.05), transparent 70%);
+  }
+  .menu-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    color: var(--color-ash);
+    background: rgb(var(--tint-rgb) / 0.04);
+    box-shadow: inset 0 0 0 1px var(--color-graphite);
+  }
+  .menu-section-head {
+    margin: 16px 2px 8px;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--color-ash);
+  }
+  .menu-section-head:first-child {
+    margin-top: 4px;
+  }
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  @media (min-width: 460px) {
+    .menu-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .menu-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 78px;
+    padding: 11px 12px;
+    border-radius: 16px;
+    text-align: start;
+    color: var(--color-mist);
+    background: rgb(var(--tint-rgb) / 0.03);
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--tint-rgb) / 0.06),
+      inset 0 1px 0 rgb(var(--tint-rgb) / 0.04);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color 160ms var(--ease-snap),
+      transform 160ms var(--ease-snap),
+      box-shadow 160ms var(--ease-snap);
+  }
+  .menu-tile:active {
+    transform: scale(0.965);
+  }
+  .menu-tile-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    color: var(--color-fog);
+    background: rgb(var(--tint-rgb) / 0.05);
+    box-shadow: inset 0 0 0 1px rgb(var(--tint-rgb) / 0.05);
+  }
+  .menu-tile-label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13.5px;
+    letter-spacing: -0.01em;
+  }
+  .menu-tile[data-active='true'] {
+    color: var(--color-void);
+    background: var(--color-paper);
+    box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.55);
+  }
+  .menu-tile[data-active='true'] .menu-tile-icon {
+    color: #08090a;
+    background: var(--color-acid);
+    box-shadow: 0 2px 10px color-mix(in oklab, var(--color-acid) 40%, transparent);
+  }
+  .mobile-menu[data-state='open'] .menu-tile {
+    animation: nx-tile-in 520ms var(--ease-out-quint) calc(150ms + var(--i, 0) * 30ms) backwards;
+  }
+  .menu-foot {
+    border-top: 1px solid var(--color-graphite);
+    background: color-mix(in oklab, var(--color-void) 60%, transparent);
+  }
+  .menu-foot-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 48px;
+    padding: 0 12px;
+    border-radius: 14px;
+    color: var(--color-fog);
+    background: rgb(var(--tint-rgb) / 0.035);
+    box-shadow: inset 0 0 0 1px var(--color-graphite);
+  }
+  .menu-foot-btn:active {
+    transform: scale(0.97);
+  }
+
+  /* ── Scroll areas ───────────────────────────────────────────────────── */
+  .scroll-y {
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* both-edges (not just "stable") reserves matching space on the left too,
+       so centered content — like the collapsed icon rail — doesn't drift
+       left by the scrollbar's width whenever the list is tall enough to
+       scroll. */
+    scrollbar-gutter: stable both-edges;
+  }
+
+  /* Masked fade so lists dissolve into the void instead of clipping */
+  .fade-edges {
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      black 14px,
+      black calc(100% - 20px),
+      transparent 100%
+    );
+    mask-image: linear-gradient(to bottom, transparent 0, black 14px, black calc(100% - 20px), transparent 100%);
+  }
+}
+
+@layer utilities {
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* ── Keyframes ───────────────────────────────────────────────────────── */
+@keyframes nx-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes nx-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes nx-scale-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes nx-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
+@keyframes nx-menu-reveal {
+  from {
+    clip-path: circle(0px at var(--mx) var(--my));
+  }
+  to {
+    clip-path: circle(var(--mr) at var(--mx) var(--my));
+  }
+}
+
+@keyframes nx-menu-conceal {
+  from {
+    clip-path: circle(var(--mr) at var(--mx) var(--my));
+    opacity: 1;
+  }
+  to {
+    clip-path: circle(0px at var(--mx) var(--my));
+    opacity: 0.6;
+  }
+}
+
+@keyframes nx-tile-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes nx-flyout-in {
+  from {
+    opacity: 0;
+    transform: translate3d(-6px, 0, 0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-menu,
+  .menu-tile,
+  .rail-flyout,
+  .rail-flyout-item {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+  }
+  .rail-indicator,
+  .menu-btn-bars i {
+    transition-duration: 1ms !important;
+  }
+}
+
+.anim-rise {
+  animation: nx-rise 460ms var(--ease-out-quint) both;
+}
+.anim-fade {
+  animation: nx-fade 300ms var(--ease-out-quint) both;
+}
+.anim-scale-in {
+  animation: nx-scale-in 220ms var(--ease-out-quint) both;
+}
+
+/* ── Circular loader (CircularLoader.tsx) ────────────────────────────────
+   A ring of icons orbits the center mark. The ring spins; each icon
+   counter-spins by the same amount in the opposite direction so it stays
+   upright while it travels — both animations share the 9s duration so they
+   stay in lockstep indefinitely. */
+@keyframes nx-orbit-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes nx-orbit-counter {
+  from {
+    transform: rotate(calc(-1 * var(--nx-orbit-deg, 0deg)));
+  }
+  to {
+    transform: rotate(calc(-360deg - var(--nx-orbit-deg, 0deg)));
+  }
+}
+.nx-orbit-spin {
+  animation: nx-orbit-rotate 9s linear infinite;
+}
+.nx-orbit-item {
+  animation: nx-fade 420ms var(--ease-out-quint) var(--nx-orbit-delay, 0s) both;
+}
+.nx-orbit-icon {
+  animation: nx-orbit-counter 9s linear infinite;
+}
+
+/* ── TipTap editor surface ───────────────────────────────────────────── */
+.tiptap {
+  outline: none;
+  color: var(--color-mist);
+  font-size: 15px;
+  line-height: 1.7;
+  letter-spacing: -0.011em;
+}
+.tiptap p {
+  margin: 0 0 0.85em;
+}
+.tiptap h1 {
+  font-size: 28px;
+  margin: 1.1em 0 0.4em;
+}
+.tiptap h2 {
+  font-size: 21px;
+  margin: 1.1em 0 0.4em;
+}
+.tiptap h3 {
+  font-size: 17px;
+  margin: 1em 0 0.35em;
+}
+.tiptap ul,
+.tiptap ol {
+  padding-left: 1.25em;
+  margin: 0 0 0.85em;
+}
+.tiptap li {
+  margin: 0.2em 0;
+}
+.tiptap code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: rgb(var(--tint-rgb) / 0.06);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--color-accent);
+}
+.tiptap pre {
+  background: var(--color-obsidian);
+  border-radius: var(--radius-ctl);
+  box-shadow: var(--shadow-inset-hair);
+  padding: 14px 16px;
+  overflow-x: auto;
+  margin: 0 0 0.9em;
+}
+.tiptap pre code {
+  background: none;
+  padding: 0;
+  color: var(--color-mist);
+  font-size: 12.5px;
+}
+.tiptap blockquote {
+  border-left: 2px solid var(--color-smoke);
+  padding-left: 14px;
+  color: var(--color-fog);
+  margin: 0 0 0.9em;
+}
+.tiptap hr {
+  border: none;
+  border-top: 1px solid var(--color-graphite);
+  margin: 1.4em 0;
+}
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: var(--color-ash);
+}
+
+/* ── A4 print engine (Articles module) ───────────────────────────────── */
+@page {
+  size: A4;
+  margin: 18mm 16mm;
+}
+
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+    color: #111111 !important;
+    overflow: visible !important;
+  }
+  body * {
+    visibility: hidden;
+  }
+  #print-root,
+  #print-root * {
+    visibility: visible;
+  }
+  #print-root {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    background: #ffffff;
+    color: #111111;
+    font-size: 11pt;
+    line-height: 1.55;
+  }
+  #print-root h1 {
+    color: #000;
+    font-size: 20pt;
+    letter-spacing: -0.02em;
+  }
+  #print-root h2,
+  #print-root h3 {
+    color: #000;
+  }
+  #print-root .print-rule {
+    border-top: 0.6pt solid #999;
+  }
+  #print-root .print-meta {
+    color: #555;
+    font-size: 9pt;
+  }
+  #print-root .print-badge {
+    border: 0.6pt solid #666;
+    color: #333;
+    border-radius: 3pt;
+    padding: 0 4pt;
+    font-size: 8.5pt;
+  }
+  .no-print {
+    display: none !important;
+  }
+  #print-root a {
+    color: #111;
+    text-decoration: none;
+  }
+  #print-root pre,
+  #print-root blockquote,
+  #print-root figure {
+    break-inside: avoid;
+  }
+}
+
+@layer components {
+  /* ── Touch & coarse-pointer devices ─────────────────────────────────── */
+  @media (pointer: coarse) {
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+    }
+    .btn {
+      padding: 9px 14px;
+    }
+    .nav-row {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+    .pill {
+      padding: 7px 14px;
+    }
+    /* iOS zooms any field under 16px on focus — this keeps the layout still */
+    .field,
+    input,
+    textarea,
+    select {
+      font-size: 16px;
+    }
+  }
+
+  /* Actions that appear on hover have no hover to appear on, so show them */
+  @media (hover: none) {
+    .group:hover .group-hover\:opacity-100,
+    .group .group-hover\:opacity-100 {
+      opacity: 1;
+    }
+  }
+
+  /* Notch and home-indicator clearance on phones */
+  .safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+  }
+  .safe-top {
+    padding-top: max(env(safe-area-inset-top), 0px);
+  }
+}
