@@ -11,6 +11,7 @@ import {
 import { useMemo } from 'react';
 import { useStagger } from '@/components/motion/ViewTransition';
 import { StatTile } from '@/components/charts/StatTile';
+import { AvatarPrompt } from '@/components/profile/AvatarPrompt';
 import { ProSpotlight } from '@/components/profile/ProSpotlight';
 import { Avatar } from '@/components/ui/Avatar';
 import { PlanChip } from '@/components/ui/PlanChip';
@@ -129,6 +130,7 @@ export function HomeModule(): JSX.Element {
       <div className="scroll-y min-h-0 flex-1 px-4 py-5 md:px-7 md:py-6">
         <ScrollIndex />
         <div ref={gridRef} className="mx-auto max-w-[1080px] space-y-4">
+          <AvatarPrompt />
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <StatTile
               icon={<ListChecks size={14} strokeWidth={1.7} />}

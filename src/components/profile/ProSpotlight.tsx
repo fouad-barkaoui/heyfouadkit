@@ -1,10 +1,11 @@
-import { Check, Cloud, Crown, Gem, Link2, Pill, Share2, Sparkles, Star, Users } from 'lucide-react';
+import { Camera, Check, Cloud, Crown, Gem, Link2, Pill, Share2, Sparkles, Star, Users } from 'lucide-react';
 import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { dominantColor } from '@/data/avatar';
 import { isAdminUser } from '@/lib/access';
 import { cn } from '@/lib/utils';
 import { getDisplayName, useAuth } from '@/state/authStore';
+import { useUI } from '@/state/uiStore';
 import { useWorkspace } from '@/state/workspaceStore';
 import type { MedallionTilt } from '@/three/GoldMedallion';
 
@@ -71,6 +72,7 @@ function SealSvg({ size }: { size: number }): JSX.Element {
 export function ProSpotlight({ className, compact = false }: { className?: string; compact?: boolean }): JSX.Element {
   const { user, avatarUrl } = useAuth();
   const { workspace, recordCount } = useWorkspace();
+  const { setAccountOpen } = useUI();
   const name = getDisplayName(user) || 'You';
   const [tab, setTab] = useState<Tab>('overview');
   const [flipKey, setFlipKey] = useState(0);
@@ -259,7 +261,20 @@ export function ProSpotlight({ className, compact = false }: { className?: strin
                 >
                   <span className="pro-medal-ring flex items-center justify-center rounded-full" style={{ width: MEDAL * 0.545, height: MEDAL * 0.545 }}>
                     <span className="pro-medal-well flex items-center justify-center rounded-full" style={{ width: MEDAL * 0.44, height: MEDAL * 0.44 }}>
-                      <Avatar src={avatarUrl} name={name} size={Math.round(MEDAL * 0.36)} />
+                      {avatarUrl ? (
+                        <Avatar src={avatarUrl} name={name} size={Math.round(MEDAL * 0.36)} />
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setAccountOpen(true)}
+                          className="pro-medal-add pointer-events-auto flex flex-col items-center justify-center gap-1 rounded-full"
+                          style={{ width: Math.round(MEDAL * 0.36), height: Math.round(MEDAL * 0.36) }}
+                          aria-label="Add your profile picture"
+                        >
+                          <Camera size={Math.round(MEDAL * 0.09)} strokeWidth={1.8} aria-hidden />
+                          <span className="text-[10.5px] font-medium leading-none">Add photo</span>
+                        </button>
+                      )}
                     </span>
                   </span>
                 </div>
