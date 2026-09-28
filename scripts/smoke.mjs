@@ -77,8 +77,10 @@ async function waitForServer(url, timeoutMs = 40000) {
  * intends to use the app would proceed, and lets storage-dependent checks
  * (persistence across reload, etc.) behave the way they would for them. */
 async function dismissCookieConsent(pg) {
-  const accept = pg.getByRole('button', { name: 'Accept', exact: true });
+  const accept = pg.getByRole('button', { name: 'Accept and Continue', exact: true });
   await accept.click({ timeout: 5000 }).catch(() => {});
+  // The sheet confirms with a checkmark before it closes.
+  await pg.locator('.consent-card').waitFor({ state: 'detached', timeout: 4000 }).catch(() => {});
 }
 
 /* Build local-only (no cloud project) so the auth gate is a no-op for the
@@ -393,6 +395,22 @@ await page.getByRole('button', { name: 'Board', exact: true }).click();
 await page.waitForTimeout(900);
 await page.screenshot({ path: 'screenshots/desktop-board.png' });
 
+/* — Profile picture: pick → crop → save, then it shows on the account row — */
+await page.getByRole('button', { name: 'Settings', exact: true }).first().click();
+await page.waitForTimeout(500);
+await page.locator('input[type=file][accept^="image"]').first().setInputFiles(PNG_PATH);
+await page.waitForTimeout(500);
+check('avatar: cropper opens for a picked image', await page.locator('.avatar-crop-frame').isVisible());
+await page.getByRole('button', { name: 'Save picture' }).click();
+await page.waitForTimeout(900);
+check('avatar: saved on this device', await page.locator('text=Picture saved on this device.').isVisible());
+await page.keyboard.press('Escape');
+await page.waitForTimeout(400);
+check(
+  'avatar: account row shows the picture',
+  (await page.locator('nav[aria-label="Modules"] .avatar img').count()) > 0,
+);
+
 /* — Persistence across reload — */
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(1200);
@@ -400,6 +418,7 @@ await page.getByRole('button', { name: 'Notebook', exact: true }).click();
 await page.waitForTimeout(800);
 check('persistence: records survive a reload', await page.locator('text=Smoke test note').first().isVisible());
 check('theme: preference persists across reload', (await readTheme()) === 'dark');
+check('avatar: picture persists across reload', (await page.locator('nav[aria-label="Modules"] .avatar img').count()) > 0);
 
 /* — Installable: the manifest and icons actually resolve — */
 const manifestOk = await page.evaluate(async () => {

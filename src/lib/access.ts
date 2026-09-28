@@ -32,3 +32,9 @@ export function isSubscribed(_user: User | null): boolean {
 export function hasMedicationsAccess(user: User | null): boolean {
   return isAdminUser(user) || isSubscribed(user);
 }
+
+/** "Pro" is the one plan tier the UI knows about: admins, and anyone with an
+ * active subscription once billing lands. Drives the gold profile styling. */
+export function isProUser(user: User | null): boolean {
+  return isAdminUser(user) || isSubscribed(user);
+}

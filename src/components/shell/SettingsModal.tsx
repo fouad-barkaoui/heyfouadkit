@@ -1,10 +1,12 @@
 import { Instagram, LogOut, Moon, Orbit, Sparkles, Sun, Waves, Wind } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { AvatarEditor } from '@/components/profile/AvatarEditor';
 import { Button } from '@/components/ui/Button';
+import { isProUser } from '@/lib/access';
 import { Modal } from '@/components/ui/Modal';
 import { Select } from '@/components/ui/Field';
 import { cn, formatBytes } from '@/lib/utils';
-import { useAuth } from '@/state/authStore';
+import { getDisplayName, useAuth } from '@/state/authStore';
 import { useTheme } from '@/state/themeStore';
 import { useLanguage, type Language } from '@/state/languageStore';
 import { MAX_TOTAL_CLOUD_BYTES, totalCloudBytes } from '@/data/attachments';
@@ -72,6 +74,13 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps): JSX.E
       }
     >
       <div className="space-y-6">
+        {/* Profile Section */}
+        <div>
+          <p className="mb-2.5 text-[11px] font-medium uppercase tracking-[0.08em] text-ash">{t('settings.profile')}</p>
+          <AvatarEditor name={user ? getDisplayName(user) : 'You'} pro={isProUser(user)} />
+          {user?.email ? <p className="mt-2 truncate px-1 text-[11.5px] text-ash">Signed in as {user.email}</p> : null}
+        </div>
+
         {/* Theme Section */}
         <div>
           <p className="mb-2.5 text-[11px] font-medium uppercase tracking-[0.08em] text-ash">
@@ -152,26 +161,6 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps): JSX.E
             <option value="ar">العربية (Arabic)</option>
           </Select>
         </div>
-
-        {/* Profile Section */}
-        {user ? (
-          <div>
-            <p className="mb-2.5 text-[11px] font-medium uppercase tracking-[0.08em] text-ash">
-              {t('settings.profile')}
-            </p>
-            <div className="rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
-              <div className="flex items-start gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#e4f222] to-[#9db300] text-[13px] font-semibold text-[#08090a]">
-                  {user.email?.[0]?.toUpperCase() ?? '?'}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[12px] text-paper">{user.user_metadata?.name || user.email || 'User'}</p>
-                  <p className="mt-0.5 truncate text-[11px] text-ash">{user.email}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : null}
 
         {/* Storage Section */}
         <div>

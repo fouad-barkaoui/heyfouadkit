@@ -12,7 +12,7 @@ type Stage = 'none' | 'welcome' | 'terms';
  * terms and storage-limit screen. Mounted once at the shell level.
  */
 export function OnboardingFlow(): JSX.Element {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [stage, setStage] = useState<Stage>('none');
   const seenUserId = useRef<string | null>(null);
 
@@ -45,7 +45,14 @@ export function OnboardingFlow(): JSX.Element {
   return (
     <>
       <WelcomeModal open={stage === 'welcome'} onContinue={goToTermsOrClose} />
-      <CloudTermsModal open={stage === 'terms'} onAccept={accept} />
+      <CloudTermsModal
+        open={stage === 'terms'}
+        onAccept={accept}
+        onCancel={() => {
+          setStage('none');
+          void signOut();
+        }}
+      />
     </>
   );
 }

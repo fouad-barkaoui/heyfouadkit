@@ -1,7 +1,6 @@
-import * as Dialog from '@radix-ui/react-dialog';
 import { Cookie } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/Button';
+import { ConsentSheet } from './ConsentSheet';
 
 const CONSENT_KEY = 'heyfouad.cookieConsent.v1';
 
@@ -45,44 +44,31 @@ export function CookieConsentModal(): JSX.Element {
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={() => undefined}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-[85] bg-void/82 backdrop-blur-[4px] data-[state=open]:animate-[nx-fade_220ms_var(--ease-out-quint)_both]" />
-        <Dialog.Content
-          onEscapeKeyDown={(e) => e.preventDefault()}
-          onInteractOutside={(e) => e.preventDefault()}
-          className="fixed left-1/2 top-1/2 z-[85] w-[calc(100vw-24px)] max-w-[440px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[14px] bg-carbon shadow-[inset_0_0_0_1px_var(--color-graphite),0_8px_48px_rgba(8,9,10,0.8)] data-[state=open]:animate-[nx-scale-in_240ms_var(--ease-out-quint)_both]"
-        >
-          <div className="border-b border-graphite px-5 py-4">
-            <span className="mb-3 flex h-9 w-9 items-center justify-center rounded-[9px] bg-[rgb(var(--tint-rgb)/0.04)] text-accent">
-              <Cookie size={17} strokeWidth={1.8} aria-hidden />
-            </span>
-            <Dialog.Title className="text-[15px] font-medium tracking-[-0.012em] text-paper">
-              We keep your data on this device
-            </Dialog.Title>
-            <Dialog.Description className="mt-1 text-[12.5px] text-fog">
-              So heyfouad is exactly how you left it, next time.
-            </Dialog.Description>
-          </div>
-
-          <div className="px-5 py-4">
-            <p className="text-[12.5px] leading-[1.6] text-ash">
-              heyfouad stores your notes, tasks, docs, and preferences locally in this browser — and, if you sign in, in your own
-              private cloud copy — so everything is ready for you the next time you open the app. Accepting lets us reuse that
-              saved data on your next visit.
-            </p>
-          </div>
-
-          <div className="flex items-center justify-end gap-2 border-t border-graphite bg-void/40 px-5 py-3.5">
-            <Button variant="ghost" onClick={() => choose('declined')}>
-              Decline
-            </Button>
-            <Button variant="primary" onClick={() => choose('accepted')}>
-              Accept
-            </Button>
-          </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+    <ConsentSheet
+      open={open}
+      tone="gold"
+      partner="THIS DEVICE"
+      zIndex={85}
+      title="Keep Your Workspace"
+      body={<p>Heyfouad saves your work in this browser, so everything is exactly how you left it next time.</p>}
+      boxIcon={Cookie}
+      box={(link) => (
+        <p>
+          By continuing, you accept that Heyfouad {link('stores your data locally')} in this browser and reuses it on your
+          next visit.
+        </p>
+      )}
+      details={
+        <p className="text-[#6b6a66]">
+          Notes, tasks, docs and preferences live in this browser’s local storage — and, if you sign in, in your own private
+          cloud copy. Nothing is used for tracking or ads. Declining only hides this notice; the app still needs local
+          storage to remember your work.
+        </p>
+      }
+      acceptLabel="Accept and Continue"
+      cancelLabel="Decline"
+      onAccept={() => choose('accepted')}
+      onCancel={() => choose('declined')}
+    />
   );
 }

@@ -113,6 +113,47 @@ export function AppShell(): JSX.Element {
     return () => window.clearTimeout(t);
   }, [ready]);
 
+  // Pointer-tracked light on cards: one delegated listener for the whole app,
+  // throttled to a frame, so hundreds of cards cost nothing extra.
+  useEffect(() => {
+    if (window.matchMedia('(hover: none)').matches) return;
+    let lit: HTMLElement | null = null;
+    let raf = 0;
+    let last: PointerEvent | null = null;
+    const apply = (): void => {
+      raf = 0;
+      const e = last;
+      if (!e) return;
+      const card = (e.target instanceof Element ? e.target.closest<HTMLElement>('.surface-card') : null) ?? null;
+      if (card !== lit) {
+        lit?.removeAttribute('data-lit');
+        lit = card;
+        card?.setAttribute('data-lit', 'true');
+      }
+      if (card) {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--sx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--sy', `${e.clientY - r.top}px`);
+      }
+    };
+    const onMove = (e: PointerEvent): void => {
+      last = e;
+      if (!raf) raf = requestAnimationFrame(apply);
+    };
+    const onLeave = (): void => {
+      lit?.removeAttribute('data-lit');
+      lit = null;
+    };
+    window.addEventListener('pointermove', onMove, { passive: true });
+    document.documentElement.addEventListener('pointerleave', onLeave);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      document.documentElement.removeEventListener('pointerleave', onLeave);
+      if (raf) cancelAnimationFrame(raf);
+      onLeave();
+    };
+  }, []);
+
   const view = useMemo(() => {
     switch (module) {
       case 'todo':

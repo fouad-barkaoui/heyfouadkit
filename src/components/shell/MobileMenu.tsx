@@ -1,7 +1,10 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { CloudOff, Search, Settings } from 'lucide-react';
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
+import { Avatar } from '@/components/ui/Avatar';
+import { PlanChip } from '@/components/ui/PlanChip';
 import { BRAND_NAME, BRAND_TAGLINE, BrandMark } from '@/components/ui/BrandMark';
+import { isProUser } from '@/lib/access';
 import type { ModuleId } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { DOCS_GROUP, ESSENTIALS, INSIGHT, MODULE_MAP } from '@/modules/registry';
@@ -38,7 +41,8 @@ export function MobileMenu(): JSX.Element {
   const { module, setModule, mobileNavOpen, setMobileNavOpen, setPaletteOpen, setAccountOpen, setSettingsOpen } =
     useUI();
   const { live, syncState } = useWorkspace();
-  const { user, configured } = useAuth();
+  const { user, configured, avatarUrl } = useAuth();
+  const pro = isProUser(user);
   const { t } = useLanguage();
   const flagFor = useRowFlag();
 
@@ -182,15 +186,22 @@ export function MobileMenu(): JSX.Element {
                 aria-label={t('shell.account')}
                 className="menu-foot-btn"
               >
-                <SyncIcon
-                  size={16}
-                  strokeWidth={1.7}
-                  aria-hidden
-                  className={cn('shrink-0', configured && live && syncState === 'syncing' && 'animate-spin')}
-                  style={configured ? { color: sync.color } : undefined}
-                />
+                <span className="relative shrink-0">
+                  <Avatar src={avatarUrl} name={user ? accountName : 'Guest'} size={30} pro={pro} />
+                  <span className="absolute -bottom-0.5 -end-0.5 flex h-[14px] w-[14px] items-center justify-center rounded-full bg-void" aria-hidden>
+                    <SyncIcon
+                      size={9.5}
+                      strokeWidth={2.4}
+                      className={cn(configured && live && syncState === 'syncing' && 'animate-spin')}
+                      style={configured ? { color: sync.color } : undefined}
+                    />
+                  </span>
+                </span>
                 <span className="min-w-0 flex-1 text-start">
-                  <span className="block truncate text-[13px] text-mist">{accountName}</span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="block truncate text-[13px] text-mist">{accountName}</span>
+                    <PlanChip user={user} />
+                  </span>
                   <span className="mono block truncate text-[10px] uppercase tracking-[0.07em] text-ash">
                     {user ? t(sync.key) : t('shell.thisDevice')}
                   </span>

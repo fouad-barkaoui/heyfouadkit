@@ -4,6 +4,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import './styles/index.css';
+import './styles/premium.css';
 
 /** Warm the connection to the cloud project as early as possible — a
  * preconnect here shaves the DNS + TLS handshake off whichever request

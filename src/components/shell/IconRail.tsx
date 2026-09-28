@@ -1,8 +1,11 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { Check, ChevronDown, ChevronLeft, CloudOff, LibraryBig, Search, Settings, UserRound } from 'lucide-react';
+import { Check, ChevronDown, ChevronLeft, LibraryBig, Search, Settings, UserRound } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { Avatar } from '@/components/ui/Avatar';
+import { PlanChip } from '@/components/ui/PlanChip';
 import { BRAND_NAME, BRAND_TAGLINE, BrandMark } from '@/components/ui/BrandMark';
+import { isProUser } from '@/lib/access';
 import type { ModuleId } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { DOCS_GROUP, ESSENTIALS, INSIGHT, MODULE_MAP, type ModuleMeta } from '@/modules/registry';
@@ -222,7 +225,8 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
   const { module, setModule, railExpanded, toggleRail, setRailExpanded, setPaletteOpen, setAccountOpen, setSettingsOpen } =
     useUI();
   const { live, syncState } = useWorkspace();
-  const { user, configured } = useAuth();
+  const { user, configured, avatarUrl } = useAuth();
+  const pro = isProUser(user);
   const { t } = useLanguage();
   const flagFor = useRowFlag();
   const expanded = railExpanded;
@@ -491,21 +495,29 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
               aria-label={t('shell.account')}
               className={cn('nav-row', expanded ? 'rail-account' : 'is-compact')}
             >
-              {configured ? (
-                <SyncIcon
-                  size={16}
-                  strokeWidth={1.7}
-                  aria-hidden
-                  className={cn('shrink-0', syncState === 'syncing' && live && 'animate-spin')}
-                  style={{ color: sync.color }}
-                />
-              ) : (
-                <CloudOff size={16} strokeWidth={1.6} className="shrink-0" aria-hidden />
-              )}
+              <span className="relative shrink-0">
+                <Avatar src={avatarUrl} name={user ? accountName : 'Guest'} size={expanded ? 28 : 24} pro={pro} />
+                {configured ? (
+                  <span
+                    className="rail-sync-dot absolute -bottom-0.5 -end-0.5 flex h-[13px] w-[13px] items-center justify-center rounded-full bg-void"
+                    aria-hidden
+                  >
+                    <SyncIcon
+                      size={9}
+                      strokeWidth={2.4}
+                      className={cn(syncState === 'syncing' && live && 'animate-spin')}
+                      style={{ color: sync.color }}
+                    />
+                  </span>
+                ) : null}
+              </span>
               {expanded ? (
                 <>
                   <span className="min-w-0 flex-1 text-start">
-                    <span className="block truncate text-[12.5px] text-mist">{accountName}</span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="block truncate text-[12.5px] text-mist">{accountName}</span>
+                      <PlanChip user={user} />
+                    </span>
                     <span className="mono block truncate text-[10px] uppercase tracking-[0.07em] text-ash">
                       {user ? syncLabel : t('shell.thisDevice')}
                     </span>

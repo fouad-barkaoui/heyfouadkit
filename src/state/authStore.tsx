@@ -8,6 +8,14 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import {
+  AVATAR_EVENT,
+  blobToDataUrl,
+  pruneCloudAvatars,
+  readLocalAvatar,
+  uploadCloudAvatar,
+  writeLocalAvatar,
+} from '@/data/avatar';
 import { cloudConfigured, getSupabase } from '@/data/supabaseClient';
 
 export type AuthResult =
@@ -26,6 +34,27 @@ interface AuthContextValue {
   sendReset: (email: string) => Promise<AuthResult>;
   changePassword: (next: string) => Promise<AuthResult>;
   updateUsername: (next: string) => Promise<AuthResult>;
+  /** The profile picture to show for whoever is using the app right now —
+   * the account's cloud picture when signed in, a device-local one otherwise. */
+  avatarUrl: string | null;
+  /** Save a cropped picture (or `null` to remove it). */
+  setAvatar: (image: Blob | null) => Promise<AuthResult>;
+}
+
+/** The account's cloud profile picture URL, if one was set. */
+export function getAvatarUrl(user: User | null): string | null {
+  if (!user) return null;
+  const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+  return typeof meta.avatar_url === 'string' && meta.avatar_url ? meta.avatar_url : null;
+}
+
+/** Up to two initials for the no-picture fallback. */
+export function getInitials(name: string): string {
+  const parts = name.trim().split(/[\s._-]+/).filter(Boolean);
+  if (parts.length === 0) return '·';
+  const first = parts[0]!.charAt(0);
+  const second = parts.length > 1 ? parts[parts.length - 1]!.charAt(0) : '';
+  return (first + second).toUpperCase();
 }
 
 /** The username the person chose, or a name derived from their email as a fallback. */
@@ -196,6 +225,57 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
     [supabase],
   );
 
+  /* ── Profile picture ─────────────────────────────────────────────── */
+  const [localAvatar, setLocalAvatar] = useState<string | null>(() =>
+    typeof window === 'undefined' ? null : readLocalAvatar(),
+  );
+  useEffect(() => {
+    const sync = (): void => setLocalAvatar(readLocalAvatar());
+    window.addEventListener(AVATAR_EVENT, sync);
+    window.addEventListener('storage', sync);
+    return () => {
+      window.removeEventListener(AVATAR_EVENT, sync);
+      window.removeEventListener('storage', sync);
+    };
+  }, []);
+
+  const user = session?.user ?? null;
+  const avatarUrl = user ? getAvatarUrl(user) : localAvatar;
+
+  const setAvatar = useCallback(
+    async (image: Blob | null): Promise<AuthResult> => {
+      const current = session?.user ?? null;
+      // No account: the picture lives only in this browser.
+      if (!current || !supabase) {
+        if (!image) {
+          writeLocalAvatar(null);
+          return { ok: true, message: 'Picture removed.' };
+        }
+        const saved = writeLocalAvatar(await blobToDataUrl(image));
+        return saved
+          ? { ok: true, message: 'Picture saved on this device.' }
+          : { ok: false, error: 'This browser would not let us save the picture (storage is full or blocked).' };
+      }
+      try {
+        if (!image) {
+          const { data, error } = await supabase.auth.updateUser({ data: { avatar_url: null } });
+          if (error) return { ok: false, error: friendly(error.message) };
+          if (data.user) setSession((s) => (s ? { ...s, user: data.user } : s));
+          void pruneCloudAvatars(current.id, null);
+          return { ok: true, message: 'Picture removed.' };
+        }
+        const url = await uploadCloudAvatar(current.id, image);
+        const { data, error } = await supabase.auth.updateUser({ data: { avatar_url: url } });
+        if (error) return { ok: false, error: friendly(error.message) };
+        if (data.user) setSession((s) => (s ? { ...s, user: data.user } : s));
+        return { ok: true, message: 'Profile picture updated.' };
+      } catch (err) {
+        return { ok: false, error: friendly(err instanceof Error ? err.message : String(err)) };
+      }
+    },
+    [session, supabase],
+  );
+
   const value = useMemo<AuthContextValue>(
     () => ({
       configured: cloudConfigured,
@@ -209,8 +289,10 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
       sendReset,
       changePassword,
       updateUsername,
+      avatarUrl,
+      setAvatar,
     }),
-    [ready, session, signIn, signUp, signInWithGoogle, signOut, sendReset, changePassword, updateUsername],
+    [ready, session, signIn, signUp, signInWithGoogle, signOut, sendReset, changePassword, updateUsername, avatarUrl, setAvatar],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
