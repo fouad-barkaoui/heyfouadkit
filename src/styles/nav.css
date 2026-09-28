@@ -121,3 +121,25 @@
     animation: none;
   }
 }
+
+/* ── Dialogs fit the visible screen ──────────────────────────────────────
+   --vvh / --vv-top follow window.visualViewport (set in main.tsx): on a
+   phone that's the area left after the browser bars and the keyboard. */
+.modal-frame {
+  top: calc(var(--vv-top, 0px) + var(--vvh, 100dvh) / 2);
+  max-height: min(88dvh, calc(var(--vvh, 100dvh) - 20px));
+}
+@supports not (height: 1dvh) {
+  .modal-frame {
+    top: calc(var(--vv-top, 0px) + var(--vvh, 100vh) / 2);
+    max-height: calc(var(--vvh, 100vh) - 20px);
+  }
+}
+@media (max-width: 639px) {
+  .modal-frame {
+    max-height: calc(var(--vvh, 100dvh) - 16px);
+  }
+  .modal-foot {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+}

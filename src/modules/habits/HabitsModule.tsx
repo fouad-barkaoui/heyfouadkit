@@ -489,6 +489,7 @@ export function HabitsModule(): JSX.Element {
             <button
               type="button"
               className="btn btn-primary"
+              aria-label={tab === 'habits' ? 'New habit' : 'New goal'}
               onClick={() =>
                 requireAuth() && (tab === 'habits' ? setHabitEditor({ open: true, habit: null }) : setGoalEditor({ open: true, goal: null }))
               }

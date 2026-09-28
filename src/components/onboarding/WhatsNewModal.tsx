@@ -200,7 +200,7 @@ export function WhatsNewModal({
         <Dialog.Overlay className="wn-overlay fixed inset-0 z-[72]" />
         <Dialog.Content
           onInteractOutside={(e) => e.preventDefault()}
-          className="wn-modal fixed left-1/2 top-1/2 z-[72] flex max-h-[calc(100dvh-24px)] w-[calc(100vw-24px)] max-w-[780px] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[18px] md:flex-row"
+          className="wn-modal modal-frame fixed left-1/2 top-1/2 z-[72] flex max-h-[calc(100dvh-24px)] w-[calc(100vw-24px)] max-w-[780px] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[18px] md:flex-row"
           aria-describedby={undefined}
         >
           {/* Feature list */}

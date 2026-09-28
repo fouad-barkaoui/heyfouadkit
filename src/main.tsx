@@ -41,6 +41,28 @@ try {
   /* private mode — sharing just won't prefill */
 }
 
+// Track the *visible* viewport (what's left after mobile browser bars and
+// the on-screen keyboard) so dialogs can size themselves to it.
+try {
+  const vv = window.visualViewport;
+  if (vv) {
+    const rootStyle = document.documentElement.style;
+    let frame = 0;
+    const sync = (): void => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        rootStyle.setProperty('--vvh', `${Math.round(vv.height)}px`);
+        rootStyle.setProperty('--vv-top', `${Math.round(vv.offsetTop)}px`);
+      });
+    };
+    sync();
+    vv.addEventListener('resize', sync);
+    vv.addEventListener('scroll', sync);
+  }
+} catch {
+  /* older browsers fall back to dvh/vh */
+}
+
 const root = document.getElementById('root');
 if (!root) throw new Error('Root element #root is missing from index.html');
 

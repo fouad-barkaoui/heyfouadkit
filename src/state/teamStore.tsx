@@ -1,13 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Team, TeamInvite, TeamMember, TeamRole } from '@/lib/types';
 import { getSupabase } from '@/data/supabaseClient';
 import { useAuth } from './authStore';
@@ -51,6 +42,8 @@ interface TeamContextValue {
   setMemberRole: (userId: string, role: TeamRole) => Promise<RpcResult>;
   removeMember: (userId: string) => Promise<RpcResult>;
   leaveTeam: (id: string) => Promise<RpcResult>;
+  deleteTeam: (id: string) => Promise<RpcResult>;
+  revokeInvite: (inviteId: string) => Promise<RpcResult>;
 
   invites: TeamInvite[];
   invitesLoading: boolean;
@@ -65,8 +58,17 @@ interface TeamContextValue {
 const TeamContext = createContext<TeamContextValue | null>(null);
 
 function friendlyRpcError(e: unknown): string {
-  const msg = e instanceof Error ? e.message : 'Something went wrong.';
-  return msg.replace(/^.*?:\s*/, '');
+  // Supabase hands back plain `{ message }` objects, not Error instances.
+  const raw =
+    e instanceof Error
+      ? e.message
+      : e && typeof e === 'object' && 'message' in e && typeof (e as { message: unknown }).message === 'string'
+        ? (e as { message: string }).message
+        : '';
+  if (!raw) return 'Something went wrong.';
+  if (/failed to fetch|network/i.test(raw)) return 'No connection — try again when you are back online.';
+  if (/could not find the function/i.test(raw)) return 'This action is not available on the server yet.';
+  return raw.replace(/^(error|exception):\s*/i, '');
 }
 
 export function TeamProvider({ children }: { children: ReactNode }): JSX.Element {
@@ -112,10 +114,7 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
       }
     };
     if (typeof navigator !== 'undefined' && navigator.onLine === false) return fromCache();
-    const query = supabase
-      .from('team_members')
-      .select('team_id, role, teams:team_id(id, name)')
-      .eq('user_id', user.id);
+    const query = supabase.from('team_members').select('team_id, role, teams:team_id(id, name)').eq('user_id', user.id);
     const res = await Promise.race([
       query.then((r) => r),
       new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 8000)),
@@ -382,6 +381,39 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
     [supabase, user, refreshTeams, switchTeam],
   );
 
+  const deleteTeam = useCallback(
+    async (id: string): Promise<RpcResult> => {
+      if (!supabase || !user) return { ok: false, error: 'This build is not connected to a cloud project.' };
+      try {
+        const { error } = await supabase.rpc('delete_team', { p_team_id: id });
+        if (error) throw error;
+        const list = await refreshTeams();
+        const next = list.find((t) => t.id !== id) ?? null;
+        if (next) switchTeam(next.id);
+        else writeStoredTeam(null);
+        return { ok: true, message: 'Team deleted.' };
+      } catch (e) {
+        return { ok: false, error: friendlyRpcError(e) };
+      }
+    },
+    [supabase, user, refreshTeams, switchTeam],
+  );
+
+  const revokeInvite = useCallback(
+    async (inviteId: string): Promise<RpcResult> => {
+      if (!supabase) return { ok: false, error: 'This build is not connected to a cloud project.' };
+      try {
+        const { error } = await supabase.rpc('revoke_invite', { p_invite_id: inviteId });
+        if (error) throw error;
+        refreshInvites();
+        return { ok: true, message: 'Invite cancelled.' };
+      } catch (e) {
+        return { ok: false, error: friendlyRpcError(e) };
+      }
+    },
+    [supabase, refreshInvites],
+  );
+
   const activeTeam = teams.find((t) => t.id === activeTeamId) ?? null;
   const myRole = activeTeam?.role ?? null;
   const canEdit = myRole === 'owner' || myRole === 'admin' || myRole === 'editor';
@@ -405,6 +437,8 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
       setMemberRole,
       removeMember,
       leaveTeam,
+      deleteTeam,
+      revokeInvite,
       invites,
       invitesLoading,
       refreshInvites,
@@ -430,6 +464,8 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
       setMemberRole,
       removeMember,
       leaveTeam,
+      deleteTeam,
+      revokeInvite,
       invites,
       invitesLoading,
       refreshInvites,

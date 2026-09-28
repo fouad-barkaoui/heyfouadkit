@@ -1,4 +1,5 @@
 import {
+  Check,
   ChevronRight,
   Folder,
   FolderOpen,
@@ -38,8 +39,7 @@ const emptyDraft = (folder: string): Doc => ({
   updatedAt: nowISO(),
 });
 
-const isMeaningful = (d: Doc): boolean =>
-  d.title.trim().length > 0 || stripHtml(d.content).length > 0;
+const isMeaningful = (d: Doc): boolean => d.title.trim().length > 0 || stripHtml(d.content).length > 0;
 
 export function DocsModule(): JSX.Element {
   const { workspace, createRecord, updateRecord, toggleInteresting } = useWorkspace();
@@ -57,10 +57,7 @@ export function DocsModule(): JSX.Element {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Doc | null>(null);
   const [newFolder, setNewFolder] = useState('');
-  const [badgeEditor, setBadgeEditor] = useState<{ open: boolean; badge: Badge | null }>({
-    open: false,
-    badge: null,
-  });
+  const [badgeEditor, setBadgeEditor] = useState<{ open: boolean; badge: Badge | null }>({ open: false, badge: null });
 
   useEffect(() => {
     if (focusRequest?.module === 'docs') {
@@ -296,9 +293,7 @@ export function DocsModule(): JSX.Element {
 
       <section>
         <div className="mb-3 flex items-center gap-2.5">
-          <h2 className="text-[15px] font-medium tracking-[-0.014em] text-paper">
-            {folder ?? 'All documents'}
-          </h2>
+          <h2 className="text-[15px] font-medium tracking-[-0.014em] text-paper">{folder ?? 'All documents'}</h2>
           <span className="mono num rounded-[4px] bg-[rgb(var(--tint-rgb)/0.05)] px-1.5 py-[1px] text-[11px] text-ash">
             {filtered.length}
           </span>
@@ -359,7 +354,11 @@ export function DocsModule(): JSX.Element {
                         </div>
                       </td>
                       <td className="hidden px-4 py-2.5 sm:table-cell">
-                        {badge ? <BadgeChip badge={badge} size="sm" /> : <span className="text-[12px] text-ash">—</span>}
+                        {badge ? (
+                          <BadgeChip badge={badge} size="sm" />
+                        ) : (
+                          <span className="text-[12px] text-ash">—</span>
+                        )}
                       </td>
                       <td className="hidden px-4 py-2.5 text-[12.5px] text-mist lg:table-cell">{doc.folder}</td>
                       <td className="hidden px-4 py-2.5 text-[12px] text-ash md:table-cell">
@@ -486,7 +485,7 @@ export function DocsModule(): JSX.Element {
               <span>Edited {relativeTime(active.updatedAt)}</span>
               {active.id === DRAFT_ID ? (
                 <span className="rounded-[4px] bg-[rgb(var(--tint-rgb)/0.06)] px-1.5 py-[1px] text-[11px] text-ash">
-                  Unsaved draft
+                  Draft · saves as you type
                 </span>
               ) : null}
             </span>
@@ -501,12 +500,14 @@ export function DocsModule(): JSX.Element {
           active ? (
             <>
               <Button
+                variant="primary"
+                icon={<Check size={14} strokeWidth={2.2} />}
                 onClick={() => {
                   setSelectedId(null);
                   setDraft(null);
                 }}
               >
-                Close
+                Save
               </Button>
               <IconButton
                 label={active.isInteresting ? 'Remove from vault' : 'Add to vault'}

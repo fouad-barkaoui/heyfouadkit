@@ -331,7 +331,7 @@ await page.waitForTimeout(400);
 await page.getByLabel('Document title').fill('Smoke doc');
 await page.waitForTimeout(500);
 check('docs: created', await page.locator('text=Smoke doc').first().isVisible());
-await page.getByRole('button', { name: 'Close', exact: true }).click();
+await page.getByRole('button', { name: 'Save', exact: true }).click();
 await page.waitForTimeout(500);
 
 check('docs: folder cards render', await page.locator('text=Folders').first().isVisible());
@@ -649,7 +649,7 @@ await tpage.getByRole('button', { name: 'New document', exact: true }).first().c
 await tpage.waitForTimeout(400);
 await tpage.getByLabel('Document title').fill('Tablet smoke doc');
 await tpage.waitForTimeout(500);
-await tpage.getByRole('button', { name: 'Close', exact: true }).click();
+await tpage.getByRole('button', { name: 'Save', exact: true }).click();
 await tpage.waitForTimeout(500);
 check('tablet: content pane renders', await tpage.locator('table').first().isVisible());
 const tOverflow = await tpage.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
@@ -698,6 +698,29 @@ check(
 );
 await mpage.keyboard.press('Escape');
 await mpage.waitForTimeout(400);
+
+/* — Phones: a dialog's Create/Save button must be on screen, even short — */
+{
+  for (const [w, h] of [[390, 664], [375, 420]]) {
+    await mpage.setViewportSize({ width: w, height: h });
+    await mpage.goto(`${BASE}/#/habits`, { waitUntil: 'domcontentloaded' });
+    await mpage.waitForTimeout(900);
+    await mpage.getByRole('button', { name: 'New habit' }).first().click();
+    await mpage.waitForTimeout(500);
+    const box = await mpage.getByRole('button', { name: 'Create habit', exact: true }).boundingBox();
+    check(`mobile: dialog Create button is on screen (${w}x${h})`, !!box && box.y >= 0 && box.y + box.height <= h, JSON.stringify(box));
+    await mpage.keyboard.press('Escape');
+    await mpage.waitForTimeout(300);
+  }
+  await mpage.setViewportSize({ width: 390, height: 844 });
+  await mpage.goto(`${BASE}/#/notebook`, { waitUntil: 'domcontentloaded' });
+  await mpage.waitForTimeout(800);
+  await mpage.getByRole('button', { name: 'New note' }).first().click();
+  await mpage.waitForTimeout(500);
+  check('mobile: editors show a Save button', await mpage.getByRole('button', { name: 'Save', exact: true }).isVisible());
+  await mpage.goto(`${BASE}/#/home`, { waitUntil: 'domcontentloaded' });
+  await mpage.waitForTimeout(600);
+}
 
 const mOverflow = await mpage.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
 check('layout: no horizontal page overflow (mobile)', !mOverflow);

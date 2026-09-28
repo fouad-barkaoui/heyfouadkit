@@ -1,4 +1,5 @@
 import { Lock } from 'lucide-react';
+import { MenuButton } from '@/components/shell/MenuButton';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/state/authStore';
 import { useUI } from '@/state/uiStore';
@@ -15,11 +16,12 @@ export function MedicationsPaywall(): JSX.Element {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="border-b border-graphite px-4 py-3.5 md:px-7 md:py-4">
-        <h1 className="text-[19px] font-medium leading-tight tracking-[-0.016em] text-paper">
-          Medications Catalog
-        </h1>
-        <p className="mt-1 text-[12.5px] text-ash">Subscriber feature</p>
+      <header className="flex items-center gap-3 border-b border-graphite px-4 py-3.5 md:px-7 md:py-4">
+        <MenuButton className="md:hidden" />
+        <div className="min-w-0">
+          <h1 className="text-[19px] font-medium leading-tight tracking-[-0.016em] text-paper">Medications Catalog</h1>
+          <p className="mt-1 text-[12.5px] text-ash">Subscriber feature</p>
+        </div>
       </header>
 
       <div className="scroll-y flex min-h-0 flex-1 items-center justify-center px-6 py-10">
@@ -29,8 +31,8 @@ export function MedicationsPaywall(): JSX.Element {
           </div>
           <p className="text-[15px] text-mist">Medications is a subscriber feature</p>
           <p className="mt-2 max-w-[320px] text-[12.5px] leading-[1.6] text-ash">
-            Track medicines and treatment plans — dosing, schedules, and history — with an active subscription.
-            Billing isn't set up yet, so this isn't purchasable from here just yet.
+            Track medicines and treatment plans — dosing, schedules, and history — with an active subscription. Billing
+            isn't set up yet, so this isn't purchasable from here just yet.
           </p>
           {configured && !user ? (
             <Button variant="primary" className="mt-5" onClick={() => setAccountOpen(true)}>

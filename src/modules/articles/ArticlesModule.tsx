@@ -1,4 +1,4 @@
-import { FileImage, FileText, FileType2, PenLine, Printer, Star, Upload } from 'lucide-react';
+import { Check, FileImage, FileText, FileType2, PenLine, Printer, Star, Upload } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AttachmentPanel } from '@/components/attachments/AttachmentPanel';
 import { useStagger } from '@/components/motion/ViewTransition';
@@ -311,7 +311,7 @@ export function ArticlesModule(): JSX.Element {
               <span>Edited {relativeTime(active.updatedAt)}</span>
               {active.id === DRAFT_ID ? (
                 <span className="rounded-[4px] bg-[rgb(var(--tint-rgb)/0.06)] px-1.5 py-[1px] text-[11px] text-ash">
-                  Unsaved draft
+                  Draft · saves as you type
                 </span>
               ) : null}
             </span>
@@ -320,7 +320,21 @@ export function ArticlesModule(): JSX.Element {
         actions={
           active ? (
             <>
-              <Button icon={<Printer size={13.5} strokeWidth={1.85} />} onClick={() => setPrintOpen(true)}>
+              <Button
+                variant="primary"
+                icon={<Check size={14} strokeWidth={2.2} />}
+                onClick={() => {
+                  setSelectedId(null);
+                  setDraft(null);
+                }}
+              >
+                Save
+              </Button>
+              <Button
+                icon={<Printer size={13.5} strokeWidth={1.85} />}
+                onClick={() => setPrintOpen(true)}
+                className="max-sm:hidden"
+              >
                 Print
               </Button>
               <IconButton
@@ -437,12 +451,7 @@ export function ArticlesModule(): JSX.Element {
                 </div>
               ) : null}
 
-              <AttachmentPanel
-                ownerType="article"
-                ownerId={active.id}
-                ensureOwnerId={ensureOwnerId}
-                className="mt-4"
-              />
+              <AttachmentPanel ownerType="article" ownerId={active.id} ensureOwnerId={ensureOwnerId} className="mt-4" />
             </div>
             {meta}
           </div>

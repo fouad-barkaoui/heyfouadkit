@@ -1,4 +1,4 @@
-import { NotebookPen, Plus, Star } from 'lucide-react';
+import { Check, NotebookPen, Plus, Star } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { AttachmentPanel } from '@/components/attachments/AttachmentPanel';
 import { ConfirmDelete } from '@/components/ui/ConfirmDelete';
@@ -49,9 +49,7 @@ export function NotebookModule(): JSX.Element {
   const notes = useMemo(() => workspace.notes.filter((n) => !n.isDeleted), [workspace.notes]);
 
   const [query, setQuery] = useState('');
-  const [selectedId, setSelectedId] = useState<string | null>(() =>
-    isWideViewport() ? (notes[0]?.id ?? null) : null,
-  );
+  const [selectedId, setSelectedId] = useState<string | null>(() => (isWideViewport() ? (notes[0]?.id ?? null) : null));
   const [draft, setDraft] = useState<Note | null>(null);
 
   useEffect(() => {
@@ -135,9 +133,7 @@ export function NotebookModule(): JSX.Element {
   const panel = (
     <div ref={panelRef}>
       {filtered.length === 0 ? (
-        <p className="px-2.5 py-6 text-[12.5px] text-ash">
-          {query ? 'No note matches that.' : 'No notes yet.'}
-        </p>
+        <p className="px-2.5 py-6 text-[12.5px] text-ash">{query ? 'No note matches that.' : 'No notes yet.'}</p>
       ) : (
         grouped.map(([bucket, items]) => (
           <div key={bucket} className="mb-3">
@@ -166,7 +162,10 @@ export function NotebookModule(): JSX.Element {
                   note.tags.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
                       {note.tags.slice(0, 3).map((t) => (
-                        <span key={t} className="rounded-[4px] bg-[rgb(var(--tint-rgb)/0.05)] px-1.5 py-[1px] text-[10.5px] text-fog">
+                        <span
+                          key={t}
+                          className="rounded-[4px] bg-[rgb(var(--tint-rgb)/0.05)] px-1.5 py-[1px] text-[10.5px] text-fog"
+                        >
                           #{t}
                         </span>
                       ))}
@@ -203,7 +202,7 @@ export function NotebookModule(): JSX.Element {
             <span>Edited {relativeTime(active.updatedAt)}</span>
             {active.id === DRAFT_ID ? (
               <span className="rounded-[4px] bg-[rgb(var(--tint-rgb)/0.06)] px-1.5 py-[1px] text-[11px] text-ash">
-                Unsaved draft
+                Draft · saves as you type
               </span>
             ) : null}
           </span>
@@ -212,6 +211,17 @@ export function NotebookModule(): JSX.Element {
       actions={
         active ? (
           <>
+            {/* Notes save as you type; this just confirms it and closes. */}
+            <Button
+              variant="primary"
+              icon={<Check size={14} strokeWidth={2.2} />}
+              onClick={() => {
+                setSelectedId(null);
+                setDraft(null);
+              }}
+            >
+              Save
+            </Button>
             <IconButton
               label={active.isInteresting ? 'Remove from vault' : 'Add to vault'}
               className={cn(active.isInteresting && 'text-accent')}
@@ -236,7 +246,7 @@ export function NotebookModule(): JSX.Element {
       }}
     >
       {active ? (
-        <div className="mx-auto flex h-full max-w-[820px] flex-col">
+        <div className="mx-auto flex max-w-[820px] flex-col md:h-full">
           <input
             value={active.title}
             onChange={(e) => patch({ title: e.target.value })}
@@ -254,12 +264,7 @@ export function NotebookModule(): JSX.Element {
             minHeight={280}
           />
 
-          <AttachmentPanel
-            ownerType="note"
-            ownerId={active.id}
-            ensureOwnerId={ensureOwnerId}
-            className="mt-4"
-          />
+          <AttachmentPanel ownerType="note" ownerId={active.id} ensureOwnerId={ensureOwnerId} className="mt-4" />
         </div>
       ) : (
         <EmptyState

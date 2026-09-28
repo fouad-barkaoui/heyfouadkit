@@ -53,7 +53,7 @@ export function LinkPreview({
       <Dialog.Portal>
         <Dialog.Overlay className="save-preview-overlay fixed inset-0 z-50" />
         <Dialog.Content
-          className="save-preview fixed left-1/2 top-1/2 z-50 flex max-h-[92dvh] w-[calc(100vw-20px)] max-w-[1080px] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[18px] lg:flex-row"
+          className="save-preview modal-frame fixed left-1/2 top-1/2 z-50 flex max-h-[92dvh] w-[calc(100vw-20px)] max-w-[1080px] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[18px] lg:flex-row"
           style={{ ['--c' as string]: color }}
           aria-describedby={undefined}
         >
