@@ -12,9 +12,11 @@ import {
 import { getRepository } from '@/data';
 import { deleteAttachmentFile } from '@/data/attachments';
 import { friendlyCloudError } from '@/data/cloudErrors';
-import { countRecords, deleteRow, fetchTeamWorkspace, patchRow, subscribeTeam, writeRow } from '@/data/cloudSync';
+import { countRecords, fetchTeamWorkspace, subscribeTeam } from '@/data/cloudSync';
+import { kvGet, kvSet } from '@/data/kvStore';
+import { applyOutbox, enqueue, flushOutbox, pendingCount, readOutbox, subscribeOutbox, type NewOp, type OpInput } from '@/data/outbox';
 import { markTouched, resetLocalWorkspace } from '@/data/localRepository';
-import { emptyWorkspace } from '@/data/normalize';
+import { emptyWorkspace, normalizeWorkspace } from '@/data/normalize';
 import { getSupabase } from '@/data/supabaseClient';
 import type { Attachment, CollectionKey, Workspace } from '@/lib/types';
 import { nowISO } from '@/lib/utils';
@@ -23,7 +25,7 @@ import { useTeam } from './teamStore';
 
 type Item<K extends CollectionKey> = Workspace[K][number];
 
-export type SyncState = 'offline' | 'idle' | 'syncing' | 'synced' | 'error';
+export type SyncState = 'offline' | 'idle' | 'syncing' | 'synced' | 'queued' | 'error';
 
 /** Bounds a promise so a stalled connection can't leave the loader spinning
  * forever — a flaky link fails outright in a few seconds; it's slow requests
@@ -68,6 +70,10 @@ interface WorkspaceContextValue {
   recordCount: number;
   /** Re-run the cloud load (after an error, or on demand). */
   retrySync: () => void;
+  /** Changes made offline that are waiting to reach the cloud. */
+  pendingChanges: number;
+  /** The browser's view of the network. */
+  online: boolean;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
@@ -82,6 +88,8 @@ const HAS_UPDATED_AT: CollectionKey[] = [
   'medicines',
   'treatmentPlans',
   'links',
+  'habits',
+  'goals',
 ];
 
 export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.Element {
@@ -100,6 +108,25 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
 
   const dirty = useRef(false);
   const live = Boolean(supabase && user && activeTeamId);
+  // Profile edits hand us a new user object; only a different account matters.
+  const userId = user?.id ?? null;
+
+  const [online, setOnline] = useState(() => (typeof navigator === 'undefined' ? true : navigator.onLine !== false));
+  const [pendingChanges, setPendingChanges] = useState(() => pendingCount(activeTeamId));
+  useEffect(() => {
+    const sync = (): void => setPendingChanges(pendingCount(activeTeamId));
+    sync();
+    const up = (): void => setOnline(true);
+    const down = (): void => setOnline(false);
+    window.addEventListener('online', up);
+    window.addEventListener('offline', down);
+    const unsub = subscribeOutbox(sync);
+    return () => {
+      window.removeEventListener('online', up);
+      window.removeEventListener('offline', down);
+      unsub();
+    };
+  }, [activeTeamId]);
 
   /* ── Local-first fallback: no cloud project, signed out, or no team yet ── */
   useEffect(() => {
@@ -131,33 +158,82 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
     return () => window.clearTimeout(handle);
   }, [workspace, ready, repo, live]);
 
-  /* ── Live team mode: initial load + realtime subscription ──────────── */
+  /* ── Sending queued changes ──────────────────────────────────────────── */
+  const flushing = useRef(false);
+  const flush = useCallback(async (): Promise<void> => {
+    if (!supabase || !userId) return;
+    if (flushing.current) return;
+    flushing.current = true;
+    try {
+      const res = await flushOutbox(supabase, userId);
+      if (res.dropped.length) {
+        setSyncState('error');
+        setSyncMessage(`A change could not be saved to the cloud — ${friendlyCloudError(res.dropped[0]!.message)}`);
+      } else if (res.remaining > 0 && res.blocked) {
+        setSyncState('queued');
+        setSyncMessage(null);
+      } else if (res.remaining === 0) {
+        setSyncState((s) => (s === 'queued' || s === 'syncing' ? 'synced' : s));
+      }
+    } finally {
+      flushing.current = false;
+    }
+  }, [supabase, userId]);
+
+  /* ── Live team mode: cached boot, then cloud load + realtime ─────────── */
   useEffect(() => {
-    if (!live || !supabase || !activeTeamId) return;
+    if (!live || !supabase || !activeTeamId || !userId) return;
     let cancelled = false;
     let channel: RealtimeChannel | null = null;
+    const cacheKey = `ws.${userId}.${activeTeamId}`;
 
-    setReady(false);
     setSyncState('syncing');
     setSyncMessage(null);
 
     void (async () => {
+      // 1. Paint instantly from the last snapshot on this device (and work
+      //    fully offline from it), with any unsent changes laid on top.
+      let painted = false;
       try {
+        const cached = await kvGet<Workspace>(cacheKey);
+        if (cached && !cancelled) {
+          setWorkspace(applyOutbox(normalizeWorkspace(cached), readOutbox(), activeTeamId));
+          setReady(true);
+          painted = true;
+        }
+      } catch {
+        /* no cache — fall through to the network */
+      }
+      if (!painted && !cancelled) setReady(false);
+
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        if (cancelled) return;
+        setReady(true);
+        setSyncState(pendingCount(activeTeamId) ? 'queued' : painted ? 'queued' : 'error');
+        if (!painted) setSyncMessage('You are offline and this team has not been opened on this device yet.');
+        return;
+      }
+
+      try {
+        // 2. Send anything that was waiting, so the fresh load includes it.
+        await withTimeout(flushOutbox(supabase, userId), 15000, 'Timed out sending queued changes.').catch(() => undefined);
         const { workspace: remote, failed } = await withTimeout(
           fetchTeamWorkspace(supabase, activeTeamId),
           20000,
           'Timed out reaching the cloud — check your connection and try again.',
         );
         if (cancelled) return;
-        setWorkspace(remote);
+        const pending = readOutbox();
+        setWorkspace(applyOutbox(remote, pending, activeTeamId));
         setReady(true);
+        void kvSet(cacheKey, remote);
         if (failed.length) {
           setSyncState('error');
           setSyncMessage(
             `Synced, except ${failed.map((f) => f.table.replace('_', ' ')).join(', ')} — ${friendlyCloudError(failed[0]!.message)}`,
           );
         } else {
-          setSyncState('synced');
+          setSyncState(pending.some((o) => o.teamId === activeTeamId) ? 'queued' : 'synced');
         }
 
         channel = subscribeTeam(supabase, activeTeamId, (change) => {
@@ -177,8 +253,15 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
         });
       } catch (e) {
         if (!cancelled) {
-          setSyncState('error');
-          setSyncMessage(friendlyCloudError(e));
+          // With a snapshot on screen a failed load isn't an error for the
+          // person — they keep working and it catches up when it can.
+          if (painted) {
+            setSyncState('queued');
+            setSyncMessage(null);
+          } else {
+            setSyncState('error');
+            setSyncMessage(friendlyCloudError(e));
+          }
           setReady(true);
         }
       }
@@ -188,20 +271,33 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
       cancelled = true;
       if (channel) void supabase.removeChannel(channel);
     };
-  }, [live, supabase, activeTeamId, syncAttempt]);
+  }, [live, supabase, activeTeamId, userId, syncAttempt]);
 
-  // Coming back online, or back to the tab after a failure, retries quietly.
+  // Keep this device's snapshot fresh (debounced, off the typing path).
   useEffect(() => {
-    if (!live || syncState !== 'error') return;
-    const onOnline = (): void => retrySync();
-    const onVisible = (): void => {
-      if (document.visibilityState === 'visible') retrySync();
+    if (!live || !ready || !userId || !activeTeamId || !dirty.current) return;
+    const cacheKey = `ws.${userId}.${activeTeamId}`;
+    const handle = window.setTimeout(() => void kvSet(cacheKey, workspace), 1200);
+    return () => window.clearTimeout(handle);
+  }, [workspace, live, ready, userId, activeTeamId]);
+
+  // Back online, back to the tab, or every 30s while something waits: retry.
+  useEffect(() => {
+    if (!live || (syncState !== 'error' && syncState !== 'queued')) return;
+    const kick = (): void => {
+      if (navigator.onLine === false) return;
+      retrySync();
     };
-    window.addEventListener('online', onOnline);
+    const onVisible = (): void => {
+      if (document.visibilityState === 'visible') kick();
+    };
+    window.addEventListener('online', kick);
     document.addEventListener('visibilitychange', onVisible);
+    const timer = window.setInterval(kick, 30000);
     return () => {
-      window.removeEventListener('online', onOnline);
+      window.removeEventListener('online', kick);
       document.removeEventListener('visibilitychange', onVisible);
+      window.clearInterval(timer);
     };
   }, [live, syncState, retrySync]);
 
@@ -210,23 +306,24 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
     markTouched();
   }, []);
 
-  const reportWriteError = useCallback((e: unknown) => {
-    setSyncState('error');
-    setSyncMessage(`A change could not be saved to the cloud — ${friendlyCloudError(e)}`);
-  }, []);
+  /** Queue a cloud write and try to send it right away. */
+  const push = useCallback(
+    (op: OpInput) => {
+      if (!live || !userId || !activeTeamId) return;
+      enqueue({ ...op, teamId: activeTeamId, userId } as NewOp);
+      void flush();
+    },
+    [live, userId, activeTeamId, flush],
+  );
 
   /* ── Mutations — optimistic locally, mirrored to the team live ──────── */
   const createRecord = useCallback(
     <K extends CollectionKey>(key: K, record: Item<K>) => {
       touch();
       setWorkspace((prev) => ({ ...prev, [key]: [record, ...prev[key]] }) as Workspace);
-      if (live && supabase && user && activeTeamId) {
-        void writeRow(supabase, key, user.id, activeTeamId, record as unknown as Record<string, unknown>).catch(
-          reportWriteError,
-        );
-      }
+      push({ kind: 'upsert', key, id: record.id, record: record as unknown as Record<string, unknown> });
     },
-    [touch, live, supabase, user, activeTeamId, reportWriteError],
+    [touch, push],
   );
 
   const updateRecord = useCallback(
@@ -240,11 +337,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
             [key]: (prev[key] as Item<K>[]).map((item) => (item.id === id ? { ...item, ...stamped } : item)),
           }) as Workspace,
       );
-      if (live && supabase) {
-        void patchRow(supabase, key, id, stamped as unknown as Record<string, unknown>).catch(reportWriteError);
-      }
+      push({ kind: 'patch', key, id, patch: stamped as unknown as Record<string, unknown> });
     },
-    [touch, live, supabase, reportWriteError],
+    [touch, push],
   );
 
   const removeRecord = useCallback(
@@ -262,11 +357,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
               : prev.attachments.filter((a) => a.ownerId !== id),
         } as Workspace;
       });
-      if (live && supabase) {
-        void deleteRow(supabase, key, id).catch(reportWriteError);
-      }
+      push({ kind: 'delete', key, id });
     },
-    [touch, live, supabase, reportWriteError],
+    [touch, push],
   );
 
   const toggleInteresting = useCallback(
@@ -285,11 +378,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
           }),
         } as Workspace;
       });
-      if (live && supabase) {
-        void patchRow(supabase, key, id, { isInteresting: nextValue }).catch(reportWriteError);
-      }
+      push({ kind: 'patch', key, id, patch: { isInteresting: nextValue } });
     },
-    [touch, live, supabase, reportWriteError],
+    [touch, push],
   );
 
   const resetWorkspace = useCallback(() => {
@@ -307,17 +398,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
     (attachment: Attachment) => {
       touch();
       setWorkspace((prev) => ({ ...prev, attachments: [...prev.attachments, attachment] }));
-      if (live && supabase && user && activeTeamId) {
-        void writeRow(
-          supabase,
-          'attachments',
-          user.id,
-          activeTeamId,
-          attachment as unknown as Record<string, unknown>,
-        ).catch(reportWriteError);
-      }
+      push({ kind: 'upsert', key: 'attachments', id: attachment.id, record: attachment as unknown as Record<string, unknown> });
     },
-    [touch, live, supabase, user, activeTeamId, reportWriteError],
+    [touch, push],
   );
 
   const removeAttachment = useCallback(
@@ -328,25 +411,25 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
         if (target) void deleteAttachmentFile(target);
         return { ...prev, attachments: prev.attachments.filter((a) => a.id !== id) };
       });
-      if (live && supabase) {
-        void deleteRow(supabase, 'attachments', id).catch(reportWriteError);
-      }
+      push({ kind: 'delete', key: 'attachments', id });
     },
-    [touch, live, supabase, reportWriteError],
+    [touch, push],
   );
 
   const reparentAttachments = useCallback(
     (fromOwnerId: string, toOwnerId: string) => {
       touch();
-      setWorkspace((prev) => ({
-        ...prev,
-        attachments: prev.attachments.map((a) => (a.ownerId === fromOwnerId ? { ...a, ownerId: toOwnerId } : a)),
-      }));
-      if (live && supabase) {
-        void patchRow(supabase, 'attachments', fromOwnerId, { ownerId: toOwnerId }).catch(reportWriteError);
-      }
+      setWorkspace((prev) => {
+        for (const a of prev.attachments) {
+          if (a.ownerId === fromOwnerId) push({ kind: 'patch', key: 'attachments', id: a.id, patch: { ownerId: toOwnerId } });
+        }
+        return {
+          ...prev,
+          attachments: prev.attachments.map((a) => (a.ownerId === fromOwnerId ? { ...a, ownerId: toOwnerId } : a)),
+        };
+      });
     },
-    [touch, live, supabase, reportWriteError],
+    [touch, push],
   );
 
   const value = useMemo<WorkspaceContextValue>(
@@ -367,6 +450,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
       syncState,
       syncMessage,
       retrySync,
+      pendingChanges,
+      online,
       recordCount: countRecords(workspace),
     }),
     [
@@ -387,6 +472,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
       syncState,
       syncMessage,
       retrySync,
+      pendingChanges,
+      online,
     ],
   );
 

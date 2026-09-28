@@ -1,0 +1,349 @@
+/* ────────────────────────────────────────────────────────────────────────────
+   Habits & Goals. Every card carries its own hue in --c (the habit/goal
+   colour); everything else is mixed from it so a card reads as one object in
+   both themes. Motion is transform/opacity only.
+   ──────────────────────────────────────────────────────────────────────── */
+
+.hb-today-card {
+  background: color-mix(in oklab, var(--color-acid) 7%, var(--color-carbon));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-acid) 18%, var(--color-graphite));
+}
+
+/* Habit card */
+.hb-card {
+  --c: var(--color-acid);
+  background:
+    radial-gradient(120% 90% at 100% 0%, color-mix(in oklab, var(--c) 9%, transparent), transparent 60%),
+    var(--color-carbon);
+  box-shadow: inset 0 0 0 1px var(--color-graphite);
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.hb-card:hover {
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c) 35%, var(--color-graphite));
+  transform: translateY(-1px);
+}
+.hb-card.is-done {
+  background:
+    radial-gradient(130% 100% at 100% 0%, color-mix(in oklab, var(--c) 18%, transparent), transparent 65%),
+    var(--color-carbon);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c) 45%, var(--color-graphite));
+}
+.hb-card.is-rest {
+  opacity: 0.78;
+}
+.hb-emoji-tile {
+  background: color-mix(in oklab, var(--c) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c) 22%, transparent);
+}
+.hb-streak {
+  color: color-mix(in oklab, #f59e0b 80%, var(--color-paper));
+}
+
+.hb-check {
+  color: var(--color-ash);
+  box-shadow: inset 0 0 0 1.5px var(--color-smoke);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.18s ease;
+}
+.hb-check:not(.is-on):hover:not(:disabled) {
+  color: var(--c);
+  box-shadow: inset 0 0 0 1.5px var(--c);
+}
+.hb-check:active:not(:disabled) {
+  transform: scale(0.9);
+}
+.hb-check:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.hb-check.is-on {
+  background: var(--c);
+  color: #0b0c0e;
+  box-shadow: 0 6px 18px -6px color-mix(in oklab, var(--c) 80%, transparent);
+  animation: hb-pop 0.36s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+@keyframes hb-pop {
+  0% {
+    transform: scale(0.8);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.hb-dot {
+  border-radius: 8px;
+  padding: 2px;
+}
+.hb-dot.is-today span:first-child {
+  color: var(--color-paper);
+  font-weight: 600;
+}
+.hb-dot-ball {
+  display: block;
+  box-shadow: inset 0 0 0 1.5px var(--color-graphite);
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+}
+.hb-dot:hover .hb-dot-ball {
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--c) 60%, transparent);
+}
+.hb-dot-ball.is-on {
+  background: var(--c);
+  box-shadow: none;
+}
+.hb-dot-ball.is-off:not(.is-on) {
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0 3px,
+    color-mix(in oklab, var(--color-graphite) 70%, transparent) 3px 4.5px
+  );
+}
+.hb-dot.is-today .hb-dot-ball:not(.is-on) {
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--c) 55%, var(--color-smoke));
+}
+
+.hb-edit {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.hb-card:hover .hb-edit,
+.hb-edit:focus-visible {
+  opacity: 1;
+}
+@media (hover: none) {
+  .hb-edit {
+    opacity: 0.7;
+  }
+}
+/* keep the edit pencil from covering the check button */
+.hb-card .hb-edit {
+  top: auto;
+  bottom: 0.5rem;
+}
+
+.hb-add {
+  border: 1.5px dashed var(--color-graphite);
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+.hb-add:hover {
+  border-color: color-mix(in oklab, var(--color-acid) 55%, var(--color-graphite));
+  color: var(--color-paper);
+  background: color-mix(in oklab, var(--color-acid) 4%, transparent);
+}
+
+/* Editor controls */
+.hb-swatch {
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.15);
+  transition: transform 0.15s ease;
+}
+.hb-swatch:hover {
+  transform: scale(1.1);
+}
+.hb-swatch.is-on {
+  box-shadow:
+    0 0 0 2px var(--color-void),
+    0 0 0 4px var(--color-paper);
+}
+.hb-emoji {
+  background: var(--color-obsidian);
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.hb-emoji:hover {
+  background: var(--color-graphite);
+}
+.hb-emoji.is-on {
+  background: color-mix(in oklab, var(--color-acid) 16%, var(--color-obsidian));
+  box-shadow: inset 0 0 0 1.5px var(--color-acid);
+}
+.hb-day {
+  background: var(--color-obsidian);
+  color: var(--color-fog);
+  transition: transform 0.12s ease;
+}
+.hb-day:active {
+  transform: scale(0.92);
+}
+
+/* Year grid */
+.hb-year {
+  --hb: var(--color-acid);
+}
+.hb-cell {
+  display: block;
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  background: color-mix(in oklab, var(--color-graphite) 70%, transparent);
+  animation: hb-cell-in 0.4s ease both;
+}
+.hb-cell[data-l='1'] {
+  background: color-mix(in oklab, var(--hb) 28%, var(--color-obsidian));
+}
+.hb-cell[data-l='2'] {
+  background: color-mix(in oklab, var(--hb) 50%, var(--color-obsidian));
+}
+.hb-cell[data-l='3'] {
+  background: color-mix(in oklab, var(--hb) 74%, var(--color-obsidian));
+}
+.hb-cell[data-l='4'] {
+  background: var(--hb);
+}
+.hb-cell[data-out] {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-graphite) 40%, transparent);
+}
+.hb-cell:not([data-out]):hover {
+  outline: 1.5px solid var(--color-paper);
+  outline-offset: 0.5px;
+}
+@keyframes hb-cell-in {
+  from {
+    opacity: 0;
+  }
+}
+.hb-tip {
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: var(--color-obsidian);
+  box-shadow:
+    inset 0 0 0 1px var(--color-graphite),
+    0 10px 24px -10px rgb(0 0 0 / 0.6);
+}
+
+/* Goals */
+.gl-card {
+  --c: var(--color-acid);
+  background:
+    radial-gradient(110% 80% at 0% 0%, color-mix(in oklab, var(--c) 10%, transparent), transparent 55%),
+    var(--color-carbon);
+  box-shadow: inset 0 0 0 1px var(--color-graphite);
+  transition: box-shadow 0.25s ease;
+}
+.gl-card:hover {
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c) 30%, var(--color-graphite));
+}
+.gl-card.is-achieved {
+  background:
+    radial-gradient(120% 90% at 0% 0%, color-mix(in oklab, var(--c) 20%, transparent), transparent 60%),
+    var(--color-carbon);
+}
+.gl-status {
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 10.5px;
+  font-weight: 500;
+  background: var(--color-obsidian);
+  color: var(--color-fog);
+  box-shadow: inset 0 0 0 1px var(--color-graphite);
+}
+.gl-status.is-win {
+  background: color-mix(in oklab, var(--c) 20%, transparent);
+  color: var(--color-paper);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c) 45%, transparent);
+}
+.gl-why {
+  background: color-mix(in oklab, var(--c) 6%, var(--color-obsidian));
+  border-inline-start: 2px solid color-mix(in oklab, var(--c) 60%, transparent);
+}
+.gl-step {
+  transition: background-color 0.15s ease;
+}
+.gl-step:hover {
+  background: color-mix(in oklab, var(--color-graphite) 45%, transparent);
+}
+.gl-tick {
+  color: #0b0c0e;
+  box-shadow: inset 0 0 0 1.5px var(--color-smoke);
+  transition:
+    background-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.15s ease;
+}
+.gl-tick:hover {
+  box-shadow: inset 0 0 0 1.5px var(--c);
+}
+.gl-tick:active {
+  transform: scale(0.88);
+}
+.gl-tick.is-on {
+  background: var(--c);
+  box-shadow: none;
+}
+.gl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--color-fog);
+  box-shadow: inset 0 0 0 1px var(--color-graphite);
+  opacity: 0;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.gl-step:hover .gl-chip,
+.gl-chip:focus-visible,
+.gl-chip.is-linked {
+  opacity: 1;
+}
+@media (hover: none) {
+  .gl-chip {
+    opacity: 1;
+  }
+}
+.gl-chip:hover {
+  color: var(--color-paper);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c) 55%, var(--color-graphite));
+}
+.gl-chip.is-linked {
+  color: color-mix(in oklab, var(--c) 70%, var(--color-paper));
+  background: color-mix(in oklab, var(--c) 10%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c) 30%, transparent);
+}
+
+/* Empty states */
+.hb-empty-flame {
+  color: #f59e0b;
+  background: radial-gradient(circle at 50% 70%, rgb(245 158 11 / 0.28), rgb(245 158 11 / 0.06) 70%);
+  box-shadow: inset 0 0 0 1px rgb(245 158 11 / 0.3);
+  animation: hb-breathe 3.2s ease-in-out infinite;
+}
+.hb-empty-flame.is-goal {
+  color: #7c83ff;
+  background: radial-gradient(circle at 50% 70%, rgb(124 131 255 / 0.28), rgb(124 131 255 / 0.06) 70%);
+  box-shadow: inset 0 0 0 1px rgb(124 131 255 / 0.3);
+}
+@keyframes hb-breathe {
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hb-cell,
+  .hb-check.is-on,
+  .hb-empty-flame {
+    animation: none !important;
+  }
+  .hb-card:hover {
+    transform: none;
+  }
+}

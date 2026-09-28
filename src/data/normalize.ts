@@ -11,6 +11,9 @@ import type {
   MedicineType,
   Note,
   NewsItem,
+  Goal,
+  GoalStep,
+  Habit,
   SavedLink,
   Todo,
   TreatmentPlan,
@@ -242,6 +245,52 @@ export function normalizeLink(raw: Record<string, unknown>): SavedLink {
   };
 }
 
+const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
+const hexOr = (v: unknown, fallback: string): string => (/^#[0-9a-f]{3,8}$/i.test(str(v)) ? str(v) : fallback);
+
+export function normalizeHabit(raw: Record<string, unknown>): Habit {
+  return {
+    id: str(raw.id) || uid('hab'),
+    name: str(raw.name, 'Untitled habit') || 'Untitled habit',
+    emoji: str(raw.emoji) || '✨',
+    color: hexOr(raw.color, '#2dd4a0'),
+    days: numArr(raw.days),
+    log: [...new Set(strArr(raw.log).filter((d) => DAY_RE.test(d)))].sort(),
+    archived: bool(raw.archived),
+    ...stamps(raw),
+    ...trash(raw),
+  };
+}
+
+function normalizeStep(raw: unknown): GoalStep | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const r = raw as Record<string, unknown>;
+  const title = str(r.title).trim();
+  if (!title) return null;
+  return {
+    id: str(r.id) || uid('stp'),
+    title,
+    done: bool(r.done),
+    todoId: nullableStr(r.todoId),
+    dueDate: nullableStr(r.dueDate),
+  };
+}
+
+export function normalizeGoal(raw: Record<string, unknown>): Goal {
+  return {
+    id: str(raw.id) || uid('goal'),
+    title: str(raw.title, 'Untitled goal') || 'Untitled goal',
+    why: str(raw.why),
+    emoji: str(raw.emoji) || '🎯',
+    color: hexOr(raw.color, '#7c83ff'),
+    dueDate: nullableStr(raw.dueDate),
+    steps: (Array.isArray(raw.steps) ? raw.steps : []).map(normalizeStep).filter((x): x is GoalStep => x !== null),
+    status: oneOf(raw.status, ['active', 'achieved', 'paused'] as const, 'active'),
+    ...stamps(raw),
+    ...trash(raw),
+  };
+}
+
 const asRecords = (v: unknown): Record<string, unknown>[] =>
   Array.isArray(v) ? v.filter((x): x is Record<string, unknown> => !!x && typeof x === 'object') : [];
 
@@ -259,6 +308,8 @@ export function normalizeWorkspace(raw: unknown): Workspace {
     medicines: asRecords(src.medicines).map(normalizeMedicine),
     treatmentPlans: asRecords(src.treatmentPlans).map(normalizeTreatmentPlan),
     links: asRecords(src.links).map(normalizeLink).filter((l) => l.url !== ''),
+    habits: asRecords(src.habits).map(normalizeHabit),
+    goals: asRecords(src.goals).map(normalizeGoal),
   };
 }
 
@@ -274,4 +325,6 @@ export const emptyWorkspace = (): Workspace => ({
   medicines: [],
   treatmentPlans: [],
   links: [],
+  habits: [],
+  goals: [],
 });

@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   BookmarkPlus,
+  Flame,
   FileText,
   GraduationCap,
   HeartPulse,
@@ -9,6 +10,7 @@ import {
   NotebookPen,
   Pill,
   RotateCcw,
+  Target,
   Trash2,
 } from 'lucide-react';
 import { useMemo } from 'react';
@@ -21,7 +23,7 @@ import { useLanguage } from '@/state/languageStore';
 import { useWorkspace } from '@/state/workspaceStore';
 import { ScrollIndex } from '@/components/motion/ScrollIndex';
 
-type TrashKind = 'note' | 'task' | 'article' | 'doc' | 'course' | 'news' | 'medicine' | 'plan' | 'link';
+type TrashKind = 'note' | 'task' | 'article' | 'doc' | 'course' | 'news' | 'medicine' | 'plan' | 'link' | 'habit' | 'goal';
 
 export interface TrashItem {
   id: string;
@@ -41,6 +43,8 @@ const KIND_ICON: Record<TrashKind, JSX.Element> = {
   course: <GraduationCap size={15} strokeWidth={1.7} />,
   news: <Newspaper size={15} strokeWidth={1.7} />,
   link: <BookmarkPlus size={15} strokeWidth={1.7} />,
+  habit: <Flame size={15} strokeWidth={1.7} />,
+  goal: <Target size={15} strokeWidth={1.7} />,
   medicine: <Pill size={15} strokeWidth={1.7} />,
   plan: <HeartPulse size={15} strokeWidth={1.7} />,
 };
@@ -144,6 +148,26 @@ export function TrashPage(): JSX.Element {
           deletedAt: l.deletedAt || l.updatedAt,
           preview: l.domain,
         })),
+      ...workspace.habits
+        .filter((h) => h.isDeleted)
+        .map((h) => ({
+          id: h.id,
+          key: 'habits' as CollectionKey,
+          title: `${h.emoji} ${h.name}`,
+          type: 'habit' as TrashKind,
+          deletedAt: h.deletedAt || h.updatedAt,
+          preview: `${h.log.length} check-ins`,
+        })),
+      ...workspace.goals
+        .filter((g) => g.isDeleted)
+        .map((g) => ({
+          id: g.id,
+          key: 'goals' as CollectionKey,
+          title: `${g.emoji} ${g.title}`,
+          type: 'goal' as TrashKind,
+          deletedAt: g.deletedAt || g.updatedAt,
+          preview: `${g.steps.length} steps`,
+        })),
     ];
     return items.sort((a, b) => new Date(b.deletedAt).getTime() - new Date(a.deletedAt).getTime());
   }, [
@@ -156,6 +180,8 @@ export function TrashPage(): JSX.Element {
     workspace.medicines,
     workspace.treatmentPlans,
     workspace.links,
+    workspace.habits,
+    workspace.goals,
   ]);
 
   const restore = (item: TrashItem): void => {

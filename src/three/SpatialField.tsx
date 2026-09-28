@@ -305,6 +305,37 @@ function PointerEase({ pointer }: { pointer: React.MutableRefObject<PointerState
   return null;
 }
 
+/**
+ * Keeps the background from ever costing the UI its frame rate: measures
+ * real FPS every ~2s and steps render resolution down on slow machines (and
+ * back up once there's headroom). It's a backdrop — it should never be the
+ * reason typing or scrolling feels heavy.
+ */
+function AdaptiveQuality({ max }: { max: number }): null {
+  const setDpr = useThree((s) => s.setDpr);
+  const st = useRef({ acc: 0, frames: 0, dpr: max, calm: 0 });
+  useFrame((_, delta) => {
+    const s = st.current;
+    if (delta > 0.25) return; // tab switch / GC hiccup — not representative
+    s.acc += delta;
+    s.frames++;
+    if (s.acc < 2) return;
+    const fps = s.frames / s.acc;
+    s.acc = 0;
+    s.frames = 0;
+    if (fps < 47 && s.dpr > 0.7) {
+      s.dpr = Math.max(0.7, Math.round((s.dpr - 0.3) * 100) / 100);
+      s.calm = 0;
+      setDpr(s.dpr);
+    } else if (fps > 57 && s.dpr < max && ++s.calm >= 4) {
+      s.dpr = Math.min(max, Math.round((s.dpr + 0.2) * 100) / 100);
+      s.calm = 0;
+      setDpr(s.dpr);
+    }
+  });
+  return null;
+}
+
 export function SpatialField({
   module,
   energized = false,
@@ -343,6 +374,7 @@ export function SpatialField({
         camera={{ position: [0, 0, 15.5], fov: 52 }}
         frameloop={reduced ? 'demand' : 'always'}
       >
+        <AdaptiveQuality max={Math.min(typeof window === 'undefined' ? 1 : window.devicePixelRatio || 1, 1.65)} />
         <PointerEase pointer={pointer} />
         <AmbientField module={module} style={style} energized={energized} reduced={reduced} pointer={pointer} />
         {style === 'orbit' ? <Field module={module} reduced={reduced} energized={energized} pointer={pointer} /> : null}

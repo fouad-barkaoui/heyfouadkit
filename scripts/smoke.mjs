@@ -83,6 +83,26 @@ async function dismissCookieConsent(pg) {
   await pg.locator('.consent-card').waitFor({ state: 'detached', timeout: 4000 }).catch(() => {});
 }
 
+
+/* The rail groups modules into collapsible families (Plan, Library, …).
+ * Click a module by name, opening its family first when it's folded away. */
+async function nav(pg, label) {
+  const rail = pg.locator('nav[aria-label="Modules"]').first();
+  const direct = rail.getByRole('button', { name: label, exact: true });
+  if ((await direct.count()) && (await direct.first().isVisible())) return direct.first().click();
+  const gid = await pg.evaluate(
+    (l) =>
+      [...document.querySelectorAll('[data-nav-group]')].find((e) => (e.dataset.contains || '').split('|').includes(l))
+        ?.dataset.navGroup,
+    label,
+  );
+  if (gid) {
+    await rail.locator(`[data-nav-group="${gid}"]`).click();
+    await pg.waitForTimeout(250);
+  }
+  return direct.first().click();
+}
+
 /* Build local-only (no cloud project) so the auth gate is a no-op for the
  * full CRUD/theme/layout suite below — exactly how this suite always ran. */
 console.log('Building local-only bundle (no cloud project) for the main smoke pass…');
@@ -115,7 +135,10 @@ const consoleErrors = [];
 async function newPage(context) {
   const page = await context.newPage();
   page.on('console', (msg) => {
-    if (msg.type() === 'error') consoleErrors.push(msg.text());
+    if (msg.type() === 'error') {
+      const where = msg.location()?.url;
+      consoleErrors.push(where && /Failed to load resource/.test(msg.text()) ? `${msg.text()} (${where})` : msg.text());
+    }
   });
   page.on('pageerror', (err) => consoleErrors.push(`pageerror: ${err.message}`));
   return page;
@@ -132,7 +155,7 @@ await dismissCookieConsent(page);
 
 /* Default landing is Home; check the empty state on the module that actually
  * shows one. Fresh workspace: nothing is preinstalled, so this must start empty. */
-await page.getByRole('button', { name: 'Notebook', exact: true }).click();
+await nav(page, 'Notebook');
 await page.waitForTimeout(500);
 check(
   'starts empty: no preinstalled demo data',
@@ -154,7 +177,7 @@ const MODULES = [
 ];
 
 for (const [navLabel, heading] of MODULES) {
-  await page.getByRole('button', { name: navLabel, exact: true }).click();
+  await nav(page, navLabel);
   await page.waitForTimeout(700);
   const visible = await page
     .locator('h1, h2')
@@ -166,7 +189,7 @@ for (const [navLabel, heading] of MODULES) {
 }
 
 /* WebGL field actually mounted */
-await page.getByRole('button', { name: 'Notebook', exact: true }).click();
+await nav(page, 'Notebook');
 await page.waitForTimeout(800);
 check('webgl canvas is present', (await page.locator('canvas').count()) > 0);
 
@@ -238,13 +261,13 @@ check(
 const notesBefore = await page.locator('[data-stagger]').count();
 await page.getByRole('button', { name: 'New note', exact: true }).first().click();
 await page.waitForTimeout(300);
-await page.getByRole('button', { name: 'Notebook', exact: true }).click();
+await nav(page, 'Notebook');
 await page.waitForTimeout(600);
 const notesAfter = await page.locator('[data-stagger]').count();
 check('notebook: empty draft is not persisted', notesAfter <= notesBefore, `${notesBefore} → ${notesAfter}`);
 
 /* — Tasks CRUD + views — */
-await page.getByRole('button', { name: 'Tasks', exact: true }).click();
+await nav(page, 'Tasks');
 await page.waitForTimeout(700);
 await page.getByRole('button', { name: 'New task', exact: true }).first().click();
 await page.waitForTimeout(400);
@@ -274,7 +297,7 @@ await page.waitForTimeout(600);
 check('tasks: checkbox toggles without error', true);
 
 /* — Courses: badge creator — */
-await page.getByRole('button', { name: 'Course Hub', exact: true }).click();
+await nav(page, 'Course Hub');
 await page.waitForTimeout(700);
 await page.getByRole('button', { name: 'Badge', exact: true }).click();
 await page.waitForTimeout(400);
@@ -299,7 +322,7 @@ await page.waitForTimeout(600);
 check('courses: created', await page.locator('text=Smoke course').first().isVisible());
 
 /* — Docs: folder tree + table — */
-await page.getByRole('button', { name: 'Docs Storage', exact: true }).click();
+await nav(page, 'Docs Storage');
 await page.waitForTimeout(700);
 
 /* the workspace starts empty, so a document has to exist before the table does */
@@ -321,7 +344,7 @@ check(
 );
 
 /* — Vault — */
-await page.getByRole('button', { name: 'Vault', exact: true }).click();
+await nav(page, 'Vault');
 await page.waitForTimeout(700);
 check('vault: curated cards render', (await page.locator('article').count()) > 0);
 
@@ -338,7 +361,7 @@ await page.waitForTimeout(700);
 check('search: enter navigates to the record', await page.locator('main').isVisible());
 
 /* — Attachments: upload while composing, then preview — */
-await page.getByRole('button', { name: 'Notebook', exact: true }).click();
+await nav(page, 'Notebook');
 await page.waitForTimeout(800);
 await page.locator('text=Smoke test note').first().click();
 await page.waitForTimeout(500);
@@ -375,7 +398,7 @@ await page.getByRole('button', { name: 'Close' }).first().click();
 await page.waitForTimeout(400);
 
 /* — Analytics charts — */
-await page.getByRole('button', { name: 'Analytics', exact: true }).click();
+await nav(page, 'Analytics');
 await page.waitForTimeout(900);
 check('analytics: charts render', (await page.locator('figure').count()) >= 4);
 await page.getByRole('button', { name: 'Table' }).first().click();
@@ -383,13 +406,13 @@ await page.waitForTimeout(400);
 check('analytics: table view available for a11y', (await page.locator('figure table').count()) > 0);
 
 await page.screenshot({ path: 'screenshots/desktop-analytics.png' });
-await page.getByRole('button', { name: 'Notebook', exact: true }).click();
+await nav(page, 'Notebook');
 await page.waitForTimeout(900);
 await page.screenshot({ path: 'screenshots/desktop-notebook.png' });
-await page.getByRole('button', { name: 'Docs Storage', exact: true }).click();
+await nav(page, 'Docs Storage');
 await page.waitForTimeout(900);
 await page.screenshot({ path: 'screenshots/desktop-docs.png' });
-await page.getByRole('button', { name: 'Tasks', exact: true }).click();
+await nav(page, 'Tasks');
 await page.waitForTimeout(500);
 await page.getByRole('button', { name: 'Board', exact: true }).click();
 await page.waitForTimeout(900);
@@ -412,7 +435,7 @@ check(
 );
 
 /* — SaveIt: save a link, see its card, open its preview — */
-await page.getByRole('button', { name: 'SaveIt', exact: true }).first().click();
+await nav(page, 'SaveIt');
 await page.waitForTimeout(700);
 check('saveit: empty state invites a first link', await page.locator('text=Your internet, kept.').isVisible());
 await page.getByLabel('Link to save').fill('https://www.youtube.com/watch?v=aircAruvnKk');
@@ -439,10 +462,82 @@ check('saveit: constellation renders a 3D canvas', (await page.locator('.save-sp
 await page.getByRole('radio', { name: 'Grid' }).click();
 await page.waitForTimeout(300);
 
+/* — Rail: modules are grouped into a few families, not one tall list — */
+{
+  const heads = await page.locator('nav[aria-label="Modules"] [data-nav-group]').count();
+  check('rail: modules grouped into families', heads === 4, `${heads} groups`);
+  const open = await page.locator('nav[aria-label="Modules"] [data-nav-group][aria-expanded="true"]').count();
+  check('rail: only one family open at a time', open <= 1, `${open} open`);
+}
+
+/* — Habits & Goals: habit, check-in, streak grid, goal steps → Tasks — */
+await nav(page, 'Habits & Goals');
+await page.waitForTimeout(800);
+check('habits: empty state shows', await page.locator('text=Small things, every day.').isVisible());
+await page.getByRole('button', { name: 'New habit' }).first().click();
+await page.waitForTimeout(300);
+await page.getByLabel('Habit', { exact: true }).fill('Smoke habit');
+await page.getByRole('button', { name: 'Create habit', exact: true }).click();
+await page.waitForTimeout(700);
+check('habits: habit card appears', await page.locator('.hb-card', { hasText: 'Smoke habit' }).isVisible());
+await page.getByRole('button', { name: 'Mark Smoke habit done today' }).click();
+await page.waitForTimeout(500);
+check(
+  'habits: checking in marks today done',
+  (await page.getByRole('button', { name: 'Undo Smoke habit today' }).getAttribute('aria-pressed')) === 'true',
+);
+check('habits: yearly grid records the check-in', (await page.locator('.hb-year .hb-cell[data-l="4"]').count()) >= 1);
+await page.getByRole('tab', { name: 'Goals' }).click();
+await page.waitForTimeout(500);
+check('goals: empty state shows', await page.locator('text=Big goals, small steps.').isVisible());
+await page.getByRole('button', { name: 'New goal' }).first().click();
+await page.waitForTimeout(300);
+await page.getByLabel('Goal', { exact: true }).fill('Smoke goal');
+await page.locator('#gl-steps').fill('First smoke step\nSecond smoke step');
+await page.getByRole('button', { name: 'Create goal', exact: true }).click();
+await page.waitForTimeout(700);
+check('goals: goal with its steps appears', await page.locator('.gl-card', { hasText: 'Second smoke step' }).isVisible());
+await page.getByRole('button', { name: 'Send 2 steps to Tasks' }).click();
+await page.waitForTimeout(600);
+check('goals: steps are linked to Tasks', (await page.locator('.gl-chip.is-linked').count()) === 2);
+await nav(page, 'Tasks');
+await page.waitForTimeout(800);
+check('goals: steps show up in Tasks', await page.locator('text=First smoke step').first().isVisible());
+
+/* — Offline: the service worker caches the app so it opens with no network — */
+{
+  const swReady = await page
+    .evaluate(() =>
+      Promise.race([
+        navigator.serviceWorker.ready.then(() => true),
+        new Promise((r) => setTimeout(() => r(false), 12000)),
+      ]),
+    )
+    .catch(() => false);
+  check('offline: service worker is installed', swReady === true);
+  await page.waitForTimeout(1500);
+  const cached = await page.evaluate(async () => {
+    let n = 0;
+    for (const k of await caches.keys()) n += (await (await caches.open(k)).keys()).length;
+    return n;
+  });
+  check('offline: app shell is cached', cached > 20, `${cached} files`);
+  await desktop.setOffline(true);
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('nav[aria-label="Modules"]', { timeout: 15000 }).catch(() => {});
+  check('offline: app opens with no network', await page.locator('nav[aria-label="Modules"]').first().isVisible());
+  check('offline: status pill says so', await page.locator('.offline-pill', { hasText: 'Offline' }).isVisible());
+  await nav(page, 'Habits & Goals');
+  await page.waitForTimeout(700);
+  check('offline: local data is still there', await page.locator('.hb-card', { hasText: 'Smoke habit' }).isVisible());
+  await desktop.setOffline(false);
+  await page.waitForTimeout(400);
+}
+
 /* — Persistence across reload — */
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(1200);
-await page.getByRole('button', { name: 'Notebook', exact: true }).click();
+await nav(page, 'Notebook');
 await page.waitForTimeout(800);
 check('persistence: records survive a reload', await page.locator('text=Smoke test note').first().isVisible());
 check('theme: preference persists across reload', (await readTheme()) === 'dark');
@@ -472,12 +567,12 @@ check('pwa: manifest and icons resolve', manifestOk);
   const fit = await zpage.evaluate(() => {
     const nav = document.querySelector('nav[aria-label="Modules"]');
     const sc = nav?.querySelector('.rail-scroll');
-    const trash = [...(nav?.querySelectorAll('button') ?? [])].find((b) => b.getAttribute('aria-label') === 'Trash');
-    const r = trash?.getBoundingClientRect();
-    return { overflow: sc ? sc.scrollHeight - sc.clientHeight : -1, trashVisible: !!r && r.bottom <= window.innerHeight && r.height > 0 };
+    const last = [...(nav?.querySelectorAll('button') ?? [])].find((b) => b.getAttribute('aria-label') === 'Insight');
+    const r = last?.getBoundingClientRect();
+    return { overflow: sc ? sc.scrollHeight - sc.clientHeight : -1, lastVisible: !!r && r.bottom <= window.innerHeight && r.height > 0 };
   });
-  check('rail: collapsed rail fits every destination without scrolling', fit.overflow <= 1 && fit.trashVisible, JSON.stringify(fit));
-  check('rail: brand mark shows the avatar', (await zpage.locator('.brand-mark img').count()) > 0);
+  check('rail: collapsed rail fits every destination without scrolling', fit.overflow <= 1 && fit.lastVisible, JSON.stringify(fit));
+  check('rail: no library logo block at the top', (await zpage.locator('.rail-head, .brand-mark').count()) === 0);
   check('sticky notes: feature removed', (await zpage.locator('[aria-label*="sticky" i]').count()) === 0);
   await zctx.close();
 }
@@ -489,7 +584,7 @@ check('pwa: manifest and icons resolve', manifestOk);
   await spage.goto(BASE, { waitUntil: 'networkidle' });
   await spage.waitForTimeout(900);
   await dismissCookieConsent(spage);
-  await spage.getByRole('button', { name: 'Notebook', exact: true }).click();
+  await nav(spage, 'Notebook');
   await spage.waitForTimeout(500);
   await spage.getByRole('button', { name: 'New note', exact: true }).first().click();
   await spage.waitForTimeout(400);
@@ -542,10 +637,10 @@ await tpage.goto(BASE, { waitUntil: 'networkidle' });
 await tpage.waitForTimeout(1300);
 await dismissCookieConsent(tpage);
 check('tablet: three-pane shell fits', await tpage.locator('nav[aria-label="Modules"]').first().isVisible());
-/* collapsed rail on a tablet: the document modules live in the "Docs" flyout */
-await tpage.getByRole('button', { name: 'Docs', exact: true }).click();
+/* collapsed rail on a tablet: the document modules live in the "Library" flyout */
+await tpage.getByRole('button', { name: 'Library', exact: true }).click();
 await tpage.waitForTimeout(400);
-check('tablet: docs flyout lists its modules', await tpage.getByRole('menuitem', { name: 'Docs Storage' }).isVisible());
+check('tablet: library flyout lists its modules', await tpage.getByRole('menuitem', { name: 'Docs Storage' }).isVisible());
 await tpage.getByRole('menuitem', { name: 'Docs Storage' }).click();
 await tpage.waitForTimeout(900);
 
@@ -642,7 +737,7 @@ if (!(await waitForServer(CLOUD_BASE))) {
   await cpage.goto(CLOUD_BASE, { waitUntil: 'networkidle' });
   await cpage.waitForSelector('nav[aria-label="Modules"]', { timeout: 15000 });
   await dismissCookieConsent(cpage);
-  await cpage.getByRole('button', { name: 'Notebook', exact: true }).click();
+  await nav(cpage, 'Notebook');
   await cpage.waitForTimeout(500);
   check(
     'auth-gate: signed out, the cloud build still browses freely',
@@ -651,7 +746,7 @@ if (!(await waitForServer(CLOUD_BASE))) {
 
   const gated = async (navLabel, triggerName) => {
     if (navLabel) {
-      await cpage.getByRole('button', { name: navLabel, exact: true }).click();
+      await nav(cpage, navLabel);
       await cpage.waitForTimeout(500);
     }
     await cpage.getByRole('button', { name: triggerName, exact: true }).first().click();

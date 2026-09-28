@@ -108,6 +108,23 @@ function friendly(message: string): string {
   return message;
 }
 
+function isOfflineAuthError(error: { name?: string; message?: string; status?: number }): boolean {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return true;
+  const m = `${error.name ?? ''} ${error.message ?? ''}`.toLowerCase();
+  return m.includes('retryable') || m.includes('fetch') || m.includes('network') || error.status === 0;
+}
+
+/** The last session this device saw (supabase-js keeps it under our storage key). */
+function readStoredSession(): Session | null {
+  try {
+    const raw = window.localStorage.getItem('heyfouad.auth');
+    const parsed = raw ? (JSON.parse(raw) as Session) : null;
+    return parsed?.user && parsed.access_token ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }): JSX.Element {
   const supabase = useMemo(() => getSupabase(), []);
   const [session, setSession] = useState<Session | null>(null);
@@ -119,15 +136,24 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
 
     supabase.auth
       .getSession()
-      .then(({ data }) => {
-        if (!cancelled) setSession(data.session);
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        // Offline with an expired token the refresh can't run, and the client
+        // reports "no session". The person hasn't signed out — keep them in
+        // (reads come from this device, writes queue) until the network is
+        // back and the token refreshes on its own.
+        if (!data.session && error && isOfflineAuthError(error)) setSession(readStoredSession());
+        else setSession(data.session);
       })
-      .catch(() => undefined)
+      .catch(() => {
+        if (!cancelled) setSession(readStoredSession());
+      })
       .finally(() => {
         if (!cancelled) setReady(true);
       });
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
+      if (event === 'INITIAL_SESSION' && !next) return; // getSession() above decides
       setSession(next);
     });
 

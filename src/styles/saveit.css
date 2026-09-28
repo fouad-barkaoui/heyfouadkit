@@ -127,7 +127,8 @@
     background-color 160ms var(--ease-snap),
     color 160ms var(--ease-snap);
 }
-.save-view-btn[aria-checked='true'] {
+.save-view-btn[aria-checked='true'],
+.save-view-btn[aria-selected='true'] {
   color: var(--color-paper);
   background: rgb(var(--tint-rgb) / 0.09);
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);

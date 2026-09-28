@@ -61,6 +61,15 @@ export function buildIndex(workspace: Workspace): IndexRow[] {
     push(l.id, 'link', 'saveit', l.title, l.description || l.note, `${l.url} ${l.domain} ${l.kind} ${l.collection} ${l.tags.join(' ')} ${l.note}`, l.updatedAt);
   }
 
+  for (const h of workspace.habits) {
+    if (h.isDeleted) continue;
+    push(h.id, 'habit', 'habits', `${h.emoji} ${h.name}`, '', 'habit streak', h.updatedAt);
+  }
+  for (const g of workspace.goals) {
+    if (g.isDeleted) continue;
+    push(g.id, 'goal', 'habits', `${g.emoji} ${g.title}`, g.why, g.steps.map((s) => s.title).join(' '), g.updatedAt);
+  }
+
   return rows;
 }
 

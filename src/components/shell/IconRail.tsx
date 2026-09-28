@@ -1,14 +1,14 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { Check, ChevronDown, ChevronLeft, LibraryBig, Search, Settings, UserRound } from 'lucide-react';
+import { Check, ChevronDown, ChevronLeft, Search, Settings, UserRound } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { PlanChip } from '@/components/ui/PlanChip';
-import { BRAND_NAME, BRAND_TAGLINE, BrandMark } from '@/components/ui/BrandMark';
 import { isProUser } from '@/lib/access';
 import type { ModuleId } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { DOCS_GROUP, ESSENTIALS, INSIGHT, MODULE_MAP, type ModuleMeta } from '@/modules/registry';
+import { groupOf, HOME_ID, MODULE_MAP, NAV_GROUPS, type ModuleMeta, type NavGroup } from '@/modules/registry';
+import { prefetchModule } from '@/modules/prefetch';
 import { getDisplayName, useAuth } from '@/state/authStore';
 import { useLanguage } from '@/state/languageStore';
 import { useUI } from '@/state/uiStore';
@@ -41,22 +41,6 @@ function RailTip({ label, children, enabled }: { label: ReactNode; children: JSX
         </Tooltip.Content>
       </Tooltip.Portal>
     </Tooltip.Root>
-  );
-}
-
-function Logo({ expanded }: { expanded: boolean }): JSX.Element {
-  return (
-    <div className={cn('flex min-w-0 items-center gap-2.5', !expanded && 'mx-auto')}>
-      <BrandMark size={36} />
-      {expanded ? (
-        <span className="anim-fade min-w-0">
-          <span className="block truncate text-[14px] font-medium leading-tight tracking-[-0.014em] text-paper">
-            {BRAND_NAME}
-          </span>
-          <span className="mono block truncate text-[9.5px] uppercase tracking-[0.12em] text-ash">{BRAND_TAGLINE}</span>
-        </span>
-      ) : null}
-    </div>
   );
 }
 
@@ -98,6 +82,8 @@ function RailRow({
         data-active={active}
         aria-label={flag ? `${label} — ${FLAG_TOOLTIP[flag]}` : label}
         aria-current={active ? 'page' : undefined}
+        onPointerEnter={() => prefetchModule(meta.id)}
+        onFocus={() => prefetchModule(meta.id)}
         className={cn('nav-row', !expanded && 'is-compact', indent && expanded && 'ps-7')}
       >
         <Icon size={indent && expanded ? 14 : 16} strokeWidth={1.6} className="shrink-0" aria-hidden />
@@ -108,21 +94,23 @@ function RailRow({
   );
 }
 
-/** Collapsed rail: the five document modules fold into one "Library" chip
- * that opens a labelled flyout — the rail stays short enough to never scroll. */
-function DocsFlyout({
+/** Collapsed rail: each master section is one chip that opens a labelled
+ * flyout of its tools — the rail stays short enough to never scroll. */
+function GroupFlyout({
+  group,
   label,
   labelFor,
   module,
   onSelect,
 }: {
+  group: NavGroup;
   label: string;
   labelFor: (id: ModuleId) => string;
   module: ModuleId;
   onSelect: (id: ModuleId) => void;
 }): JSX.Element {
-  const active = DOCS_GROUP.children.includes(module);
-  const ActiveIcon = active ? MODULE_MAP[module].icon : LibraryBig;
+  const active = group.children.includes(module);
+  const ActiveIcon = active ? MODULE_MAP[module].icon : group.icon;
   const [open, setOpen] = useState(false);
   const [tip, setTip] = useState(false);
 
@@ -135,8 +123,10 @@ function DocsFlyout({
               type="button"
               data-active={active}
               data-open={open}
+              data-nav-group={group.id}
               aria-label={label}
               className="nav-row is-compact"
+              onPointerEnter={() => group.children.forEach(prefetchModule)}
             >
               <ActiveIcon size={16} strokeWidth={1.6} aria-hidden />
               <span className="rail-flyout-caret" aria-hidden />
@@ -160,7 +150,7 @@ function DocsFlyout({
           <DropdownMenu.Label className="px-2.5 pb-1.5 pt-1 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">
             {label}
           </DropdownMenu.Label>
-          {DOCS_GROUP.children.map((id, i) => {
+          {group.children.map((id, i) => {
             const Icon = MODULE_MAP[id].icon;
             const isActive = module === id;
             return (
@@ -190,14 +180,6 @@ function DocsFlyout({
   );
 }
 
-function SectionHead({ expanded, children }: { expanded: boolean; children: ReactNode }): JSX.Element {
-  return expanded ? (
-    <p className="mb-1.5 px-2.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash/80">{children}</p>
-  ) : (
-    <div className="rail-divider" aria-hidden />
-  );
-}
-
 /** Walk offsetParents up to `root`, so transforms mid-animation don't skew the result. */
 function offsetWithin(el: HTMLElement, root: HTMLElement): { x: number; y: number } {
   let x = 0;
@@ -211,7 +193,7 @@ function offsetWithin(el: HTMLElement, root: HTMLElement): { x: number; y: numbe
   return { x, y };
 }
 
-const DOCS_OPEN_KEY = 'heyfouad.docsGroupOpen.v1';
+const GROUP_OPEN_KEY = 'heyfouad.navGroupOpen.v1';
 
 /**
  * Desktop / tablet navigation rail. Two states:
@@ -235,24 +217,27 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
 
   const labelFor = useCallback((id: ModuleId) => t(NAV_KEY[id] ?? MODULE_MAP[id].label), [t]);
 
-  const docsActive = DOCS_GROUP.children.includes(module);
-  const [docsOpen, setDocsOpen] = useState<boolean>(() => {
-    if (docsActive) return true;
+  // Accordion: one master section open at a time (the active module's),
+  // so the sidebar never grows tall. Remembered between visits.
+  const activeGroup = groupOf(module)?.id ?? null;
+  const [openGroup, setOpenGroup] = useState<string | null>(() => {
+    if (activeGroup) return activeGroup;
     try {
-      return window.localStorage.getItem(DOCS_OPEN_KEY) !== '0';
+      return window.localStorage.getItem(GROUP_OPEN_KEY);
     } catch {
-      return true;
+      return null;
     }
   });
   useEffect(() => {
-    if (docsActive) setDocsOpen(true);
-  }, [docsActive]);
+    if (activeGroup) setOpenGroup(activeGroup);
+  }, [activeGroup]);
 
-  const toggleDocsOpen = (): void => {
-    setDocsOpen((v) => {
-      const next = !v;
+  const toggleGroup = (id: string): void => {
+    setOpenGroup((cur) => {
+      const next = cur === id ? null : id;
       try {
-        window.localStorage.setItem(DOCS_OPEN_KEY, next ? '1' : '0');
+        if (next) window.localStorage.setItem(GROUP_OPEN_KEY, next);
+        else window.localStorage.removeItem(GROUP_OPEN_KEY);
       } catch {
         /* ignore */
       }
@@ -306,7 +291,7 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
 
   useLayoutEffect(() => {
     measure();
-  }, [measure, module, expanded, docsOpen, user]);
+  }, [measure, module, expanded, openGroup, user]);
 
   useEffect(() => {
     // first measurement lands without a slide, later ones animate
@@ -344,7 +329,7 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
     ro.observe(s);
     if (listRef.current) ro.observe(listRef.current);
     return () => ro.disconnect();
-  }, [updateEdges, expanded, docsOpen]);
+  }, [updateEdges, expanded, openGroup]);
 
   const sync = SYNC_LOOK_KEY[live ? syncState : 'offline'];
   const SyncIcon = sync.icon;
@@ -391,9 +376,7 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
           </button>
         </RailTip>
 
-        <div className="rail-head">
-          <Logo expanded={expanded} />
-        </div>
+        <div className="rail-top" aria-hidden />
 
         {user ? <TeamSwitcher expanded={expanded} /> : null}
 
@@ -433,43 +416,53 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
             />
 
             <section className="rail-section">
-              <SectionHead expanded={expanded}>{t('nav.essentials')}</SectionHead>
-              <div className="rail-stack">{rows(ESSENTIALS)}</div>
+              <div className="rail-stack">{rows([HOME_ID])}</div>
             </section>
 
-            <section className="rail-section">
-              {expanded ? (
-                <>
+            {NAV_GROUPS.map((g) => {
+              const label = t(g.labelKey);
+              const GroupIcon = g.icon;
+              const isOpen = openGroup === g.id;
+              const holdsActive = g.children.includes(module);
+              if (!expanded) {
+                return (
+                  <section key={g.id} className="rail-section">
+                    <div className="rail-divider" aria-hidden />
+                    <div className="rail-stack">
+                      <GroupFlyout group={g} label={label} labelFor={labelFor} module={module} onSelect={go} />
+                    </div>
+                  </section>
+                );
+              }
+              return (
+                <section key={g.id} className="rail-section">
                   <button
                     type="button"
-                    onClick={toggleDocsOpen}
-                    aria-expanded={docsOpen}
-                    className="mb-1.5 flex w-full items-center gap-1 px-2.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash/80 transition-colors hover:text-mist"
+                    onClick={() => toggleGroup(g.id)}
+                    onPointerEnter={() => g.children.forEach(prefetchModule)}
+                    aria-expanded={isOpen}
+                    data-nav-group={g.id}
+                    data-contains={g.children.map(labelFor).join('|')}
+                    className={cn('rail-group-head', holdsActive && !isOpen && 'holds-active')}
                   >
-                    <span className="flex-1 text-start">{t('nav.docs')}</span>
+                    <GroupIcon size={15} strokeWidth={1.7} className="shrink-0" aria-hidden />
+                    <span className="flex-1 truncate text-start">{label}</span>
+                    {!isOpen ? <span className="rail-group-count mono">{g.children.length}</span> : null}
                     <ChevronDown
-                      size={12}
+                      size={13}
                       strokeWidth={2}
-                      className={cn('transition-transform duration-200', docsOpen ? 'rotate-0' : '-rotate-90')}
+                      className={cn('shrink-0 transition-transform duration-200', isOpen ? 'rotate-0' : '-rotate-90')}
                       aria-hidden
                     />
                   </button>
-                  {docsOpen ? <div className="rail-stack anim-rise pb-1">{rows(DOCS_GROUP.children, true)}</div> : null}
-                </>
-              ) : (
-                <>
-                  <SectionHead expanded={false}>{t('nav.docs')}</SectionHead>
-                  <div className="rail-stack">
-                    <DocsFlyout label={t('nav.docs')} labelFor={labelFor} module={module} onSelect={go} />
+                  <div className={cn('rail-group-body grid', isOpen && 'is-open')}>
+                    <div className="min-h-0 overflow-hidden">
+                      <div className="rail-stack pb-1 pt-0.5">{isOpen ? rows(g.children, true) : null}</div>
+                    </div>
                   </div>
-                </>
-              )}
-            </section>
-
-            <section className="rail-section">
-              <SectionHead expanded={expanded}>{t('nav.insight')}</SectionHead>
-              <div className="rail-stack">{rows(INSIGHT)}</div>
-            </section>
+                </section>
+              );
+            })}
           </div>
         </div>
 

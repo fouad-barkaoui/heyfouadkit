@@ -15,6 +15,7 @@ export const NAV_KEY: Record<string, string> = {
   home: 'nav.home',
   todo: 'nav.todo',
   calendar: 'nav.calendar',
+  habits: 'nav.habits',
   team: 'nav.team',
   news: 'nav.news',
   saveit: 'nav.saveit',
@@ -34,6 +35,7 @@ export const SYNC_LOOK_KEY: Record<SyncState, { icon: typeof Cloud; color: strin
   idle: { icon: Cloud, color: '#8a8f98', key: 'shell.cloudReady' },
   syncing: { icon: Loader2, color: '#e4f222', key: 'shell.syncing' },
   synced: { icon: Cloud, color: '#27a644', key: 'shell.live' },
+  queued: { icon: CloudOff, color: '#f5a524', key: 'shell.queued' },
   error: { icon: AlertTriangle, color: '#eb5757', key: 'shell.syncFailed' },
 };
 

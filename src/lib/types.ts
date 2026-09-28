@@ -3,6 +3,7 @@ export type ModuleId =
   | 'notebook'
   | 'todo'
   | 'calendar'
+  | 'habits'
   | 'team'
   | 'news'
   | 'saveit'
@@ -15,7 +16,7 @@ export type ModuleId =
   | 'analytics'
   | 'trash';
 
-export type ItemType = 'note' | 'article' | 'todo' | 'doc' | 'course' | 'news' | 'medicine' | 'link';
+export type ItemType = 'note' | 'article' | 'todo' | 'doc' | 'course' | 'news' | 'medicine' | 'link' | 'habit' | 'goal';
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'critical';
 export type TaskStatus = 'backlog' | 'in_progress' | 'completed' | 'archived';
@@ -200,6 +201,46 @@ export interface SavedLink extends Trashable {
   updatedAt: string;
 }
 
+/* ── Habits & Goals ──────────────────────────────────────────────────────── */
+
+export interface Habit extends Trashable {
+  id: string;
+  name: string;
+  emoji: string;
+  color: string;
+  /** Weekdays it's scheduled on, 0 = Sunday … 6 = Saturday. Empty = every day. */
+  days: number[];
+  /** Local dates it was done, as YYYY-MM-DD. */
+  log: string[];
+  archived: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GoalStep {
+  id: string;
+  title: string;
+  done: boolean;
+  /** Set once the step has been sent to Tasks. */
+  todoId: string | null;
+  dueDate: string | null;
+}
+
+export type GoalStatus = 'active' | 'achieved' | 'paused';
+
+export interface Goal extends Trashable {
+  id: string;
+  title: string;
+  why: string;
+  emoji: string;
+  color: string;
+  dueDate: string | null;
+  steps: GoalStep[];
+  status: GoalStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Workspace {
   badges: Badge[];
   notes: Note[];
@@ -212,6 +253,8 @@ export interface Workspace {
   medicines: Medicine[];
   treatmentPlans: TreatmentPlan[];
   links: SavedLink[];
+  habits: Habit[];
+  goals: Goal[];
 }
 
 export type CollectionKey = keyof Workspace;

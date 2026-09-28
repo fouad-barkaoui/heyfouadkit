@@ -1,6 +1,8 @@
 import {
   BookMarked,
   BookmarkPlus,
+  Flame,
+  Target,
   FileText,
   GraduationCap,
   ListChecks,
@@ -39,6 +41,8 @@ const TYPE_META: Record<ItemType, { label: string; icon: LucideIcon; color: stri
   news: { label: 'News', icon: Newspaper, color: '#02b8cc' },
   medicine: { label: 'Medicine', icon: Pill, color: '#27a644' },
   link: { label: 'Saved link', icon: BookmarkPlus, color: '#f59e0b' },
+  habit: { label: 'Habit', icon: Flame, color: '#f97316' },
+  goal: { label: 'Goal', icon: Target, color: '#7c83ff' },
 };
 
 const FILTERS: { id: ItemType | 'all'; label: string }[] = [

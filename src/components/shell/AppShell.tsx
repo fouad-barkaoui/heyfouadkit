@@ -6,6 +6,7 @@ import { CookieConsentModal } from '@/components/onboarding/CookieConsentModal';
 import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow';
 import { hasMedicationsAccess } from '@/lib/access';
 import { useAuth } from '@/state/authStore';
+import { prefetchLikelyModules } from '@/modules/prefetch';
 import { useUI } from '@/state/uiStore';
 import { useWorkspace } from '@/state/workspaceStore';
 import { AccountPanel } from './AccountPanel';
@@ -13,6 +14,7 @@ import { AuthOverlay } from './AuthOverlay';
 import { CommandPalette } from './CommandPalette';
 import { IconRail } from './IconRail';
 import { MobileMenu } from './MobileMenu';
+import { OfflinePill } from './OfflinePill';
 import { useMediaQuery } from './navShared';
 import { SettingsModal } from './SettingsModal';
 
@@ -47,6 +49,9 @@ const VaultModule = lazy(async () => ({ default: (await import('@/modules/vault/
 const TrashPage = lazy(async () => ({ default: (await import('@/modules/trash/TrashPage')).TrashPage }));
 const SaveItModule = lazy(async () => ({
   default: (await import('@/modules/saveit/SaveItModule')).SaveItModule,
+}));
+const HabitsModule = lazy(async () => ({
+  default: (await import('@/modules/habits/HabitsModule')).HabitsModule,
 }));
 const NewsModule = lazy(async () => ({ default: (await import('@/modules/news/NewsModule')).NewsModule }));
 const MedicationsModule = lazy(async () => ({
@@ -157,6 +162,11 @@ export function AppShell(): JSX.Element {
     };
   }, []);
 
+  // Once the workspace is on screen, warm the most-used modules in the background.
+  useEffect(() => {
+    if (ready) prefetchLikelyModules(['saveit', 'todo', 'habits', 'notebook', 'calendar']);
+  }, [ready]);
+
   const view = useMemo(() => {
     switch (module) {
       case 'todo':
@@ -169,6 +179,8 @@ export function AppShell(): JSX.Element {
         return <NewsModule />;
       case 'saveit':
         return <SaveItModule />;
+      case 'habits':
+        return <HabitsModule />;
       case 'medications':
         return canOpenMedications ? <MedicationsModule /> : <MedicationsPaywall />;
       case 'articles':
@@ -252,6 +264,7 @@ export function AppShell(): JSX.Element {
       )}
       <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
       <OnboardingFlow />
+      <OfflinePill />
       <CookieConsentModal />
     </div>
   );

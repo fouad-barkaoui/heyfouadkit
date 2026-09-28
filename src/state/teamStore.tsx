@@ -71,7 +71,12 @@ function friendlyRpcError(e: unknown): string {
 
 export function TeamProvider({ children }: { children: ReactNode }): JSX.Element {
   const supabase = useMemo(() => getSupabase(), []);
-  const { user, ready: authReady } = useAuth();
+  const { user: authUser, ready: authReady } = useAuth();
+  // A profile edit (avatar, consents) hands us a new user object for the same
+  // account; everything here only cares which account it is.
+  const authUserId = authUser?.id ?? null;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const user = useMemo(() => authUser, [authUserId]);
 
   const [teams, setTeams] = useState<Team[]>([]);
   const [ready, setReady] = useState(false);
@@ -93,11 +98,30 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
 
   const refreshTeams = useCallback(async (): Promise<Team[]> => {
     if (!supabase || !user) return [];
-    const { data, error } = await supabase
+    const cacheKey = `heyfouad.teams.${user.id}`;
+    // Offline (or a stalled link): fall back to the list we saw last time, so
+    // the right team opens and your role still lets you edit.
+    const fromCache = (): Team[] => {
+      try {
+        const raw = window.localStorage.getItem(cacheKey);
+        const cached = raw ? (JSON.parse(raw) as Team[]) : [];
+        if (Array.isArray(cached) && cached.length) setTeams(cached);
+        return Array.isArray(cached) ? cached : [];
+      } catch {
+        return [];
+      }
+    };
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return fromCache();
+    const query = supabase
       .from('team_members')
       .select('team_id, role, teams:team_id(id, name)')
       .eq('user_id', user.id);
-    if (error || !data) return [];
+    const res = await Promise.race([
+      query.then((r) => r),
+      new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 8000)),
+    ]).catch(() => null);
+    if (!res || res.error || !res.data) return fromCache();
+    const { data } = res;
     const list: Team[] = data
       .map((row) => {
         const t = row.teams as unknown as { id: string; name: string } | null;
@@ -107,6 +131,11 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
       .filter((t): t is Team => t !== null)
       .sort((a, b) => (a.name === 'Personal' ? -1 : b.name === 'Personal' ? 1 : a.name.localeCompare(b.name)));
     setTeams(list);
+    try {
+      window.localStorage.setItem(cacheKey, JSON.stringify(list));
+    } catch {
+      /* ignore */
+    }
     return list;
   }, [supabase, user]);
 
@@ -135,6 +164,13 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
       setReady(true);
     })();
   }, [authReady, user, supabase, refreshTeams, switchTeam]);
+
+  useEffect(() => {
+    if (!user || !supabase) return;
+    const onOnline = (): void => void refreshTeams();
+    window.addEventListener('online', onOnline);
+    return () => window.removeEventListener('online', onOnline);
+  }, [user, supabase, refreshTeams]);
 
   /* ── Redeem a `?join=` link once signed in ──────────────────────────── */
   const redeemInvite = useCallback(

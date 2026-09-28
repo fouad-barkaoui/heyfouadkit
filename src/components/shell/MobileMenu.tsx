@@ -3,11 +3,10 @@ import { CloudOff, Search, Settings } from 'lucide-react';
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { PlanChip } from '@/components/ui/PlanChip';
-import { BRAND_NAME, BRAND_TAGLINE, BrandMark } from '@/components/ui/BrandMark';
 import { isProUser } from '@/lib/access';
 import type { ModuleId } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { DOCS_GROUP, ESSENTIALS, INSIGHT, MODULE_MAP } from '@/modules/registry';
+import { HOME_ID, MODULE_MAP, NAV_GROUPS } from '@/modules/registry';
 import { getDisplayName, useAuth } from '@/state/authStore';
 import { useLanguage } from '@/state/languageStore';
 import { useUI } from '@/state/uiStore';
@@ -125,13 +124,7 @@ export function MobileMenu(): JSX.Element {
 
           <header className="relative flex items-center gap-3 px-4 pb-3 pt-[max(14px,env(safe-area-inset-top))]">
             <MenuButton open={morph} onClick={close} label="Close navigation" />
-            <BrandMark size={34} />
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-[15px] font-medium leading-tight tracking-[-0.014em] text-paper">
-                {BRAND_NAME}
-              </span>
-              <span className="mono block truncate text-[9.5px] uppercase tracking-[0.12em] text-ash">{BRAND_TAGLINE}</span>
-            </span>
+            <span className="min-w-0 flex-1 text-[15px] font-medium tracking-[-0.014em] text-paper">Menu</span>
           </header>
 
           <div className="relative px-4 pb-3">
@@ -155,12 +148,13 @@ export function MobileMenu(): JSX.Element {
           ) : null}
 
           <nav aria-label="Modules" className="scroll-y relative min-h-0 flex-1 px-4 pb-4">
-            <p className="menu-section-head">{t('nav.essentials')}</p>
-            <div className="menu-grid">{tiles(ESSENTIALS)}</div>
-            <p className="menu-section-head">{t('nav.docs')}</p>
-            <div className="menu-grid">{tiles(DOCS_GROUP.children)}</div>
-            <p className="menu-section-head">{t('nav.insight')}</p>
-            <div className="menu-grid">{tiles(INSIGHT)}</div>
+            <div className="menu-grid mt-1">{tiles([HOME_ID])}</div>
+            {NAV_GROUPS.map((g) => (
+              <div key={g.id}>
+                <p className="menu-section-head">{t(g.labelKey)}</p>
+                <div className="menu-grid">{tiles(g.children)}</div>
+              </div>
+            ))}
           </nav>
 
           <footer className="menu-foot relative px-4 pt-3 pb-[max(14px,env(safe-area-inset-bottom))]">

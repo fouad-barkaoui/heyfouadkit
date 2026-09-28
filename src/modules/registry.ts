@@ -1,5 +1,9 @@
 import {
   BarChart3,
+  Briefcase,
+  CalendarCheck2,
+  Flame,
+  LibraryBig,
   BookmarkPlus,
   BookMarked,
   CalendarDays,
@@ -30,6 +34,7 @@ export const MODULES: ModuleMeta[] = [
   { id: 'home', label: 'Home', short: 'Home', icon: Sparkles },
   { id: 'todo', label: 'Tasks', short: 'Tasks', icon: ListChecks },
   { id: 'calendar', label: 'Calendar', short: 'Calendar', icon: CalendarDays },
+  { id: 'habits', label: 'Habits & Goals', short: 'Habits', icon: Flame },
   { id: 'team', label: 'Team', short: 'Team', icon: Users },
   { id: 'news', label: 'News', short: 'News', icon: Newspaper },
   { id: 'saveit', label: 'SaveIt', short: 'SaveIt', icon: BookmarkPlus },
@@ -48,19 +53,29 @@ export const MODULE_MAP: Record<ModuleId, ModuleMeta> = Object.fromEntries(
   MODULES.map((m) => [m.id, m]),
 ) as Record<ModuleId, ModuleMeta>;
 
-/**
- * Sidebar structure, matching the reference layout: a flat "Essentials" list,
- * a single collapsible "Docs" group bundling the original document modules
- * (an open/close sub-list, same idea as the reference's collapsible
- * "Projects" group), then an "Insight" group. "Automations" was intentionally
- * left out per instruction — it is not a module and never will be.
- */
-export const ESSENTIALS: ModuleId[] = ['home', 'saveit', 'todo', 'calendar', 'team', 'news', 'medications'];
+export interface NavGroup {
+  id: 'plan' | 'library' | 'workspace' | 'insight';
+  labelKey: string;
+  icon: LucideIcon;
+  children: ModuleId[];
+}
 
-export const DOCS_GROUP = {
-  label: 'Docs',
-  icon: FolderTree,
-  children: ['notebook', 'articles', 'courses', 'docs', 'vault'] as ModuleId[],
-};
+/** Home sits on its own; everything else folds into four master sections,
+ * so the sidebar stays short however many tools the app grows. */
+export const HOME_ID: ModuleId = 'home';
 
-export const INSIGHT: ModuleId[] = ['reporting', 'analytics', 'trash'];
+export const NAV_GROUPS: NavGroup[] = [
+  { id: 'plan', labelKey: 'nav.group.plan', icon: CalendarCheck2, children: ['todo', 'calendar', 'habits'] },
+  {
+    id: 'library',
+    labelKey: 'nav.group.library',
+    icon: LibraryBig,
+    children: ['saveit', 'notebook', 'articles', 'courses', 'docs', 'vault'],
+  },
+  { id: 'workspace', labelKey: 'nav.group.workspace', icon: Briefcase, children: ['team', 'news', 'medications'] },
+  { id: 'insight', labelKey: 'nav.group.insight', icon: BarChart3, children: ['reporting', 'analytics', 'trash'] },
+];
+
+export function groupOf(id: ModuleId): NavGroup | undefined {
+  return NAV_GROUPS.find((g) => g.children.includes(id));
+}

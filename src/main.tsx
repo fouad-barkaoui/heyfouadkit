@@ -8,6 +8,8 @@ import './styles/premium.css';
 import './styles/saveit.css';
 import './styles/whatsnew.css';
 import './styles/theme.css';
+import './styles/nav.css';
+import './styles/habits.css';
 
 /** Warm the connection to the cloud project as early as possible — a
  * preconnect here shaves the DNS + TLS handshake off whichever request
@@ -47,3 +49,11 @@ createRoot(root).render(
     <App />
   </StrictMode>,
 );
+
+// Offline: cache the app so it opens with no connection. Registered after
+// load so it never competes with the first paint.
+if (import.meta.env.PROD && 'serviceWorker' in navigator && window.isSecureContext) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => undefined);
+  });
+}

@@ -59,6 +59,7 @@ const VALID: ModuleId[] = [
   'notebook',
   'todo',
   'calendar',
+  'habits',
   'team',
   'news',
   'saveit',
