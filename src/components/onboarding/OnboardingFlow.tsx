@@ -1,58 +1,75 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/state/authStore';
-import { acceptCloudTerms, consumeJustAuthedFlag, hasAcceptedCloudTerms } from '@/state/onboarding';
+import {
+  consentDecision,
+  consentMetaPatch,
+  hasSeenWhatsNew,
+  rememberConsentLocally,
+  rememberWhatsNewLocally,
+  unsyncedLocalConsents,
+  WHATS_NEW_RELEASE,
+  type ConsentValue,
+} from '@/state/onboarding';
+import { useUI } from '@/state/uiStore';
 import { CloudTermsModal } from './CloudTermsModal';
-import { WelcomeModal } from './WelcomeModal';
-
-type Stage = 'none' | 'welcome' | 'terms';
+import { WhatsNewModal, type WhatsNewAction } from './WhatsNewModal';
 
 /**
- * Orchestrates the two-step onboarding popup: a welcome screen right after a
- * real sign-in/sign-up, then — once, per account, on this device — the cloud
- * terms and storage-limit screen. Mounted once at the shell level.
+ * What a signed-in person sees, at most once each, for life:
+ *   1. the cloud terms — only if they have never answered (accept OR
+ *      decline is final, stored on the account so no device asks again);
+ *   2. "What's new" — once per release, also remembered on the account.
+ * Everything is derived from the account + a local mirror, so re-renders,
+ * reloads and other devices can never show a popup twice.
  */
 export function OnboardingFlow(): JSX.Element {
-  const { user, signOut } = useAuth();
-  const [stage, setStage] = useState<Stage>('none');
-  const seenUserId = useRef<string | null>(null);
+  const { user, ready, updateMeta } = useAuth();
+  const { setModule, setAccountOpen } = useUI();
+  // Bumped after a local decision so the derived stage re-reads storage.
+  const [tick, setTick] = useState(0);
 
+  // Carry decisions made on this device (before signing in / before this
+  // version) up to the account once.
   useEffect(() => {
-    if (!user) {
-      seenUserId.current = null;
-      return;
-    }
-    if (seenUserId.current === user.id) return;
-    seenUserId.current = user.id;
+    if (!user) return;
+    const pending = unsyncedLocalConsents(user);
+    if (pending.terms) void updateMeta(consentMetaPatch(user, 'terms', pending.terms));
+  }, [user, updateMeta]);
 
-    if (consumeJustAuthedFlag()) {
-      setStage('welcome');
-    }
-  }, [user]);
+  void tick;
+  const stage: 'none' | 'terms' | 'whatsnew' =
+    !ready || !user
+      ? 'none'
+      : consentDecision('terms', user) === null
+        ? 'terms'
+        : !hasSeenWhatsNew(user)
+          ? 'whatsnew'
+          : 'none';
 
-  const goToTermsOrClose = (): void => {
-    if (!user || hasAcceptedCloudTerms(user.id)) {
-      setStage('none');
-      return;
-    }
-    setStage('terms');
+  const decideTerms = (value: ConsentValue): void => {
+    if (!user) return;
+    rememberConsentLocally('terms', value, user);
+    setTick((t) => t + 1);
+    void updateMeta(consentMetaPatch(user, 'terms', value));
   };
 
-  const accept = (): void => {
-    if (user) acceptCloudTerms(user.id);
-    setStage('none');
+  const closeWhatsNew = (action: WhatsNewAction): void => {
+    if (!user) return;
+    rememberWhatsNewLocally(user);
+    setTick((t) => t + 1);
+    void updateMeta({ whats_new_seen: WHATS_NEW_RELEASE });
+    if (action === 'saveit') setModule('saveit');
+    if (action === 'account') setAccountOpen(true);
   };
 
   return (
     <>
-      <WelcomeModal open={stage === 'welcome'} onContinue={goToTermsOrClose} />
       <CloudTermsModal
         open={stage === 'terms'}
-        onAccept={accept}
-        onCancel={() => {
-          setStage('none');
-          void signOut();
-        }}
+        onAccept={() => decideTerms('accepted')}
+        onCancel={() => decideTerms('declined')}
       />
+      <WhatsNewModal open={stage === 'whatsnew'} onClose={closeWhatsNew} />
     </>
   );
 }

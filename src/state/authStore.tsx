@@ -39,6 +39,8 @@ interface AuthContextValue {
   avatarUrl: string | null;
   /** Save a cropped picture (or `null` to remove it). */
   setAvatar: (image: Blob | null) => Promise<AuthResult>;
+  /** Merge keys into the account's metadata (consents, "what's new" seen…). Best effort. */
+  updateMeta: (data: Record<string, unknown>) => Promise<boolean>;
 }
 
 /** The account's cloud profile picture URL, if one was set. */
@@ -276,6 +278,21 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
     [session, supabase],
   );
 
+  const updateMeta = useCallback(
+    async (data: Record<string, unknown>): Promise<boolean> => {
+      if (!supabase || !session?.user) return false;
+      try {
+        const { data: res, error } = await withRetry(() => supabase.auth.updateUser({ data }));
+        if (error) return false;
+        if (res.user) setSession((s) => (s ? { ...s, user: res.user } : s));
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [session, supabase],
+  );
+
   const value = useMemo<AuthContextValue>(
     () => ({
       configured: cloudConfigured,
@@ -291,8 +308,9 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
       updateUsername,
       avatarUrl,
       setAvatar,
+      updateMeta,
     }),
-    [ready, session, signIn, signUp, signInWithGoogle, signOut, sendReset, changePassword, updateUsername, avatarUrl, setAvatar],
+    [ready, session, signIn, signUp, signInWithGoogle, signOut, sendReset, changePassword, updateUsername, avatarUrl, setAvatar, updateMeta],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

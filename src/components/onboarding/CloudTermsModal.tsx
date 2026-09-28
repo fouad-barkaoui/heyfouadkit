@@ -21,9 +21,8 @@ const RULES: { icon: typeof Lock; title: string; body: string }[] = [
 ];
 
 /**
- * Shown once per account per device, right after the welcome popup on first
- * sign-in. Accepting turns on cloud sync; cancelling signs back out, so
- * nothing leaves this device without agreement.
+ * Asked once per account, for life — the answer (accept or decline) is
+ * stored on the account, so no device ever asks again.
  */
 export function CloudTermsModal({
   open,
@@ -66,6 +65,7 @@ export function CloudTermsModal({
         </ul>
       }
       acceptLabel="Accept Terms and Continue"
+      cancelLabel="Decline"
       onAccept={onAccept}
       onCancel={onCancel}
     />

@@ -1,0 +1,167 @@
+/* ────────────────────────────────────────────────────────────────────────────
+   "Midnight" — the refined dark theme.
+   Flat grey-black becomes a deep, faintly blue night: surfaces pick up a cool
+   tint, panels are frosted glass over a slow aurora, cards catch light on
+   their top edge, and text gets a touch more contrast. Light mode is
+   untouched (every rule here is scoped to the dark theme).
+   ──────────────────────────────────────────────────────────────────────── */
+
+:root:not([data-theme='light']) {
+  --color-void: #06070b;
+  --color-carbon: #0c0e14;
+  --color-obsidian: #12151d;
+  --color-graphite: #222634;
+  --color-smoke: #353b4d;
+  --color-ash: #6c7385;
+  --color-fog: #979eb0;
+  --color-mist: #dde2ec;
+  --color-bone: #eceef3;
+  --dark-glass: rgb(12 14 20 / 0.62);
+  --dark-edge: rgb(255 255 255 / 0.055);
+  --dark-lift: 0 1px 0 rgb(255 255 255 / 0.045) inset;
+}
+
+/* Aurora behind everything: two slow colour fields drifting under the WebGL
+   particles. Cheap — one fixed element, transform-only animation. */
+:root:not([data-theme='light']) .app-shell::before {
+  content: '';
+  position: fixed;
+  inset: -20%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(40% 35% at 18% 12%, rgb(99 102 241 / 0.19), transparent 70%),
+    radial-gradient(38% 32% at 86% 88%, rgb(20 184 166 / 0.13), transparent 70%),
+    radial-gradient(30% 26% at 78% 8%, rgb(228 242 34 / 0.035), transparent 70%),
+    radial-gradient(45% 40% at 40% 100%, rgb(139 92 246 / 0.1), transparent 70%);
+  animation: midnight-aurora 38s ease-in-out infinite alternate;
+}
+@keyframes midnight-aurora {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate3d(3%, -2%, 0) rotate(4deg) scale(1.05);
+  }
+  100% {
+    transform: translate3d(-3%, 2%, 0) rotate(-3deg) scale(1.02);
+  }
+}
+
+/* Cards: a whisper of gradient and a lit top edge instead of a flat fill. */
+:root:not([data-theme='light']) .surface-card {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.028), rgb(255 255 255 / 0.006) 42%),
+    var(--color-carbon);
+  box-shadow:
+    inset 0 0 0 1px var(--color-graphite),
+    var(--dark-lift),
+    0 14px 34px -22px rgb(0 0 0 / 0.75);
+}
+
+/* Glass panes (sidebar, list panel, content) read as frosted, not flat. */
+:root:not([data-theme='light']) .rail:not([data-overlay='true']) {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.025), transparent 30%),
+    var(--dark-glass);
+  -webkit-backdrop-filter: blur(22px) saturate(1.3);
+  backdrop-filter: blur(22px) saturate(1.3);
+  box-shadow: inset -1px 0 0 var(--dark-edge);
+}
+
+/* Primary actions glow softly in the dark. */
+:root:not([data-theme='light']) .btn-primary {
+  box-shadow:
+    0 0 0 1px rgb(228 242 34 / 0.35),
+    0 6px 20px -8px rgb(228 242 34 / 0.55),
+    inset 0 1px 0 rgb(255 255 255 / 0.35);
+}
+:root:not([data-theme='light']) .btn-ghost {
+  background: rgb(255 255 255 / 0.018);
+  box-shadow:
+    inset 0 0 0 1px var(--color-graphite),
+    var(--dark-lift);
+}
+
+/* Inputs: recessed wells with a crisp focus ring. */
+:root:not([data-theme='light']) .field {
+  background: rgb(0 0 0 / 0.22);
+  border-color: var(--color-graphite);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.35);
+}
+:root:not([data-theme='light']) .field:focus {
+  border-color: color-mix(in oklab, var(--color-acid) 55%, var(--color-graphite));
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 0.35),
+    0 0 0 3px color-mix(in oklab, var(--color-acid) 14%, transparent);
+}
+
+/* Dialogs: lifted glass with a lit rim. */
+:root:not([data-theme='light']) [role='dialog'].bg-carbon {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.03), transparent 120px),
+    var(--color-carbon);
+  box-shadow:
+    inset 0 0 0 1px var(--color-graphite),
+    var(--dark-lift),
+    0 30px 90px -20px rgb(0 0 0 / 0.85) !important;
+}
+
+/* Hairline scrollbars that match the night. */
+:root:not([data-theme='light']) ::-webkit-scrollbar-thumb {
+  background: #2a2f3f;
+  background-clip: content-box;
+}
+:root:not([data-theme='light']) ::-webkit-scrollbar-thumb:hover {
+  background: #3b4257;
+  background-clip: content-box;
+}
+:root:not([data-theme='light']) * {
+  scrollbar-color: #2a2f3f transparent;
+}
+
+/* Selection */
+:root:not([data-theme='light']) ::selection {
+  background: rgb(124 131 255 / 0.38);
+  color: #fff;
+}
+
+/* ── Native dropdowns follow the theme ───────────────────────────────────
+   Chrome on Windows paints a <select>'s open list from the select's own
+   background — ours were translucent, so the list fell back to white.
+   Give selects an opaque themed fill and style the options directly. */
+select {
+  background-color: var(--color-carbon);
+  color: var(--color-mist);
+}
+select option,
+select optgroup {
+  background-color: var(--color-obsidian);
+  color: var(--color-mist);
+}
+select option:checked {
+  background-color: color-mix(in oklab, var(--color-acid) 22%, var(--color-obsidian));
+  color: var(--color-paper);
+}
+select.field {
+  background-color: var(--color-carbon);
+}
+:root:not([data-theme='light']) select.field {
+  background-color: #0a0c11;
+}
+input[type='date'],
+input[type='time'],
+input[type='datetime-local'] {
+  color-scheme: inherit;
+}
+:root:not([data-theme='light']) input[type='date']::-webkit-calendar-picker-indicator,
+:root:not([data-theme='light']) input[type='time']::-webkit-calendar-picker-indicator,
+:root:not([data-theme='light']) input[type='datetime-local']::-webkit-calendar-picker-indicator {
+  filter: invert(0.85);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell::before {
+    animation: none !important;
+  }
+}

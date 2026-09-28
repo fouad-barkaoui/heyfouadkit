@@ -1,0 +1,426 @@
+/* ── What's new ──────────────────────────────────────────────────────────── */
+.wn-overlay {
+  background: rgb(4 5 8 / 0.62);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: nx-fade 240ms both;
+}
+.wn-modal {
+  background: var(--color-carbon);
+  box-shadow:
+    inset 0 0 0 1px var(--color-graphite),
+    inset 0 1px 0 rgb(var(--tint-rgb) / 0.05),
+    0 40px 120px -30px rgb(0 0 0 / 0.75);
+  animation: wn-in 520ms var(--ease-out-quint) both;
+}
+@keyframes wn-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0) scale(0.965);
+  }
+}
+.wn-side {
+  background: color-mix(in oklab, var(--color-obsidian) 70%, var(--color-carbon));
+  border-bottom: 1px solid var(--color-graphite);
+}
+@media (min-width: 768px) {
+  .wn-side {
+    border-bottom: 0;
+    border-right: 1px solid var(--color-graphite);
+  }
+}
+.wn-kicker {
+  color: var(--color-accent);
+  background: color-mix(in oklab, var(--color-acid) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-acid) 28%, transparent);
+}
+.wn-item {
+  color: var(--color-fog);
+  transition:
+    background-color 160ms var(--ease-snap),
+    color 160ms var(--ease-snap);
+}
+.wn-item:hover {
+  color: var(--color-paper);
+  background: rgb(var(--tint-rgb) / 0.04);
+}
+.wn-item[aria-selected='true'] {
+  color: var(--color-paper);
+  background: color-mix(in oklab, #6366f1 26%, rgb(var(--tint-rgb) / 0.06));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, #6366f1 45%, transparent);
+}
+.wn-tag {
+  border-radius: 9999px;
+  padding: 1px 7px;
+  font-size: 10px;
+  font-weight: 590;
+  letter-spacing: 0.04em;
+  color: #0b0c0e;
+  background: var(--color-acid);
+}
+.wn-tag.is-dev {
+  color: #fbbf24;
+  background: rgb(251 191 36 / 0.12);
+  box-shadow: inset 0 0 0 1px rgb(251 191 36 / 0.35);
+}
+.wn-hero {
+  background:
+    radial-gradient(120% 120% at 0% 0%, color-mix(in oklab, var(--h2) 55%, transparent), transparent 55%),
+    radial-gradient(90% 110% at 100% 100%, color-mix(in oklab, var(--h2) 45%, transparent), transparent 60%),
+    linear-gradient(135deg, var(--h1), color-mix(in oklab, var(--h1) 60%, var(--h2)));
+  animation: wn-hero-in 520ms var(--ease-out-quint) both;
+}
+@keyframes wn-hero-in {
+  from {
+    opacity: 0;
+    filter: saturate(0.4) blur(6px);
+  }
+}
+.wn-hero-grain {
+  opacity: 0.2;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.wn-sparkle {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+  filter: drop-shadow(0 0 6px rgb(255 255 255 / 0.9));
+  animation: wn-twinkle 3s ease-in-out infinite;
+}
+.wn-sparkle.is-sm {
+  width: 13px;
+  height: 13px;
+}
+@keyframes wn-twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.7) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1) rotate(45deg);
+  }
+}
+.wn-close {
+  color: rgb(255 255 255 / 0.9);
+  background: rgb(0 0 0 / 0.2);
+  transition:
+    background-color 160ms,
+    transform 220ms var(--ease-snap);
+}
+.wn-close:hover {
+  background: rgb(0 0 0 / 0.38);
+  transform: rotate(90deg);
+}
+.wn-copy {
+  animation: nx-rise 420ms var(--ease-out-quint) both;
+}
+
+/* SaveIt art: a capture bar types a link, cards pop in */
+.wn-art-saveit {
+  width: min(380px, 100%);
+}
+.wn-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 12px;
+  padding: 6px 6px 6px 10px;
+  background: #fff;
+  color: #1f2330;
+  font-size: 12px;
+  box-shadow: 0 16px 40px -12px rgb(0 0 0 / 0.45);
+}
+.wn-bar-icon {
+  color: #6d28d9;
+}
+.wn-typing {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  border-right: 1.5px solid #1f2330;
+  width: 0;
+  animation:
+    wn-type 3.6s steps(30) infinite,
+    wn-caret 0.8s step-end infinite;
+}
+@keyframes wn-type {
+  0% {
+    width: 0;
+  }
+  45%,
+  100% {
+    width: 100%;
+  }
+}
+@keyframes wn-caret {
+  50% {
+    border-color: transparent;
+  }
+}
+.wn-bar-btn {
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-weight: 600;
+  background: #e4f222;
+  color: #111;
+}
+.wn-cards {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.wn-card {
+  border-radius: 10px;
+  padding: 6px;
+  background: rgb(255 255 255 / 0.95);
+  box-shadow: 0 12px 30px -12px rgb(0 0 0 / 0.5);
+  animation: wn-card 3.6s var(--ease-out-quint) infinite;
+}
+.wn-card-b {
+  animation-delay: 0.12s;
+}
+.wn-card-c {
+  animation-delay: 0.24s;
+}
+@keyframes wn-card {
+  0%,
+  42% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.92);
+  }
+  56%,
+  92% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.wn-card-media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 10;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #ef4444, #f59e0b);
+  margin-bottom: 6px;
+}
+.wn-card-media.is-b {
+  background: linear-gradient(135deg, #10b981, #0ea5e9);
+}
+.wn-card-media.is-c {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+}
+.wn-card-play {
+  display: flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #fff;
+  color: #111;
+  padding-left: 1px;
+}
+.wn-card-line {
+  height: 5px;
+  border-radius: 4px;
+  background: #d9dce4;
+  margin-top: 4px;
+}
+
+/* Constellation art */
+.wn-art-space {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.wn-thread {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.28);
+  stroke-width: 0.35;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 200;
+  animation: wn-draw 3s var(--ease-out-quint) both;
+}
+.wn-thread.is-tag {
+  stroke: rgb(228 242 34 / 0.6);
+}
+@keyframes wn-draw {
+  from {
+    stroke-dashoffset: 200;
+  }
+}
+.wn-star {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow:
+    0 0 0 2px var(--c),
+    0 0 16px 4px var(--c);
+  animation: wn-pulse 2.4s ease-in-out infinite;
+  animation-delay: var(--d);
+}
+@keyframes wn-pulse {
+  50% {
+    transform: scale(1.35);
+    box-shadow:
+      0 0 0 2px var(--c),
+      0 0 24px 8px var(--c);
+  }
+}
+
+/* Profile art */
+.wn-art-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.wn-seal {
+  display: flex;
+  width: 120px;
+  height: 120px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: conic-gradient(from var(--wn-a, 0deg), #f7d98b, #c98d2e, #fff1c8, #b97a24, #f7d98b);
+  box-shadow: 0 18px 40px -10px rgb(0 0 0 / 0.5);
+  animation: wn-ring 6s linear infinite;
+}
+@property --wn-a {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes wn-ring {
+  to {
+    --wn-a: 360deg;
+  }
+}
+.wn-seal-ring {
+  display: block;
+  width: 102px;
+  height: 102px;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 0 0 4px #fffaf0;
+}
+.wn-seal-ring img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.wn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 9999px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #3a2408;
+  background: linear-gradient(110deg, #f7d98b, #e2a948, #fff1c8, #e2a948);
+}
+
+/* Team art */
+.wn-art-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.wn-avatars {
+  display: flex;
+}
+.wn-av {
+  display: flex;
+  width: 46px;
+  height: 46px;
+  margin-left: -12px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 3px solid rgb(255 255 255 / 0.9);
+  background: radial-gradient(circle at 35% 30%, color-mix(in oklab, var(--c) 60%, white), var(--c));
+  animation: wn-join 2.8s var(--ease-out-quint) infinite;
+  animation-delay: calc(var(--i) * 0.14s);
+}
+.wn-av.is-add {
+  color: #fff;
+  font-size: 20px;
+  border-style: dashed;
+  background: rgb(255 255 255 / 0.12);
+  animation: none;
+}
+@keyframes wn-join {
+  0%,
+  10% {
+    transform: translateX(-10px);
+    opacity: 0;
+  }
+  30%,
+  90% {
+    transform: none;
+    opacity: 1;
+  }
+}
+.wn-build {
+  width: 200px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.18);
+}
+.wn-build-bar {
+  display: block;
+  height: 100%;
+  width: 40%;
+  border-radius: inherit;
+  background: repeating-linear-gradient(45deg, #fbbf24 0 8px, #f59e0b 8px 16px);
+  animation: wn-build 2.4s ease-in-out infinite;
+}
+@keyframes wn-build {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(260%);
+  }
+}
+.wn-build-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.85);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wn-sparkle,
+  .wn-typing,
+  .wn-card,
+  .wn-star,
+  .wn-seal,
+  .wn-av,
+  .wn-build-bar {
+    animation: none !important;
+  }
+  .wn-typing {
+    width: 100%;
+  }
+}

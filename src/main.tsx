@@ -6,6 +6,8 @@ import App from './App';
 import './styles/index.css';
 import './styles/premium.css';
 import './styles/saveit.css';
+import './styles/whatsnew.css';
+import './styles/theme.css';
 
 /** Warm the connection to the cloud project as early as possible — a
  * preconnect here shaves the DNS + TLS handshake off whichever request

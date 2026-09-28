@@ -194,7 +194,7 @@ export function AppShell(): JSX.Element {
   }, [module, canOpenMedications]);
 
   return (
-    <div className="relative flex h-[100dvh] w-full overflow-hidden bg-void">
+    <div className="app-shell relative flex h-[100dvh] w-full overflow-hidden bg-void">
       {fieldReady ? (
         <Suspense fallback={null}>
           <SpatialField module={module} energized={mobileNavOpen || paletteOpen} style={bgStyle} />

@@ -1,46 +1,40 @@
 import { Cookie } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/state/authStore';
+import {
+  consentDecision,
+  consentMetaPatch,
+  rememberConsentLocally,
+  unsyncedLocalConsents,
+} from '@/state/onboarding';
 import { ConsentSheet } from './ConsentSheet';
 
-const CONSENT_KEY = 'heyfouad.cookieConsent.v1';
-
-function safeGet(key: string): string | null {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function safeSet(key: string, value: string): void {
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    /* private mode / quota — the notice just shows again next visit */
-  }
-}
-
 /**
- * A one-time notice shown the very first time anyone opens heyfouad, before
- * they've decided whether to sign in or keep browsing as a guest. heyfouad
- * already has to store data in this browser to work at all — notes, tasks,
- * docs, and preferences all live in local storage, and sync to a private
- * cloud copy once signed in — so this makes that plain and asks for an
- * explicit acknowledgement before reusing it on the next visit. Declining
- * only dismisses the notice; it can't turn off the storage the app depends
- * on to remember your work, so the choice itself is what gets remembered
- * (recorded locally either way, so this never reappears after one answer).
+ * The one-time "we keep your data on this device" notice. Asked once per
+ * person for life: the answer is kept on this device and, once signed in,
+ * on the account — so a returning person on a new device is never asked
+ * again (and anyone who already agreed to the cloud terms has, by
+ * definition, agreed to this too).
  */
 export function CookieConsentModal(): JSX.Element {
-  const [open, setOpen] = useState(false);
+  const { user, ready, updateMeta } = useAuth();
+  const [answered, setAnswered] = useState(false);
 
+  const decided =
+    consentDecision('cookies', user) !== null || (user !== null && consentDecision('terms', user) !== null);
+  const open = ready && !answered && !decided;
+
+  // A choice made before signing in is carried up to the account once.
   useEffect(() => {
-    setOpen(safeGet(CONSENT_KEY) === null);
-  }, []);
+    if (!user) return;
+    const pending = unsyncedLocalConsents(user);
+    if (pending.cookies) void updateMeta(consentMetaPatch(user, 'cookies', pending.cookies));
+  }, [user, updateMeta]);
 
   const choose = (value: 'accepted' | 'declined'): void => {
-    safeSet(CONSENT_KEY, value);
-    setOpen(false);
+    rememberConsentLocally('cookies', value, user);
+    setAnswered(true);
+    if (user) void updateMeta(consentMetaPatch(user, 'cookies', value));
   };
 
   return (
