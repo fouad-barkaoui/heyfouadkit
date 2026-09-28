@@ -81,6 +81,7 @@ const HAS_UPDATED_AT: CollectionKey[] = [
   'news',
   'medicines',
   'treatmentPlans',
+  'links',
 ];
 
 export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.Element {

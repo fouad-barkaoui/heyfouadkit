@@ -25,5 +25,28 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "shortcuts": [
+    {
+      "name": "SaveIt",
+      "short_name": "SaveIt",
+      "description": "Your saved links",
+      "url": "/#/saveit",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }

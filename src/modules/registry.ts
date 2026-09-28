@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  BookmarkPlus,
   BookMarked,
   CalendarDays,
   FileText,
@@ -31,6 +32,7 @@ export const MODULES: ModuleMeta[] = [
   { id: 'calendar', label: 'Calendar', short: 'Calendar', icon: CalendarDays },
   { id: 'team', label: 'Team', short: 'Team', icon: Users },
   { id: 'news', label: 'News', short: 'News', icon: Newspaper },
+  { id: 'saveit', label: 'SaveIt', short: 'SaveIt', icon: BookmarkPlus },
   { id: 'medications', label: 'Medications Catalog', short: 'Medications', icon: Pill },
   { id: 'notebook', label: 'Notebook', short: 'Notes', icon: NotebookPen },
   { id: 'articles', label: 'Articles & Media', short: 'Articles', icon: FileText },
@@ -53,7 +55,7 @@ export const MODULE_MAP: Record<ModuleId, ModuleMeta> = Object.fromEntries(
  * "Projects" group), then an "Insight" group. "Automations" was intentionally
  * left out per instruction — it is not a module and never will be.
  */
-export const ESSENTIALS: ModuleId[] = ['home', 'todo', 'calendar', 'team', 'news', 'medications'];
+export const ESSENTIALS: ModuleId[] = ['home', 'saveit', 'todo', 'calendar', 'team', 'news', 'medications'];
 
 export const DOCS_GROUP = {
   label: 'Docs',

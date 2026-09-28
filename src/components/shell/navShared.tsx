@@ -17,6 +17,7 @@ export const NAV_KEY: Record<string, string> = {
   calendar: 'nav.calendar',
   team: 'nav.team',
   news: 'nav.news',
+  saveit: 'nav.saveit',
   medications: 'nav.medications',
   notebook: 'nav.notebook',
   articles: 'nav.articles',

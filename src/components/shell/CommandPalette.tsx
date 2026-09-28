@@ -1,6 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import {
   BookMarked,
+  BookmarkPlus,
   CornerDownLeft,
   FileText,
   GraduationCap,
@@ -29,6 +30,7 @@ const TYPE_ICON: Record<SearchHit['type'], LucideIcon> = {
   badge: TagIcon,
   news: Newspaper,
   medicine: Pill,
+  link: BookmarkPlus,
 };
 
 const FILTERS: { id: SearchHit['type'] | 'all'; label: string }[] = [
@@ -39,6 +41,7 @@ const FILTERS: { id: SearchHit['type'] | 'all'; label: string }[] = [
   { id: 'course', label: 'Courses' },
   { id: 'doc', label: 'Docs' },
   { id: 'news', label: 'News' },
+  { id: 'link', label: 'SaveIt' },
   { id: 'medicine', label: 'Medications' },
 ];
 

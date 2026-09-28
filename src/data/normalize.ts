@@ -11,6 +11,7 @@ import type {
   MedicineType,
   Note,
   NewsItem,
+  SavedLink,
   Todo,
   TreatmentPlan,
   TreatmentStatus,
@@ -202,6 +203,45 @@ export function normalizeAttachment(raw: Record<string, unknown>): Attachment {
   };
 }
 
+export function normalizeLink(raw: Record<string, unknown>): SavedLink {
+  const url = str(raw.url);
+  let domain = str(raw.domain);
+  if (!domain) {
+    try {
+      domain = new URL(url).hostname.replace(/^www\./, '');
+    } catch {
+      domain = '';
+    }
+  }
+  const minutes = typeof raw.readingMinutes === 'number' && raw.readingMinutes > 0 ? Math.round(raw.readingMinutes) : null;
+  return {
+    id: str(raw.id) || uid('lnk'),
+    url,
+    title: str(raw.title) || domain || 'Untitled link',
+    description: str(raw.description),
+    kind: oneOf(
+      raw.kind,
+      ['video', 'article', 'repo', 'social', 'audio', 'pdf', 'image', 'website'] as const,
+      'website',
+    ),
+    siteName: str(raw.siteName) || domain,
+    domain,
+    image: nullableStr(raw.image),
+    favicon: nullableStr(raw.favicon),
+    embedUrl: nullableStr(raw.embedUrl),
+    tags: strArr(raw.tags),
+    collection: str(raw.collection) || 'Inbox',
+    note: str(raw.note),
+    status: oneOf(raw.status, ['unread', 'read'] as const, 'unread'),
+    readingMinutes: minutes,
+    accent: /^#[0-9a-f]{3,8}$/i.test(str(raw.accent)) ? str(raw.accent) : null,
+    isInteresting: bool(raw.isInteresting),
+    openedAt: nullableStr(raw.openedAt),
+    ...stamps(raw),
+    ...trash(raw),
+  };
+}
+
 const asRecords = (v: unknown): Record<string, unknown>[] =>
   Array.isArray(v) ? v.filter((x): x is Record<string, unknown> => !!x && typeof x === 'object') : [];
 
@@ -218,6 +258,7 @@ export function normalizeWorkspace(raw: unknown): Workspace {
     news: asRecords(src.news).map(normalizeNewsItem),
     medicines: asRecords(src.medicines).map(normalizeMedicine),
     treatmentPlans: asRecords(src.treatmentPlans).map(normalizeTreatmentPlan),
+    links: asRecords(src.links).map(normalizeLink).filter((l) => l.url !== ''),
   };
 }
 
@@ -232,4 +273,5 @@ export const emptyWorkspace = (): Workspace => ({
   news: [],
   medicines: [],
   treatmentPlans: [],
+  links: [],
 });

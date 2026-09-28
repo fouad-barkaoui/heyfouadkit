@@ -1,5 +1,6 @@
 import {
   ArrowRight,
+  BookmarkPlus,
   CalendarDays,
   ListChecks,
   Newspaper,
@@ -57,6 +58,7 @@ export function HomeModule(): JSX.Element {
   const { t } = useLanguage();
 
   const QUICK_LINKS: { id: ModuleId; labelKey: string; hintKey: string; icon: typeof ListChecks }[] = [
+    { id: 'saveit', labelKey: 'home.link.saveit.label', hintKey: 'home.link.saveit.hint', icon: BookmarkPlus },
     { id: 'todo', labelKey: 'home.link.tasks.label', hintKey: 'home.link.tasks.hint', icon: ListChecks },
     { id: 'calendar', labelKey: 'home.link.calendar.label', hintKey: 'home.link.calendar.hint', icon: CalendarDays },
     { id: 'team', labelKey: 'home.link.team.label', hintKey: 'home.link.team.hint', icon: Users },

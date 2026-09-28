@@ -14,6 +14,7 @@ export const TABLES: Record<CollectionKey, string> = {
   news: 'news',
   medicines: 'medicines',
   treatmentPlans: 'treatment_plans',
+  links: 'saved_links',
 };
 
 /** Badges are written before the rows that reference them; treatment plans
@@ -29,6 +30,7 @@ export const WRITE_ORDER: CollectionKey[] = [
   'news',
   'treatmentPlans',
   'medicines',
+  'links',
 ];
 
 const toSnake = (key: string): string => key.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);

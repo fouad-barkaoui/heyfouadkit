@@ -45,6 +45,9 @@ const AnalyticsModule = lazy(async () => ({
 }));
 const VaultModule = lazy(async () => ({ default: (await import('@/modules/vault/VaultModule')).VaultModule }));
 const TrashPage = lazy(async () => ({ default: (await import('@/modules/trash/TrashPage')).TrashPage }));
+const SaveItModule = lazy(async () => ({
+  default: (await import('@/modules/saveit/SaveItModule')).SaveItModule,
+}));
 const NewsModule = lazy(async () => ({ default: (await import('@/modules/news/NewsModule')).NewsModule }));
 const MedicationsModule = lazy(async () => ({
   default: (await import('@/modules/medications/MedicationsModule')).MedicationsModule,
@@ -164,6 +167,8 @@ export function AppShell(): JSX.Element {
         return <TeamModule />;
       case 'news':
         return <NewsModule />;
+      case 'saveit':
+        return <SaveItModule />;
       case 'medications':
         return canOpenMedications ? <MedicationsModule /> : <MedicationsPaywall />;
       case 'articles':

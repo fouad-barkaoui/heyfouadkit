@@ -61,6 +61,7 @@ const VALID: ModuleId[] = [
   'calendar',
   'team',
   'news',
+  'saveit',
   'medications',
   'articles',
   'courses',

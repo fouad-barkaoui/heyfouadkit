@@ -56,6 +56,11 @@ export function buildIndex(workspace: Workspace): IndexRow[] {
     push(p.id, 'medicine', 'medications', p.condition, '', p.prescriber, p.updatedAt);
   }
 
+  for (const l of workspace.links) {
+    if (l.isDeleted) continue;
+    push(l.id, 'link', 'saveit', l.title, l.description || l.note, `${l.url} ${l.domain} ${l.kind} ${l.collection} ${l.tags.join(' ')} ${l.note}`, l.updatedAt);
+  }
+
   return rows;
 }
 

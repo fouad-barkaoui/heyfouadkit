@@ -1,5 +1,6 @@
 import {
   BookMarked,
+  BookmarkPlus,
   FileText,
   GraduationCap,
   ListChecks,
@@ -37,6 +38,7 @@ const TYPE_META: Record<ItemType, { label: string; icon: LucideIcon; color: stri
   doc: { label: 'Document', icon: BookMarked, color: '#dd6a4e' },
   news: { label: 'News', icon: Newspaper, color: '#02b8cc' },
   medicine: { label: 'Medicine', icon: Pill, color: '#27a644' },
+  link: { label: 'Saved link', icon: BookmarkPlus, color: '#f59e0b' },
 };
 
 const FILTERS: { id: ItemType | 'all'; label: string }[] = [
@@ -47,6 +49,7 @@ const FILTERS: { id: ItemType | 'all'; label: string }[] = [
   { id: 'course', label: 'Courses' },
   { id: 'doc', label: 'Documents' },
   { id: 'news', label: 'News' },
+  { id: 'link', label: 'Links' },
 ];
 
 export function VaultModule(): JSX.Element {
@@ -122,6 +125,17 @@ export function VaultModule(): JSX.Element {
           title: n.title,
           body: excerpt(n.content, 150),
           updatedAt: n.updatedAt,
+        })),
+      ...workspace.links
+        .filter((l) => l.isInteresting && !l.isDeleted)
+        .map((l) => ({
+          id: l.id,
+          collection: 'links' as const,
+          type: 'link' as const,
+          module: 'saveit' as const,
+          title: l.title,
+          body: l.description || l.url,
+          updatedAt: l.updatedAt,
         })),
     ];
 

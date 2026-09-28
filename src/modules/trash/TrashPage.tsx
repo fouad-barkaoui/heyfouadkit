@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  BookmarkPlus,
   FileText,
   GraduationCap,
   HeartPulse,
@@ -20,7 +21,7 @@ import { useLanguage } from '@/state/languageStore';
 import { useWorkspace } from '@/state/workspaceStore';
 import { ScrollIndex } from '@/components/motion/ScrollIndex';
 
-type TrashKind = 'note' | 'task' | 'article' | 'doc' | 'course' | 'news' | 'medicine' | 'plan';
+type TrashKind = 'note' | 'task' | 'article' | 'doc' | 'course' | 'news' | 'medicine' | 'plan' | 'link';
 
 export interface TrashItem {
   id: string;
@@ -39,6 +40,7 @@ const KIND_ICON: Record<TrashKind, JSX.Element> = {
   doc: <FileText size={15} strokeWidth={1.7} />,
   course: <GraduationCap size={15} strokeWidth={1.7} />,
   news: <Newspaper size={15} strokeWidth={1.7} />,
+  link: <BookmarkPlus size={15} strokeWidth={1.7} />,
   medicine: <Pill size={15} strokeWidth={1.7} />,
   plan: <HeartPulse size={15} strokeWidth={1.7} />,
 };
@@ -132,6 +134,16 @@ export function TrashPage(): JSX.Element {
           deletedAt: p.deletedAt || p.updatedAt,
           preview: p.prescriber,
         })),
+      ...workspace.links
+        .filter((l) => l.isDeleted)
+        .map((l) => ({
+          id: l.id,
+          key: 'links' as CollectionKey,
+          title: l.title || l.url,
+          type: 'link' as TrashKind,
+          deletedAt: l.deletedAt || l.updatedAt,
+          preview: l.domain,
+        })),
     ];
     return items.sort((a, b) => new Date(b.deletedAt).getTime() - new Date(a.deletedAt).getTime());
   }, [
@@ -143,6 +155,7 @@ export function TrashPage(): JSX.Element {
     workspace.news,
     workspace.medicines,
     workspace.treatmentPlans,
+    workspace.links,
   ]);
 
   const restore = (item: TrashItem): void => {

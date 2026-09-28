@@ -5,6 +5,7 @@ export type ModuleId =
   | 'calendar'
   | 'team'
   | 'news'
+  | 'saveit'
   | 'medications'
   | 'articles'
   | 'courses'
@@ -14,7 +15,7 @@ export type ModuleId =
   | 'analytics'
   | 'trash';
 
-export type ItemType = 'note' | 'article' | 'todo' | 'doc' | 'course' | 'news' | 'medicine';
+export type ItemType = 'note' | 'article' | 'todo' | 'doc' | 'course' | 'news' | 'medicine' | 'link';
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'critical';
 export type TaskStatus = 'backlog' | 'in_progress' | 'completed' | 'archived';
@@ -168,6 +169,37 @@ export interface TreatmentPlan extends Trashable {
   updatedAt: string;
 }
 
+/* ── SaveIt ──────────────────────────────────────────────────────────────── */
+
+export type LinkKind = 'video' | 'article' | 'repo' | 'social' | 'audio' | 'pdf' | 'image' | 'website';
+export type LinkStatus = 'unread' | 'read';
+
+export interface SavedLink extends Trashable {
+  id: string;
+  url: string;
+  title: string;
+  description: string;
+  kind: LinkKind;
+  siteName: string;
+  domain: string;
+  /** Preview image (og:image, video thumbnail…). */
+  image: string | null;
+  favicon: string | null;
+  /** In-app player URL for videos / audio that can be embedded. */
+  embedUrl: string | null;
+  tags: string[];
+  collection: string;
+  note: string;
+  status: LinkStatus;
+  readingMinutes: number | null;
+  /** The site's theme colour, used to tint its card. */
+  accent: string | null;
+  isInteresting: boolean;
+  openedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Workspace {
   badges: Badge[];
   notes: Note[];
@@ -179,6 +211,7 @@ export interface Workspace {
   news: NewsItem[];
   medicines: Medicine[];
   treatmentPlans: TreatmentPlan[];
+  links: SavedLink[];
 }
 
 export type CollectionKey = keyof Workspace;

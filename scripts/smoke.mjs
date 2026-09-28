@@ -411,6 +411,34 @@ check(
   (await page.locator('nav[aria-label="Modules"] .avatar img').count()) > 0,
 );
 
+/* — SaveIt: save a link, see its card, open its preview — */
+await page.getByRole('button', { name: 'SaveIt', exact: true }).first().click();
+await page.waitForTimeout(700);
+check('saveit: empty state invites a first link', await page.locator('text=Your internet, kept.').isVisible());
+await page.getByLabel('Link to save').fill('https://www.youtube.com/watch?v=aircAruvnKk');
+await page.getByRole('button', { name: 'Save', exact: true }).click();
+await page.waitForTimeout(900);
+check('saveit: link saved as a card', (await page.locator('[data-link-id]').count()) === 1);
+check('saveit: YouTube detected as a video', await page.locator('.save-card .save-kind', { hasText: 'Video' }).isVisible());
+await page.getByLabel('Link to save').fill('github.com/mrdoob/three.js');
+await page.keyboard.press('Enter');
+await page.waitForTimeout(900);
+check('saveit: bare domains are accepted', (await page.locator('[data-link-id]').count()) === 2);
+await page.getByLabel('Link to save').fill('https://github.com/mrdoob/three.js');
+await page.keyboard.press('Enter');
+await page.waitForTimeout(700);
+check('saveit: duplicates are not saved twice', (await page.locator('[data-link-id]').count()) === 2);
+await page.locator('.save-card-inner').first().click();
+await page.waitForTimeout(700);
+check('saveit: preview opens with notes and tags', await page.getByLabel('Your note').isVisible());
+await page.keyboard.press('Escape');
+await page.waitForTimeout(400);
+await page.getByRole('radio', { name: 'Constellation' }).click();
+await page.waitForTimeout(1800);
+check('saveit: constellation renders a 3D canvas', (await page.locator('.save-space canvas').count()) === 1);
+await page.getByRole('radio', { name: 'Grid' }).click();
+await page.waitForTimeout(300);
+
 /* — Persistence across reload — */
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(1200);
