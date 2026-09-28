@@ -28,7 +28,7 @@ export function AccountPanel({
   onOpenChange: (open: boolean) => void;
 }): JSX.Element {
   const { configured, user, signOut, changePassword, updateUsername } = useAuth();
-  const { workspace, syncState, syncMessage, recordCount, resetWorkspace } = useWorkspace();
+  const { workspace, syncState, syncMessage, recordCount, resetWorkspace, retrySync } = useWorkspace();
   const { activeTeam } = useTeam();
   const { setModule } = useUI();
 
@@ -94,7 +94,7 @@ export function AccountPanel({
           <AvatarEditor name={getDisplayName(user)} pro={isProUser(user)} />
 
           <div className="flex items-start gap-3 rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="flex items-center gap-1.5 truncate text-[13px] text-paper">
                 {getDisplayName(user)}
                 <PlanChip user={user} />
@@ -114,6 +114,11 @@ export function AccountPanel({
                     : `Live in ${activeTeam?.name ?? 'your team'} · ${recordCount} records`}
               </p>
             </div>
+            {syncState === 'error' ? (
+              <Button className="ms-auto shrink-0" onClick={retrySync} icon={<RotateCcw size={12.5} strokeWidth={2} />}>
+                Retry
+              </Button>
+            ) : null}
           </div>
 
           <div className="rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 shadow-[inset_0_0_0_1px_var(--color-graphite)]">

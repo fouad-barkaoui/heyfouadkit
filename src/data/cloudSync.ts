@@ -1,5 +1,6 @@
 import type { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js';
 import type { CollectionKey, Workspace } from '@/lib/types';
+import { retryTransient } from './cloudErrors';
 import { normalizeWorkspace } from './normalize';
 
 export const TABLES: Record<CollectionKey, string> = {
@@ -48,16 +49,39 @@ function recordToRow(record: Record<string, unknown>, userId: string, teamId: st
   return out;
 }
 
-/** Every row belonging to a team, shaped exactly like anything read from disk. */
-export async function fetchTeamWorkspace(client: SupabaseClient, teamId: string): Promise<Workspace> {
+export interface TeamFetchResult {
+  workspace: Workspace;
+  /** Tables that could not be read — the rest of the workspace still loads. */
+  failed: { table: string; message: string }[];
+}
+
+/**
+ * Every row belonging to a team, shaped exactly like anything read from disk.
+ * Each table loads on its own (with one quiet retry for network blips), so a
+ * single failing table degrades that one section instead of the whole sync.
+ */
+export async function fetchTeamWorkspace(client: SupabaseClient, teamId: string): Promise<TeamFetchResult> {
+  const failed: TeamFetchResult['failed'] = [];
   const entries = await Promise.all(
     WRITE_ORDER.map(async (key) => {
-      const { data, error } = await client.from(TABLES[key]).select('*').eq('team_id', teamId);
-      if (error) throw new Error(`${TABLES[key]}: ${error.message}`);
-      return [key, (data ?? []).map((row) => rowToRecord(row as Record<string, unknown>))] as const;
+      try {
+        const rows = await retryTransient(async () => {
+          const { data, error } = await client.from(TABLES[key]).select('*').eq('team_id', teamId);
+          if (error) throw new Error(error.message);
+          return data ?? [];
+        });
+        return [key, rows.map((row) => rowToRecord(row as Record<string, unknown>))] as const;
+      } catch (err) {
+        failed.push({ table: TABLES[key], message: err instanceof Error ? err.message : String(err) });
+        return [key, []] as const;
+      }
     }),
   );
-  return normalizeWorkspace(Object.fromEntries(entries));
+  if (failed.length === WRITE_ORDER.length) {
+    // Nothing loaded at all — that's an outage, not a partial problem.
+    throw new Error(failed[0]?.message ?? 'Could not reach the cloud.');
+  }
+  return { workspace: normalizeWorkspace(Object.fromEntries(entries)), failed };
 }
 
 /** Insert or update one record, scoped to the active team. */
@@ -69,8 +93,10 @@ export async function writeRow(
   record: Record<string, unknown>,
 ): Promise<void> {
   const row = recordToRow(record, userId, teamId);
-  const { error } = await client.from(TABLES[key]).upsert(row, { onConflict: 'id' });
-  if (error) throw new Error(`${TABLES[key]}: ${error.message}`);
+  await retryTransient(async () => {
+    const { error } = await client.from(TABLES[key]).upsert(row, { onConflict: 'id' });
+    if (error) throw new Error(error.message);
+  });
 }
 
 /** Patch one record without touching fields the caller did not send. */
@@ -82,13 +108,17 @@ export async function patchRow(
 ): Promise<void> {
   const row: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(patch)) row[toSnake(k)] = v;
-  const { error } = await client.from(TABLES[key]).update(row).eq('id', id);
-  if (error) throw new Error(`${TABLES[key]}: ${error.message}`);
+  await retryTransient(async () => {
+    const { error } = await client.from(TABLES[key]).update(row).eq('id', id);
+    if (error) throw new Error(error.message);
+  });
 }
 
 export async function deleteRow(client: SupabaseClient, key: CollectionKey, id: string): Promise<void> {
-  const { error } = await client.from(TABLES[key]).delete().eq('id', id);
-  if (error) throw new Error(`${TABLES[key]}: ${error.message}`);
+  await retryTransient(async () => {
+    const { error } = await client.from(TABLES[key]).delete().eq('id', id);
+    if (error) throw new Error(error.message);
+  });
 }
 
 export type RowChange = {

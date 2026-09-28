@@ -1,3 +1,4 @@
+import { friendlyCloudError, retryTransient } from './cloudErrors';
 import { getSupabase } from './supabaseClient';
 
 /** Public bucket created in supabase/schema.sql — writes are limited to the owner's uid folder. */
@@ -115,10 +116,16 @@ export async function uploadCloudAvatar(userId: string, blob: Blob): Promise<str
   const ext = blob.type === 'image/webp' ? 'webp' : 'png';
   const name = `avatar-${Date.now()}.${ext}`;
   const path = `${userId}/${name}`;
-  const { error } = await client.storage
-    .from(AVATAR_BUCKET)
-    .upload(path, blob, { upsert: true, contentType: blob.type, cacheControl: '31536000' });
-  if (error) throw new Error(`The picture could not be uploaded — ${error.message}`);
+  try {
+    await retryTransient(async () => {
+      const { error } = await client.storage
+        .from(AVATAR_BUCKET)
+        .upload(path, blob, { upsert: true, contentType: blob.type, cacheControl: '31536000' });
+      if (error) throw new Error(error.message);
+    });
+  } catch (err) {
+    throw new Error(`The picture could not be uploaded — ${friendlyCloudError(err)}`);
+  }
   void pruneCloudAvatars(userId, name);
   return client.storage.from(AVATAR_BUCKET).getPublicUrl(path).data.publicUrl;
 }

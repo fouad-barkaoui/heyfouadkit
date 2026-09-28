@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { getRepository } from '@/data';
 import { deleteAttachmentFile } from '@/data/attachments';
+import { friendlyCloudError } from '@/data/cloudErrors';
 import { countRecords, deleteRow, fetchTeamWorkspace, patchRow, subscribeTeam, writeRow } from '@/data/cloudSync';
 import { markTouched, resetLocalWorkspace } from '@/data/localRepository';
 import { emptyWorkspace } from '@/data/normalize';
@@ -65,6 +66,8 @@ interface WorkspaceContextValue {
   syncState: SyncState;
   syncMessage: string | null;
   recordCount: number;
+  /** Re-run the cloud load (after an error, or on demand). */
+  retrySync: () => void;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
@@ -91,6 +94,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
   const [error, setError] = useState<string | null>(null);
   const [syncState, setSyncState] = useState<SyncState>('offline');
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const [syncAttempt, setSyncAttempt] = useState(0);
+  const retrySync = useCallback(() => setSyncAttempt((n) => n + 1), []);
 
   const dirty = useRef(false);
   const live = Boolean(supabase && user && activeTeamId);
@@ -137,15 +142,22 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
 
     void (async () => {
       try {
-        const remote = await withTimeout(
+        const { workspace: remote, failed } = await withTimeout(
           fetchTeamWorkspace(supabase, activeTeamId),
-          15000,
+          20000,
           'Timed out reaching the cloud — check your connection and try again.',
         );
         if (cancelled) return;
         setWorkspace(remote);
         setReady(true);
-        setSyncState('synced');
+        if (failed.length) {
+          setSyncState('error');
+          setSyncMessage(
+            `Synced, except ${failed.map((f) => f.table.replace('_', ' ')).join(', ')} — ${friendlyCloudError(failed[0]!.message)}`,
+          );
+        } else {
+          setSyncState('synced');
+        }
 
         channel = subscribeTeam(supabase, activeTeamId, (change) => {
           setWorkspace((prev) => {
@@ -165,7 +177,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
       } catch (e) {
         if (!cancelled) {
           setSyncState('error');
-          setSyncMessage(e instanceof Error ? e.message : 'Could not reach the cloud.');
+          setSyncMessage(friendlyCloudError(e));
           setReady(true);
         }
       }
@@ -175,7 +187,22 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
       cancelled = true;
       if (channel) void supabase.removeChannel(channel);
     };
-  }, [live, supabase, activeTeamId]);
+  }, [live, supabase, activeTeamId, syncAttempt]);
+
+  // Coming back online, or back to the tab after a failure, retries quietly.
+  useEffect(() => {
+    if (!live || syncState !== 'error') return;
+    const onOnline = (): void => retrySync();
+    const onVisible = (): void => {
+      if (document.visibilityState === 'visible') retrySync();
+    };
+    window.addEventListener('online', onOnline);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.removeEventListener('online', onOnline);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [live, syncState, retrySync]);
 
   const touch = useCallback(() => {
     dirty.current = true;
@@ -184,7 +211,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
 
   const reportWriteError = useCallback((e: unknown) => {
     setSyncState('error');
-    setSyncMessage(e instanceof Error ? e.message : 'A change could not be saved to the cloud.');
+    setSyncMessage(`A change could not be saved to the cloud — ${friendlyCloudError(e)}`);
   }, []);
 
   /* ── Mutations — optimistic locally, mirrored to the team live ──────── */
@@ -338,6 +365,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
       live,
       syncState,
       syncMessage,
+      retrySync,
       recordCount: countRecords(workspace),
     }),
     [
@@ -357,6 +385,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
       live,
       syncState,
       syncMessage,
+      retrySync,
     ],
   );
 
