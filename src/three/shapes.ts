@@ -21,6 +21,7 @@ export const MODULE_SHAPE: Record<ModuleId, ShapeName> = {
   analytics: 'spiral',
   trash: 'grid',
   contact: 'ring',
+  inbox: 'ring',
 };
 
 /** Accent the field tints toward, per module. */
@@ -42,6 +43,7 @@ export const MODULE_TINT: Record<ModuleId, [number, number, number]> = {
   analytics: [0.15, 0.65, 0.27],
   trash: [0.7, 0.4, 0.2],
   contact: [0.86, 0.16, 0.48],
+  inbox: [0.86, 0.16, 0.48],
 };
 
 const TAU = Math.PI * 2;

@@ -32,6 +32,7 @@
 }
 .cp-frame {
   position: relative;
+  font-family: var(--font-mono);
   max-width: 760px;
   margin: 0 auto;
   border-inline: 1px dashed var(--color-smoke);
@@ -105,10 +106,10 @@
   align-items: center;
   gap: 8px;
   margin: 0;
-  font-size: 26px;
+  font-size: 20px;
   font-weight: 500;
   line-height: 1.15;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   color: var(--color-paper);
 }
 .cp-verified {
@@ -118,11 +119,11 @@
 }
 .cp-role {
   position: relative;
-  height: 26px;
+  height: 22px;
   margin: 6px 0 0;
   overflow: hidden;
-  font-size: 17px;
-  line-height: 26px;
+  font-size: 13px;
+  line-height: 22px;
   color: var(--color-fog);
 }
 .cp-role-word {
@@ -141,7 +142,7 @@
   align-items: center;
   gap: 6px;
   margin: 8px 0 0;
-  font-size: 13px;
+  font-size: 11.5px;
   color: var(--color-ash);
 }
 .cp-flag {
@@ -171,227 +172,54 @@
 }
 .cp-bio {
   margin: 0;
-  font-size: 16.5px;
-  line-height: 1.7;
+  font-size: 13px;
+  line-height: 1.75;
   color: var(--color-fog);
 }
 .cp-bio strong {
   font-weight: 600;
   color: var(--color-paper);
 }
-@property --cp-angle {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: 0deg;
-}
-
 .cp-cta-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 24px;
+  gap: 10px;
+  margin-top: 20px;
 }
 
-/* CTA buttons: rotating light-trail border, cursor spotlight, shine sweep,
-   icon chip and an arrow that slides in. */
+/* One quiet solid button. */
 .cp-cta {
-  --cta-fg: var(--color-void);
-  --cta-bg: var(--color-paper);
-  --cta-ring: inset 0 1px 0 rgb(255 255 255 / 0.25);
-  position: relative;
-  isolation: isolate;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  height: 48px;
-  padding: 0 16px 0 7px;
-  border-radius: 14px;
-  font-size: 15px;
-  font-weight: 560;
-  letter-spacing: -0.005em;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 500;
   text-decoration: none;
   cursor: pointer;
-  color: var(--cta-fg);
-  background: transparent;
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.25),
-    0 10px 24px -12px rgb(0 0 0 / 0.6);
+  color: var(--color-void);
+  background: var(--color-paper);
   transition:
-    transform 220ms var(--ease-snap),
-    box-shadow 220ms var(--ease-snap);
-  animation: cp-rise 560ms var(--ease-out-quint) backwards;
+    opacity 150ms var(--ease-snap),
+    transform 150ms var(--ease-snap);
 }
-.cp-cta.is-ghost {
-  --cta-fg: var(--color-paper);
-  --cta-bg: rgb(var(--tint-rgb) / 0.05);
-  --cta-ring:
-    inset 0 0 0 1px var(--color-graphite),
-    inset 0 1px 0 rgb(var(--tint-rgb) / 0.06);
-  animation-delay: 70ms;
-  box-shadow: none;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-}
-/* Travelling light around the edge. */
-.cp-cta::before {
-  content: '';
-  position: absolute;
-  inset: -1.5px;
-  z-index: -1;
-  padding: 1.5px;
-  border-radius: 15.5px;
-  background: conic-gradient(
-    from var(--cp-angle),
-    transparent 0 55%,
-    #6d8bff 68%,
-    var(--color-acid) 78%,
-    #ff5fa2 88%,
-    transparent 96%
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  animation: cp-spin 4.2s linear infinite;
-}
-/* Same light, blurred, as a halo on hover. */
-.cp-cta::after {
-  content: '';
-  position: absolute;
-  inset: -5px;
-  z-index: -2;
-  border-radius: 19px;
-  background: conic-gradient(from var(--cp-angle), #6d8bff, var(--color-acid), #ff5fa2, #6d8bff);
-  filter: blur(14px);
-  opacity: 0;
-  transition: opacity 260ms var(--ease-snap);
-  animation: cp-spin 4.2s linear infinite;
-}
-@keyframes cp-spin {
-  to {
-    --cp-angle: 360deg;
-  }
-}
-/* Fill layer (sits above the hover halo, below the label). */
-.cp-cta-fx {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-  border-radius: inherit;
-  pointer-events: none;
-  background: var(--cta-bg);
-  box-shadow: var(--cta-ring);
-}
-.cp-cta-fx::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    140px circle at var(--mx, 50%) var(--my, 50%),
-    rgb(var(--tint-rgb) / 0.12),
-    transparent 70%
-  );
-  opacity: 0;
-  transition: opacity 200ms var(--ease-snap);
-}
-.cp-cta.is-primary .cp-cta-fx::before {
-  background: radial-gradient(140px circle at var(--mx, 50%) var(--my, 50%), rgb(109 139 255 / 0.28), transparent 70%);
-}
-.cp-cta-fx::after {
-  content: '';
-  position: absolute;
-  inset: -50% auto -50% -60%;
-  width: 45%;
-  transform: skewX(-20deg) translateX(0);
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent);
-  opacity: 0;
-}
-.cp-cta-icon {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  color: #fff;
-  background: linear-gradient(135deg, #6d8bff, #8b5cf6);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.3),
-    0 4px 12px -4px rgb(109 92 246 / 0.7);
-  transition: transform 320ms var(--ease-snap);
-}
-.cp-cta.is-ghost .cp-cta-icon {
-  color: #08090a;
-  background: linear-gradient(135deg, #f3ff6b, var(--color-acid));
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.5),
-    0 4px 12px -4px color-mix(in srgb, var(--color-acid) 70%, transparent);
-}
-.cp-cta-go {
-  flex-shrink: 0;
-  width: 0;
-  margin-inline-start: -6px;
-  opacity: 0;
-  transform: translateX(-6px);
-  transition:
-    width 260ms var(--ease-snap),
-    margin 260ms var(--ease-snap),
-    opacity 200ms var(--ease-snap),
-    transform 260ms var(--ease-snap);
-}
-@media (hover: hover) {
-  .cp-cta:hover {
-    transform: translateY(-2px);
-  }
-  .cp-cta:hover::after {
-    opacity: 0.55;
-  }
-  .cp-cta:hover .cp-cta-fx::before {
-    opacity: 1;
-  }
-  .cp-cta:hover .cp-cta-fx::after {
-    animation: cp-shine 900ms var(--ease-out-quint);
-  }
-  .cp-cta:hover .cp-cta-icon {
-    transform: rotate(-8deg) scale(1.08);
-  }
-  .cp-cta:hover .cp-cta-go {
-    width: 16px;
-    margin-inline-start: 0;
-    opacity: 1;
-    transform: none;
-  }
+.cp-cta:hover {
+  opacity: 0.88;
 }
 .cp-cta:active {
-  transform: translateY(0) scale(0.97);
+  transform: scale(0.98);
 }
-.cp-cta:focus-visible {
+.cp-cta:focus-visible,
+.cp-pill:focus-visible {
   outline: 2px solid var(--color-acid);
-  outline-offset: 3px;
-}
-@keyframes cp-shine {
-  from {
-    opacity: 1;
-    transform: skewX(-20deg) translateX(0);
-  }
-  to {
-    opacity: 0;
-    transform: skewX(-20deg) translateX(480%);
-  }
-}
-@keyframes cp-rise {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.97);
-  }
+  outline-offset: 2px;
 }
 
 .cp-socials-title {
-  margin: 30px 0 14px;
-  font-size: 15px;
+  margin: 26px 0 12px;
+  font-size: 12px;
   color: var(--color-fog);
 }
 .cp-socials-title strong {
@@ -399,254 +227,130 @@
   color: var(--color-paper);
 }
 
-/* Social tiles: brand-coloured icon chip, cursor spotlight in the brand
-   colour, glowing brand edge, handle line, arrow on hover. */
+/* Social tiles: plain outlined cards, one neutral icon each. */
 .cp-pills {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
 }
 .cp-pill {
-  --glow: #888;
   position: relative;
-  isolation: isolate;
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 62px;
-  padding: 10px 14px 10px 10px;
-  border-radius: 14px;
+  gap: 11px;
+  min-height: 54px;
+  padding: 9px 12px;
+  overflow: hidden;
+  border-radius: 10px;
   text-align: start;
   text-decoration: none;
   color: var(--color-mist);
   cursor: pointer;
-  background: linear-gradient(180deg, rgb(var(--tint-rgb) / 0.05), rgb(var(--tint-rgb) / 0.015)), var(--color-carbon);
-  box-shadow:
-    inset 0 0 0 1px var(--color-graphite),
-    inset 0 1px 0 rgb(var(--tint-rgb) / 0.05),
-    0 1px 2px rgb(0 0 0 / 0.06);
+  background: rgb(var(--tint-rgb) / 0.025);
+  box-shadow: inset 0 0 0 1px var(--color-graphite);
   transition:
-    transform 260ms var(--ease-snap),
-    box-shadow 260ms var(--ease-snap);
-  animation: cp-rise 560ms var(--ease-out-quint) backwards;
-  animation-delay: calc(140ms + var(--i, 0) * 60ms);
+    background-color 150ms var(--ease-snap),
+    box-shadow 150ms var(--ease-snap);
 }
-.cp-pill-fx {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(
-    180px circle at var(--mx, 50%) var(--my, 50%),
-    color-mix(in srgb, var(--glow) 24%, transparent),
-    transparent 70%
-  );
-  opacity: 0;
-  transition: opacity 220ms var(--ease-snap);
+.cp-pill:hover {
+  background: rgb(var(--tint-rgb) / 0.05);
+  box-shadow: inset 0 0 0 1px var(--color-smoke);
 }
 .cp-pill-icon {
   display: flex;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 11px;
-  color: #fff;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.28),
-    inset 0 -1px 0 rgb(0 0 0 / 0.15),
-    0 6px 16px -8px color-mix(in srgb, var(--glow) 80%, transparent);
-  transition: transform 340ms var(--ease-snap);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--color-paper);
+  background: rgb(var(--tint-rgb) / 0.06);
 }
 .cp-pill-text {
   display: flex;
   min-width: 0;
   flex: 1;
   flex-direction: column;
-  line-height: 1.25;
+  line-height: 1.3;
 }
 .cp-pill-name {
-  font-size: 14.5px;
-  font-weight: 560;
+  font-size: 12.5px;
+  font-weight: 500;
   color: var(--color-paper);
 }
 .cp-pill-handle {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--color-ash);
 }
 .cp-pill-go {
   flex-shrink: 0;
   color: var(--color-ash);
-  transition:
-    transform 260ms var(--ease-snap),
-    color 200ms var(--ease-snap);
-}
-.cp-pill.has-ribbon .cp-pill-go {
-  display: none;
-}
-@media (hover: hover) {
-  .cp-pill:hover {
-    transform: translateY(-3px);
-    box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--glow) 55%, var(--color-graphite)),
-      0 0 0 3px color-mix(in srgb, var(--glow) 12%, transparent),
-      0 16px 32px -16px color-mix(in srgb, var(--glow) 70%, transparent);
-  }
-  .cp-pill:hover .cp-pill-fx {
-    opacity: 1;
-  }
-  .cp-pill:hover .cp-pill-icon {
-    transform: rotate(-6deg) scale(1.08);
-  }
-  .cp-pill:hover .cp-pill-go {
-    color: var(--color-paper);
-    transform: translate(2px, -2px);
-  }
-}
-.cp-pill:active {
-  transform: translateY(-1px) scale(0.98);
-}
-.cp-pill:focus-visible {
-  outline: 2px solid var(--glow);
-  outline-offset: 3px;
 }
 .cp-pill.is-locked {
   cursor: help;
 }
-.cp-pill.is-locked .cp-pill-icon {
-  filter: saturate(0.85);
+.cp-pill.has-ribbon {
+  padding-inline-end: 44px;
 }
 
-/* Folded corner ribbon: a hazard-striped band that wraps around the tile's
-   corner (the two dark tabs are the bits "behind" the card), with stripes
-   that march and a gloss that sweeps across every few seconds. */
+/* Corner ribbon: one flat amber band across the top-right corner. */
 .cp-ribbon {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  z-index: 2;
-  width: 78px;
-  height: 78px;
+  top: 0;
+  right: 0;
+  width: 66px;
+  height: 66px;
   overflow: hidden;
   pointer-events: none;
 }
-.cp-ribbon::before,
-.cp-ribbon::after {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  display: block;
-  border: 3px solid #9a5b00;
-  border-top-color: transparent;
-  border-right-color: transparent;
-}
-.cp-ribbon::before {
-  top: 0;
-  left: 11px;
-}
-.cp-ribbon::after {
-  right: 0;
-  bottom: 11px;
-}
 .cp-ribbon > span {
   position: absolute;
-  top: 18px;
-  left: -8px;
+  top: 12px;
+  right: -26px;
   display: block;
-  width: 118px;
-  padding: 3px 0 3px;
-  overflow: hidden;
+  width: 96px;
+  padding: 2px 0;
   text-align: center;
   transform: rotate(45deg);
-  font-size: 7.5px;
-  font-weight: 800;
-  line-height: 1.4;
-  letter-spacing: 0.1em;
+  font-size: 7px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
   color: #2a1c00;
-  text-shadow: 0 1px 0 rgb(255 255 255 / 0.35);
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.35), transparent 45%, rgb(0 0 0 / 0.12)),
-    repeating-linear-gradient(-45deg, #ffc93c 0 7px, #f59e0b 7px 14px);
-  background-size:
-    100% 100%,
-    19.8px 19.8px;
-  box-shadow:
-    0 2px 5px rgb(0 0 0 / 0.35),
-    inset 0 1px 0 rgb(255 255 255 / 0.4),
-    inset 0 -1px 0 rgb(0 0 0 / 0.15);
-  animation: cp-march 1.1s linear infinite;
-}
-.cp-ribbon > span::after {
-  content: '';
-  position: absolute;
-  inset: 0 auto 0 -40%;
-  width: 30%;
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.75), transparent);
-  animation: cp-gloss 3.6s var(--ease-snap) infinite;
-  animation-delay: calc(var(--i, 0) * 0.5s + 1s);
-}
-@keyframes cp-march {
-  to {
-    background-position:
-      0 0,
-      19.8px 0;
-  }
-}
-@keyframes cp-gloss {
-  0%,
-  70% {
-    left: -40%;
-  }
-  100% {
-    left: 130%;
-  }
+  background: #f5b524;
 }
 
 /* Tooltip for unfinished tiles. */
 .cp-tip {
   position: absolute;
-  bottom: calc(100% + 10px);
+  bottom: calc(100% + 8px);
   left: 50%;
   z-index: 5;
   width: max-content;
-  max-width: 260px;
-  padding: 8px 11px;
-  border-radius: 10px;
-  font-size: 12px;
+  max-width: 240px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 11px;
   line-height: 1.45;
   color: var(--color-mist);
   background: var(--color-obsidian);
   box-shadow:
     inset 0 0 0 1px var(--color-graphite),
-    0 12px 28px -12px rgb(0 0 0 / 0.6);
+    0 10px 24px -12px rgb(0 0 0 / 0.6);
   opacity: 0;
-  transform: translate(-50%, 4px);
+  transform: translate(-50%, 3px);
   pointer-events: none;
   transition:
-    opacity 180ms var(--ease-snap),
-    transform 180ms var(--ease-snap);
+    opacity 160ms var(--ease-snap),
+    transform 160ms var(--ease-snap);
 }
-.cp-tip::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  width: 8px;
-  height: 8px;
-  background: var(--color-obsidian);
-  box-shadow: 1px 1px 0 var(--color-graphite);
-  transform: translate(-50%, -4px) rotate(45deg);
-}
-.cp-pill:focus .cp-tip,
-.cp-pill:focus-visible .cp-tip {
+.cp-pill:focus .cp-tip {
   opacity: 1;
   transform: translate(-50%, 0);
 }
@@ -655,6 +359,13 @@
     opacity: 1;
     transform: translate(-50%, 0);
   }
+}
+/* Tooltips need to escape the tile's clipped corner. */
+.cp-pill.has-ribbon {
+  overflow: visible;
+}
+.cp-pill.has-ribbon .cp-ribbon {
+  border-top-right-radius: 10px;
 }
 
 .cp-lower {
@@ -689,7 +400,7 @@
     border-radius: 12px;
   }
   .cp-name {
-    font-size: 21px;
+    font-size: 17px;
     padding-inline-end: 30px;
   }
   .cp-verified {
@@ -697,18 +408,18 @@
     height: 19px;
   }
   .cp-role {
-    height: 22px;
-    font-size: 14.5px;
-    line-height: 22px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 20px;
   }
   .cp-location {
-    font-size: 12.5px;
+    font-size: 11px;
   }
   .cp-body {
     padding: 20px 16px 24px;
   }
   .cp-bio {
-    font-size: 15px;
+    font-size: 12.5px;
   }
   .cp-cta {
     flex: 1 1 auto;
@@ -888,86 +599,39 @@
   left: -9999px;
 }
 
-/* ── Sent: the letter gets stamped PRIVATE & CONFIDENTIAL ──────────────
-   Timeline: paper slides in (0–420ms) → stamp hovers, big and blurred, its
-   shadow gathering on the paper (420–720ms) → SLAM at ~900ms: paper jolts,
-   ink droplets fly, a shock ring spreads → stamp settles with a squash →
-   the "delivered" bar rises (1.3s). */
+/* ── Sent: the letter gets a PRIVATE & CONFIDENTIAL stamp ────────────────
+   One clean, quick stamp-down — no shaking, no splatter. */
 .stamp-scene {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-}
-.stamp-stage {
-  position: relative;
-  padding: 14px 6px 6px;
-  perspective: 1200px;
+  gap: 16px;
 }
 .stamp-letter {
   position: relative;
+  width: 100%;
   max-width: 560px;
-  margin: 0 auto;
-  padding: 24px 26px 22px;
+  margin: 6px auto 0;
+  padding: 22px 24px 20px;
   overflow: hidden;
   border-radius: 6px;
   color: #3a3226;
   background:
-    radial-gradient(120% 90% at 0% 0%, rgb(255 255 255 / 0.55), transparent 60%),
     repeating-linear-gradient(0deg, transparent 0 27px, rgb(120 100 70 / 0.07) 27px 28px),
     linear-gradient(180deg, #fbf6ea, #f2e9d6);
   box-shadow:
     0 1px 0 rgb(255 255 255 / 0.6) inset,
     0 2px 4px rgb(0 0 0 / 0.12),
-    0 22px 44px -20px rgb(0 0 0 / 0.55);
-  transform-origin: 50% 80%;
-  animation:
-    stamp-paper-in 460ms var(--ease-out-quint) both,
-    stamp-jolt 420ms cubic-bezier(0.3, 0.7, 0.4, 1) 900ms both;
-}
-/* Perforated tear line along the top. */
-.stamp-letter::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto;
-  height: 6px;
-  background: radial-gradient(circle at 5px -1px, transparent 3.4px, #e7dcc4 3.6px) 0 0 / 10px 6px repeat-x;
-  opacity: 0.8;
-}
-@keyframes stamp-paper-in {
-  from {
-    opacity: 0;
-    transform: translateY(26px) rotateX(18deg) scale(0.96);
-  }
-}
-@keyframes stamp-jolt {
-  0% {
-    transform: none;
-  }
-  18% {
-    transform: translateY(5px) scale(0.985, 0.97);
-  }
-  38% {
-    transform: translate(-3px, -2px) rotate(-0.6deg);
-  }
-  58% {
-    transform: translate(2px, 1px) rotate(0.4deg);
-  }
-  78% {
-    transform: translate(-1px, 0) rotate(-0.15deg);
-  }
-  100% {
-    transform: none;
-  }
+    0 18px 36px -20px rgb(0 0 0 / 0.55);
 }
 .stamp-letter-head {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 4px 12px;
-  padding-bottom: 12px;
-  margin-bottom: 12px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
   border-bottom: 1px solid rgb(90 70 40 / 0.18);
-  font-size: 10.5px;
+  font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #8a7a5e;
@@ -978,19 +642,19 @@
 }
 .stamp-letter-meta {
   display: grid;
-  gap: 4px;
-  margin: 0 0 14px;
-  font-size: 13px;
+  gap: 3px;
+  margin: 0 0 12px;
+  font-size: 12.5px;
 }
 .stamp-letter-meta > div {
   display: flex;
   gap: 10px;
 }
 .stamp-letter-meta dt {
-  width: 38px;
+  width: 34px;
   flex-shrink: 0;
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 11px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
   line-height: 19px;
   text-transform: uppercase;
   color: #9a8a6c;
@@ -1006,7 +670,7 @@
   margin-inline-start: 6px;
   padding: 0 7px;
   border-radius: 999px;
-  font-size: 10.5px;
+  font-size: 10px;
   line-height: 17px;
   vertical-align: 1px;
   color: #6b5b40;
@@ -1019,211 +683,71 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 6;
   white-space: pre-wrap;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 15px;
-  line-height: 28px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 26px;
   color: #332b20;
 }
 .stamp-letter-sign {
-  margin-top: 12px;
-  font-family: Georgia, serif;
-  font-style: italic;
-  font-size: 12.5px;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
   color: #8a7a5e;
 }
-
-/* The stamp itself. */
 .stamp-mark {
   position: absolute;
   top: 50%;
   left: 50%;
   z-index: 3;
-  width: min(88%, 470px);
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  transform: translate(-50%, -50%) rotate(-7deg);
-  mix-blend-mode: multiply;
-  animation: stamp-slam 1100ms both;
-  -webkit-tap-highlight-color: transparent;
-}
-.stamp-mark img {
-  display: block;
-  width: 100%;
+  width: min(96%, 500px);
   height: auto;
-  user-select: none;
-  animation: stamp-ink 1400ms ease-out 900ms both;
-}
-@keyframes stamp-slam {
-  0%,
-  38% {
-    opacity: 0;
-    filter: blur(8px);
-    transform: translate(-50%, -64%) rotate(-22deg) scale(2.6);
-    animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1);
-  }
-  62% {
-    opacity: 0.85;
-    filter: blur(2px);
-    transform: translate(-50%, -58%) rotate(-12deg) scale(1.55);
-    animation-timing-function: cubic-bezier(0.7, 0, 1, 0.5);
-  }
-  82% {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-50%, -50%) rotate(-7deg) scale(0.94, 0.9);
-    animation-timing-function: cubic-bezier(0.3, 1.6, 0.5, 1);
-  }
-  100% {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate(-50%, -50%) rotate(-7deg) scale(1);
-  }
-}
-/* Fresh ink is darker and glossier, then soaks into the paper. */
-@keyframes stamp-ink {
-  from {
-    filter: saturate(1.6) contrast(1.25) brightness(0.85);
-  }
-  to {
-    filter: saturate(1) contrast(1) brightness(1);
-    opacity: 0.94;
-  }
-}
-.stamp-shadow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 2;
-  width: min(80%, 430px);
-  height: 44%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(60 20 10 / 0.35), transparent);
-  transform: translate(-50%, -50%) rotate(-7deg);
-  animation: stamp-shadow 1000ms both;
-  pointer-events: none;
-}
-@keyframes stamp-shadow {
-  0%,
-  35% {
-    opacity: 0;
-    transform: translate(-50%, -50%) rotate(-7deg) scale(1.5);
-  }
-  82% {
-    opacity: 1;
-    transform: translate(-50%, -50%) rotate(-7deg) scale(0.9);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) rotate(-7deg) scale(1);
-  }
-}
-.stamp-ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 2;
-  width: 140px;
-  height: 140px;
-  margin: -70px 0 0 -70px;
-  border-radius: 50%;
-  box-shadow:
-    0 0 0 3px rgb(180 30 25 / 0.35),
-    inset 0 0 18px rgb(180 30 25 / 0.2);
-  opacity: 0;
-  animation: stamp-ring 700ms var(--ease-out-quint) 900ms both;
-  pointer-events: none;
-}
-@keyframes stamp-ring {
-  0% {
-    opacity: 0;
-    transform: scale(0.4);
-  }
-  1% {
-    opacity: 0.9;
-    transform: scale(0.4);
-  }
-  to {
-    opacity: 0;
-    transform: scale(4);
-  }
-}
-.stamp-splatter {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 3;
-  pointer-events: none;
+  transform: translate(-50%, -50%);
   mix-blend-mode: multiply;
+  opacity: 0.9;
+  pointer-events: none;
+  user-select: none;
+  animation: stamp-down 380ms var(--ease-out-quint) 250ms backwards;
 }
-.stamp-splatter i {
-  position: absolute;
-  width: var(--s);
-  height: var(--s);
-  margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
-  border-radius: 50%;
-  background: #b3221c;
-  opacity: 0;
-  transform: rotate(var(--a)) translateX(30px) scale(0.3);
-  animation: stamp-drop 620ms cubic-bezier(0.1, 0.8, 0.3, 1) 900ms forwards;
-}
-@keyframes stamp-drop {
-  0% {
-    opacity: 1;
-    transform: rotate(var(--a)) translateX(40px) scale(1.4);
-  }
-  70% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 0.55;
-    transform: rotate(var(--a)) translateX(var(--d)) scale(1);
+@keyframes stamp-down {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.12);
   }
 }
 
-/* "Delivered" bar. */
 .stamp-done {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 12px 14px;
-  max-width: 560px;
   width: 100%;
+  max-width: 560px;
   margin: 0 auto;
   padding: 14px 16px;
-  border-radius: 14px;
+  border-radius: 12px;
   background: rgb(var(--tint-rgb) / 0.03);
   box-shadow: inset 0 0 0 1px var(--color-graphite);
-  animation: stamp-done-in 520ms var(--ease-out-quint) 1300ms both;
-}
-@keyframes stamp-done-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
 }
 .stamp-done-mark {
   display: flex;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   border-radius: 999px;
   color: #08090a;
   background: var(--color-acid);
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-acid) 14%, transparent);
 }
 .stamp-done-title {
   margin: 0;
-  font-size: 15px;
+  font-size: 13.5px;
   font-weight: 560;
   color: var(--color-paper);
 }
 .stamp-done-text {
   margin: 2px 0 0;
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--color-fog);
 }
@@ -1232,19 +756,90 @@
 }
 @media (max-width: 639px) {
   .stamp-letter {
-    padding: 20px 16px 18px;
-  }
-  .stamp-letter-body {
-    font-size: 14px;
-    line-height: 26px;
-    -webkit-line-clamp: 5;
-  }
-  .stamp-mark {
-    width: 94%;
+    padding: 18px 14px 16px;
   }
   .stamp-done .btn {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* ── Admin Inbox page ───────────────────────────────────────────────── */
+.inbox-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 920px;
+  margin: 0 auto;
+}
+.inbox-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+.inbox-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.inbox-topics .contact-topic {
+  padding: 6px 11px;
+  font-size: 12px;
+  font-family: inherit;
+}
+.inbox-count {
+  font-size: 10.5px;
+  opacity: 0.65;
+}
+.inbox-locked,
+.inbox-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 380px;
+  margin: 40px auto;
+  padding: 0 12px;
+  text-align: center;
+}
+.inbox-empty {
+  margin: 0 auto;
+  padding: 36px 12px;
+  font-size: 12.5px;
+  color: var(--color-ash);
+}
+.inbox-empty p {
+  margin: 0;
+}
+.inbox-locked h2 {
+  margin: 4px 0 0;
+  font-size: 15px;
+  font-weight: 560;
+  color: var(--color-paper);
+}
+.inbox-locked p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--color-ash);
+}
+.inbox-locked-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  color: var(--color-fog);
+  background: rgb(var(--tint-rgb) / 0.05);
+  box-shadow: inset 0 0 0 1px var(--color-graphite);
+}
+@media (max-width: 639px) {
+  .contact-msg-topic {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 6px;
   }
 }
 

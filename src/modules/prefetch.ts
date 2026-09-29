@@ -23,6 +23,7 @@ export const MODULE_LOADERS: Record<ModuleId, () => Promise<unknown>> = {
   analytics: () => import('@/modules/analytics/AnalyticsModule'),
   trash: () => import('@/modules/trash/TrashPage'),
   contact: () => import('@/modules/contact/ContactModule'),
+  inbox: () => import('@/modules/inbox/InboxModule'),
 };
 
 const warmed = new Set<ModuleId>();

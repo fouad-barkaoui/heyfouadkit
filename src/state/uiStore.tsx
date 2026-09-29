@@ -72,6 +72,7 @@ const VALID: ModuleId[] = [
   'reporting',
   'trash',
   'contact',
+  'inbox',
 ];
 
 function moduleFromHash(): ModuleId {

@@ -15,7 +15,8 @@ export type ModuleId =
   | 'reporting'
   | 'analytics'
   | 'trash'
-  | 'contact';
+  | 'contact'
+  | 'inbox';
 
 export type ItemType = 'note' | 'article' | 'todo' | 'doc' | 'course' | 'news' | 'medicine' | 'link' | 'habit' | 'goal';
 

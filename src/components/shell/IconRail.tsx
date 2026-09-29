@@ -4,7 +4,7 @@ import { Check, ChevronDown, ChevronLeft, Search, Settings, UserRound } from 'lu
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { PlanChip } from '@/components/ui/PlanChip';
-import { isProUser } from '@/lib/access';
+import { isAdminUser, isProUser } from '@/lib/access';
 import type { ModuleId } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { groupOf, HOME_ID, MODULE_MAP, NAV_GROUPS, type ModuleMeta, type NavGroup } from '@/modules/registry';
@@ -24,7 +24,6 @@ import {
   useRowFlag,
   type RowFlag,
 } from './navShared';
-import { FullscreenButton } from './FullscreenButton';
 import { NotificationBell } from './NotificationBell';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -428,7 +427,6 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
         </RailTip>
 
         <NotificationBell variant="rail" expanded={expanded} />
-        <FullscreenButton variant="rail" expanded={expanded} />
 
         <div
           ref={scrollRef}
@@ -513,6 +511,16 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
 
         <div className="rail-foot">
           <ThemeToggle expanded={expanded} />
+
+          {isAdminUser(user) ? (
+            <RailRow
+              meta={MODULE_MAP.inbox}
+              label={labelFor('inbox')}
+              active={module === 'inbox'}
+              expanded={expanded}
+              onSelect={() => go('inbox')}
+            />
+          ) : null}
 
           <RailRow
             meta={MODULE_MAP.contact}

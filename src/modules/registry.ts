@@ -3,6 +3,7 @@ import {
   Briefcase,
   CalendarCheck2,
   Flame,
+  Inbox,
   LibraryBig,
   BookmarkPlus,
   BookMarked,
@@ -49,6 +50,7 @@ export const MODULES: ModuleMeta[] = [
   { id: 'analytics', label: 'Analytics', short: 'Analytics', icon: BarChart3 },
   { id: 'trash', label: 'Trash', short: 'Trash', icon: Trash2 },
   { id: 'contact', label: 'Contact', short: 'Contact', icon: MessageSquareHeart },
+  { id: 'inbox', label: 'Inbox', short: 'Inbox', icon: Inbox },
 ];
 
 export const MODULE_MAP: Record<ModuleId, ModuleMeta> = Object.fromEntries(
