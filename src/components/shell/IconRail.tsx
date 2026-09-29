@@ -1,7 +1,7 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { Check, ChevronDown, ChevronLeft, Search, Settings, UserRound } from 'lucide-react';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { PlanChip } from '@/components/ui/PlanChip';
 import { isProUser } from '@/lib/access';
@@ -86,7 +86,7 @@ function RailRow({
         aria-current={active ? 'page' : undefined}
         onPointerEnter={() => prefetchModule(meta.id)}
         onFocus={() => prefetchModule(meta.id)}
-        className={cn('nav-row', !expanded && 'is-compact', indent && expanded && 'ps-7')}
+        className={cn('nav-row', !expanded && 'is-compact', indent && expanded && 'is-child ps-8')}
       >
         <Icon size={indent && expanded ? 14 : 16} strokeWidth={1.6} className="shrink-0" aria-hidden />
         {expanded ? <span className="truncate">{label}</span> : null}
@@ -275,6 +275,34 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
     on: false,
     ready: false,
   });
+  /* Hover glider: one highlight that slides between rows under the pointer. */
+  const [hov, setHov] = useState<{ x: number; y: number; w: number; h: number; on: boolean; fresh: boolean }>({
+    x: 0,
+    y: 0,
+    w: 0,
+    h: 0,
+    on: false,
+    fresh: true,
+  });
+  const onListPointer = useCallback((e: PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'touch') return;
+    const list = listRef.current;
+    const row = (e.target as HTMLElement).closest<HTMLElement>('.nav-row, .rail-group-head');
+    if (!list || !row || !list.contains(row)) {
+      setHov((p) => (p.on ? { ...p, on: false } : p));
+      return;
+    }
+    const { x, y } = offsetWithin(row, list);
+    const w = row.offsetWidth;
+    const h = row.offsetHeight;
+    setHov((p) =>
+      p.on && p.x === x && p.y === y && p.w === w && p.h === h
+        ? p
+        : { x, y, w, h, on: true, fresh: !p.on },
+    );
+  }, []);
+  const onListLeave = useCallback(() => setHov((p) => (p.on ? { ...p, on: false } : p)), []);
+
   const measure = useCallback(() => {
     const list = listRef.current;
     if (!list) return;
@@ -407,7 +435,19 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
           onScroll={updateEdges}
           className={cn('rail-scroll -mx-2 min-h-0 flex-1 px-2', edges.top && 'fade-top', edges.bottom && 'fade-bottom')}
         >
-          <div ref={listRef} className={cn('rail-list relative', ind.on && 'has-indicator')}>
+          <div
+            ref={listRef}
+            className={cn('rail-list relative', ind.on && 'has-indicator')}
+            onPointerMove={onListPointer}
+            onPointerLeave={onListLeave}
+          >
+            <span
+              className="rail-hover"
+              aria-hidden
+              data-on={hov.on}
+              data-fresh={hov.fresh}
+              style={{ transform: `translate3d(${hov.x}px, ${hov.y}px, 0)`, width: hov.w, height: hov.h }}
+            />
             <span
               className="rail-indicator"
               aria-hidden
@@ -462,7 +502,7 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
                   </button>
                   <div className={cn('rail-group-body grid', isOpen && 'is-open')}>
                     <div className="min-h-0 overflow-hidden">
-                      <div className="rail-stack pb-1 pt-0.5">{isOpen ? rows(g.children, true) : null}</div>
+                      <div className="rail-stack is-tree pb-1 pt-0.5">{isOpen ? rows(g.children, true) : null}</div>
                     </div>
                   </div>
                 </section>

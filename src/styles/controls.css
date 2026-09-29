@@ -22,10 +22,10 @@
 }
 
 /* Full-screen button: lit when active. */
-.fs-trigger[data-active='true'] {
+.fs-trigger[data-fs='true'] {
   color: var(--color-acid);
 }
-.menu-btn.fs-trigger[data-active='true'] {
+.menu-btn.fs-trigger[data-fs='true'] {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-acid) 45%, transparent);
 }
 .fs-trigger svg {
@@ -35,7 +35,7 @@
   .fs-trigger:hover svg {
     transform: scale(1.12);
   }
-  .fs-trigger[data-active='true']:hover svg {
+  .fs-trigger[data-fs='true']:hover svg {
     transform: scale(0.88);
   }
 }

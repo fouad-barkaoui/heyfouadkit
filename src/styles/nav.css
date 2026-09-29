@@ -20,7 +20,6 @@
 }
 .rail-group-head:hover {
   color: var(--color-paper);
-  background: rgb(var(--tint-rgb) / 0.045);
 }
 .rail-group-head[aria-expanded='true'] {
   color: var(--color-paper);
@@ -141,5 +140,72 @@
   }
   .modal-foot {
     padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+}
+
+/* ── Docs-style sidebar: gliding hover, tree lines ───────────────────── */
+.rail-hover {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  border-radius: 10px;
+  pointer-events: none;
+  background: rgb(var(--tint-rgb) / 0.055);
+  opacity: 0;
+  will-change: transform;
+  transition:
+    transform 260ms var(--ease-snap),
+    width 200ms var(--ease-snap),
+    height 200ms var(--ease-snap),
+    opacity 160ms var(--ease-snap);
+}
+.rail-hover[data-on='true'] {
+  opacity: 1;
+}
+.rail-hover[data-fresh='true'] {
+  transition: opacity 160ms var(--ease-snap);
+}
+.rail-list .rail-group-head,
+.rail-list .nav-row {
+  position: relative;
+  z-index: 1;
+}
+/* Sub-items hang off a thin vertical line; the one you're on (or pointing
+   at) gets a little elbow into it. */
+.rail[data-expanded='true'] .rail-stack.is-tree {
+  position: relative;
+}
+.rail[data-expanded='true'] .rail-stack.is-tree::before {
+  content: '';
+  position: absolute;
+  inset-block: 2px 6px;
+  inset-inline-start: 17px;
+  width: 1px;
+  background: var(--color-graphite);
+}
+.rail[data-expanded='true'] .nav-row.is-child::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 17px;
+  top: calc(50% - 9px);
+  width: 9px;
+  height: 9px;
+  border-inline-start: 1px solid var(--color-fog);
+  border-bottom: 1px solid var(--color-fog);
+  border-end-start-radius: 7px;
+  opacity: 0;
+  transition: opacity 160ms var(--ease-snap);
+}
+.rail[data-expanded='true'] .nav-row.is-child[data-active='true']::before,
+.rail[data-expanded='true'] .nav-row.is-child:hover::before {
+  opacity: 1;
+}
+.rail[data-expanded='true'] .nav-row.is-child {
+  font-size: 12.5px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rail-hover {
+    transition: none;
   }
 }

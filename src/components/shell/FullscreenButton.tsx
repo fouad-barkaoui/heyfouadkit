@@ -50,7 +50,7 @@ export function FullscreenButton({
         aria-pressed={active}
         title={expanded ? undefined : label}
         className={cn('nav-row fs-trigger', !expanded && 'is-compact', className)}
-        data-active={active}
+        data-fs={active}
         onClick={() => void onClick()}
       >
         <Icon size={16} strokeWidth={1.6} aria-hidden className="shrink-0" />
@@ -63,7 +63,7 @@ export function FullscreenButton({
         aria-label={label}
         aria-pressed={active}
         className={cn('menu-btn fs-trigger', className)}
-        data-active={active}
+        data-fs={active}
         onClick={() => void onClick()}
       >
         <Icon size={16} strokeWidth={1.8} aria-hidden />
