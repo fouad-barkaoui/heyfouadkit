@@ -155,7 +155,7 @@ To switch to Supabase:
 1. Run `supabase/schema.sql` in your project's SQL editor. It creates the six
    tables, the enums, the indexes, per-user row-level-security policies, the
    `updated_at` triggers and the `nexus-media` storage bucket.
-2. Copy `.env.example` to `.env.local` and fill both values.
+2. Copy `.env.example` to `.env` and fill both values.
 3. Restart the dev server. No component changes.
 
 Field names are camelCase throughout the app; the Supabase adapter converts to and
