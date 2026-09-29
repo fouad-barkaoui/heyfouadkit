@@ -1,11 +1,10 @@
 import {
   Archive,
-  ArrowUpRight,
+  BadgeCheck,
   Bug,
   Check,
-  Construction,
-  Copy,
   Facebook,
+  FileText,
   Github,
   Handshake,
   Inbox,
@@ -14,10 +13,13 @@ import {
   Linkedin,
   Loader2,
   Mail,
+  MapPin,
   MessageSquareHeart,
   MessagesSquare,
+  Moon,
   RefreshCw,
   Send,
+  Sun,
   Trash2,
   type LucideIcon,
 } from 'lucide-react';
@@ -39,60 +41,57 @@ import {
 import { isAdminUser } from '@/lib/access';
 import { cn, relativeTime } from '@/lib/utils';
 import { getDisplayName, useAuth } from '@/state/authStore';
+import { useTheme } from '@/state/themeStore';
 
-/* ── Where to find me ─────────────────────────────────────────────────── */
+/* ── Who I am ─────────────────────────────────────────────────────────── */
+
+const EMAIL = 'lmorfouad3@gmail.com';
+
+/** The line under the name cycles through these. */
+const ROLES = [
+  'Beginner SOC Analyst',
+  'Fullstack Web Developer',
+  'Programmer',
+  'Vibe Coder',
+  'Problem Solver',
+  'Analytical Thinker',
+  'Cybersecurity Enthusiast',
+  'Fast, Curious Learner',
+];
+const ROLE_MS = 2600;
 
 interface Social {
   id: string;
   name: string;
-  handle: string;
-  url: string;
+  /** No url = not live yet (renders as a disabled pill). */
+  url?: string;
   icon: LucideIcon;
-  /** Brand-ish gradient for the icon tile. */
-  tile: string;
-  blurb: string;
-  building?: { label: string; note: string };
+  /** Diagonal corner ribbon, for things that aren't finished. */
+  ribbon?: string;
+  /** Longer explanation for tooltips and screen readers. */
+  note?: string;
 }
 
 const SOCIALS: Social[] = [
-  {
-    id: 'instagram',
-    name: 'Instagram',
-    handle: '@heyfouad',
-    url: 'https://www.instagram.com/heyfouad/',
-    icon: Instagram,
-    tile: 'linear-gradient(135deg, #f58529 0%, #dd2a7b 50%, #8134af 100%)',
-    blurb: 'The fastest way to reach me — DMs are open.',
-  },
+  { id: 'resume', name: 'Resume', icon: FileText, ribbon: 'Coming soon', note: 'My resume is coming soon.' },
   {
     id: 'github',
     name: 'GitHub',
-    handle: 'fouad-barkaoui',
     url: 'https://github.com/fouad-barkaoui',
     icon: Github,
-    tile: 'linear-gradient(135deg, #3a3f4b 0%, #16181d 100%)',
-    blurb: 'Code, experiments and open-source work.',
-    building: { label: 'Under construction', note: 'Brand-new account — repositories are on their way.' },
+    ribbon: 'Building',
+    note: 'Under construction — a brand-new account, repositories are on their way.',
   },
   {
     id: 'linkedin',
     name: 'LinkedIn',
-    handle: 'Fouad Barkaoui',
     url: 'https://www.linkedin.com/in/fouad-barkaoui/',
     icon: Linkedin,
-    tile: 'linear-gradient(135deg, #0a66c2 0%, #004182 100%)',
-    blurb: 'Professional background and experience.',
-    building: { label: 'In development', note: 'Profile is still being put together.' },
+    ribbon: 'In progress',
+    note: 'In development — the profile is still being put together.',
   },
-  {
-    id: 'facebook',
-    name: 'Facebook',
-    handle: 'Fouad Barkaoui',
-    url: 'https://www.facebook.com/share/16E8VLshmwD/',
-    icon: Facebook,
-    tile: 'linear-gradient(135deg, #1877f2 0%, #0b4fb3 100%)',
-    blurb: 'Say hi or follow along.',
-  },
+  { id: 'instagram', name: 'Instagram', url: 'https://www.instagram.com/heyfouad/', icon: Instagram },
+  { id: 'facebook', name: 'Facebook', url: 'https://www.facebook.com/share/16E8VLshmwD/', icon: Facebook },
 ];
 
 const TOPICS: { id: ContactTopic; label: string; icon: LucideIcon; hint: string }[] = [
@@ -119,54 +118,154 @@ function loadDraft(): Partial<ContactDraft> {
   }
 }
 
-/* ── Social card ──────────────────────────────────────────────────────── */
+/* ── Profile card pieces ──────────────────────────────────────────────── */
 
-function SocialCard({ s }: { s: Social }): JSX.Element {
-  const [copied, setCopied] = useState(false);
-  const Icon = s.icon;
-  const copy = async (): Promise<void> => {
-    try {
-      await navigator.clipboard.writeText(s.url);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
-    } catch {
-      /* clipboard blocked — the link is still one tap away */
-    }
-  };
+/** Small inline Moroccan flag — emoji flags don't render on Windows. */
+function MoroccoFlag(): JSX.Element {
   return (
-    <article className={cn('social-card surface-card', s.building && 'is-building')}>
-      {s.building ? (
-        <div className="social-banner" role="note">
-          <Construction size={13} strokeWidth={2} aria-hidden />
-          <span className="social-banner-label">{s.building.label}</span>
-          <span className="social-banner-note">{s.building.note}</span>
-        </div>
-      ) : null}
-      <div className="social-body">
-        <span className="social-icon" style={{ background: s.tile }} aria-hidden>
-          <Icon size={19} strokeWidth={1.8} />
+    <svg className="cp-flag" viewBox="0 0 24 16" width="18" height="12" aria-hidden>
+      <rect width="24" height="16" rx="2" fill="#c1272d" />
+      <path
+        d="M12 3.6l1.6 4.9-4.1-3h5l-4.1 3z"
+        fill="none"
+        stroke="#006233"
+        strokeWidth="0.9"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function RotatingRole(): JSX.Element {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setI((n) => (n + 1) % ROLES.length), ROLE_MS);
+    return () => window.clearInterval(id);
+  }, []);
+  return (
+    <p className="cp-role">
+      {/* Screen readers get the whole list once, not a chatty live region. */}
+      <span className="sr-only">{ROLES.join(', ')}</span>
+      <span key={i} className="cp-role-word" aria-hidden>
+        {ROLES[i]}
+      </span>
+    </p>
+  );
+}
+
+function SocialPill({ s }: { s: Social }): JSX.Element {
+  const Icon = s.icon;
+  const body = (
+    <>
+      <Icon size={16} strokeWidth={1.8} aria-hidden />
+      <span>{s.name}</span>
+      {s.ribbon ? (
+        <span className="cp-ribbon" aria-hidden>
+          <span>{s.ribbon}</span>
         </span>
-        <div className="min-w-0 flex-1">
-          <h3 className="social-name">{s.name}</h3>
-          <p className="social-handle mono">{s.handle}</p>
-          <p className="social-blurb">{s.blurb}</p>
+      ) : null}
+      {s.note ? <span className="sr-only"> — {s.note}</span> : null}
+    </>
+  );
+  const cls = cn('cp-pill', s.ribbon && 'has-ribbon');
+  return s.url ? (
+    <a className={cls} href={s.url} target="_blank" rel="noopener noreferrer" title={s.note}>
+      {body}
+    </a>
+  ) : (
+    <button type="button" className={cls} aria-disabled="true" title={s.note} onClick={(e) => e.preventDefault()}>
+      {body}
+    </button>
+  );
+}
+
+function Rule(): JSX.Element {
+  return (
+    <div className="cp-rule" aria-hidden>
+      <i className="cp-plus" data-side="start" />
+      <i className="cp-plus" data-side="end" />
+    </div>
+  );
+}
+
+function ProfileCard(): JSX.Element {
+  const { preference, toggle } = useTheme();
+  const ThemeIcon = preference === 'light' ? Sun : Moon;
+
+  const goToForm = (): void => {
+    const el = document.getElementById('contact-form-card');
+    if (!el) return;
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' });
+    window.setTimeout(() => document.getElementById('contact-subject')?.focus({ preventScroll: true }), calm ? 0 : 450);
+  };
+
+  return (
+    <>
+      <header className="cp-head">
+        <div className="cp-avatar">
+          <img
+            src="/fouad-portrait-512.jpg"
+            alt="Portrait of Fouad Barkaoui"
+            width={100}
+            height={100}
+            decoding="async"
+          />
         </div>
-      </div>
-      <div className="social-actions">
-        <a className="btn btn-ghost social-open" href={s.url} target="_blank" rel="noopener noreferrer">
-          Open {s.name}
-          <ArrowUpRight size={14} strokeWidth={2} aria-hidden />
-        </a>
+        <div className="min-w-0 flex-1">
+          <h2 className="cp-name">
+            <span>Fouad Barkaoui</span>
+            <BadgeCheck className="cp-verified" size={22} strokeWidth={1.6} aria-label="Verified" role="img" />
+          </h2>
+          <RotatingRole />
+          <p className="cp-location">
+            <MapPin size={13} strokeWidth={1.9} aria-hidden />
+            <span>Morocco-based</span>
+            <MoroccoFlag />
+          </p>
+        </div>
         <button
           type="button"
-          className="btn-icon social-copy"
-          aria-label={copied ? 'Link copied' : `Copy ${s.name} link`}
-          onClick={() => void copy()}
+          className="cp-theme"
+          onClick={toggle}
+          aria-label={`Switch to ${preference === 'light' ? 'dark' : 'light'} theme`}
         >
-          {copied ? <Check size={14} strokeWidth={2.2} /> : <Copy size={14} strokeWidth={1.8} />}
+          <ThemeIcon size={16} strokeWidth={1.7} aria-hidden />
         </button>
+      </header>
+
+      <Rule />
+
+      <div className="cp-body">
+        <p className="cp-bio">
+          Hey, I'm <strong>Fouad Barkaoui</strong>, a <strong>beginner SOC analyst</strong> and{' '}
+          <strong>fullstack web developer</strong> from Morocco. I'm a <strong>programmer</strong> and a{' '}
+          <strong>vibe coder</strong> who loves turning ideas into working products — fast, clean and{' '}
+          <strong>secure by default</strong>. My edge is <strong>problem solving</strong>: I break big, messy problems
+          into small steps, stay curious, and keep learning how systems get built — and how they get attacked.
+        </p>
+
+        <div className="cp-cta-row">
+          <button type="button" className="cp-cta" onClick={goToForm}>
+            <MessageSquareHeart size={16} strokeWidth={1.8} aria-hidden />
+            Send a Message
+          </button>
+          <a className="cp-cta" href={`mailto:${EMAIL}`}>
+            <Mail size={16} strokeWidth={1.8} aria-hidden />
+            Send an Email
+          </a>
+        </div>
+
+        <p className="cp-socials-title">
+          Here are my <strong>socials</strong>
+        </p>
+        <div className="cp-pills">
+          {SOCIALS.map((s) => (
+            <SocialPill key={s.id} s={s} />
+          ))}
+        </div>
       </div>
-    </article>
+    </>
   );
 }
 
@@ -607,46 +706,35 @@ export function ContactModule(): JSX.Element {
         </div>
       </header>
 
-      <div className="scroll-y min-h-0 flex-1 px-4 py-5 md:px-7 md:py-7">
-        <div className="contact-page">
-          <section className="contact-hero surface-card">
-            <img src="/avatar-256.png" alt="" className="contact-hero-avatar" width={72} height={72} />
-            <div className="min-w-0 flex-1">
-              <p className="contact-eyebrow mono">Made by</p>
-              <h2 className="contact-hero-name">Fouad Barkaoui</h2>
-              <p className="contact-hero-line">
-                Builder of Heyfouad Library. Questions, bugs, ideas or collaborations — all welcome.
-              </p>
-            </div>
-          </section>
+      <div className="scroll-y min-h-0 flex-1">
+        <div className="cp-wrap">
+          <Rule />
+          <div className="cp-frame">
+            <ProfileCard />
 
-          {admin ? <AdminInbox /> : null}
+            <Rule />
 
-          <section aria-labelledby="socials-title">
-            <h2 id="socials-title" className="contact-section-title">
-              Find me online
-            </h2>
-            <div className="social-grid">
-              {SOCIALS.map((s) => (
-                <SocialCard key={s.id} s={s} />
-              ))}
-            </div>
-          </section>
+            <div className="cp-lower">
+              {admin ? <AdminInbox /> : null}
 
-          <section aria-labelledby="form-title" className="surface-card contact-form-card">
-            <div className="contact-form-head">
-              <span className="contact-form-icon" aria-hidden>
-                <Send size={16} strokeWidth={1.9} />
-              </span>
-              <div>
-                <h2 id="form-title" className="text-[15px] font-medium text-paper">
-                  Send a message
-                </h2>
-                <p className="text-[12px] text-ash">I read every message personally.</p>
-              </div>
+              <section id="contact-form-card" aria-labelledby="form-title" className="surface-card contact-form-card">
+                <div className="contact-form-head">
+                  <span className="contact-form-icon" aria-hidden>
+                    <Send size={16} strokeWidth={1.9} />
+                  </span>
+                  <div>
+                    <h2 id="form-title" className="text-[15px] font-medium text-paper">
+                      Send a message
+                    </h2>
+                    <p className="text-[12px] text-ash">I read every message personally.</p>
+                  </div>
+                </div>
+                <ContactForm />
+              </section>
             </div>
-            <ContactForm />
-          </section>
+
+            <Rule />
+          </div>
         </div>
       </div>
     </div>
