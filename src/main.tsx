@@ -12,6 +12,7 @@ import './styles/nav.css';
 import './styles/habits.css';
 import './styles/notifications.css';
 import './styles/contact.css';
+import './styles/controls.css';
 
 /** Warm the connection to the cloud project as early as possible — a
  * preconnect here shaves the DNS + TLS handshake off whichever request

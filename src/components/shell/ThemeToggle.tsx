@@ -1,7 +1,7 @@
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { Moon, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useTheme, type ThemePreference } from '@/state/themeStore';
+import { originOf, useTheme, type ThemePreference } from '@/state/themeStore';
 
 const OPTIONS: { id: ThemePreference; label: string; icon: typeof Sun }[] = [
   { id: 'light', label: 'Light', icon: Sun },
@@ -24,7 +24,7 @@ export function ThemeToggle({ expanded }: { expanded: boolean }): JSX.Element {
         <Tooltip.Trigger asChild>
           <button
             type="button"
-            onClick={() => setPreference(CYCLE[preference])}
+            onClick={(e) => setPreference(CYCLE[preference], originOf(e.currentTarget))}
             aria-label={`Theme: ${preference}. Click to change.`}
             className="nav-row is-compact"
           >
@@ -54,7 +54,7 @@ export function ThemeToggle({ expanded }: { expanded: boolean }): JSX.Element {
         <button
           key={id}
           type="button"
-          onClick={() => setPreference(id)}
+          onClick={(e) => setPreference(id, originOf(e.currentTarget))}
           aria-pressed={preference === id}
           aria-label={`${label} theme`}
           title={label}

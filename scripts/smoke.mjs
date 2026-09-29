@@ -211,19 +211,20 @@ check('theme: collapsed rail shows the cycling toggle button', await themeButton
 
 const beforeClick = await readTheme();
 await themeButton.click();
-await page.waitForTimeout(250);
+// The theme wipes in with a view transition, so give it a moment to commit.
+await page.waitForFunction((b) => document.documentElement.dataset.theme !== b, beforeClick, { timeout: 2000 }).catch(() => {});
 check('theme: clicking the toggle changes the theme', (await readTheme()) !== beforeClick);
 
 for (let i = 0; i < 3 && (await readTheme()) !== 'light'; i++) {
   await themeButton.click();
-  await page.waitForTimeout(250);
+  await page.waitForTimeout(900);
 }
 check('theme: can cycle to light mode', (await readTheme()) === 'light');
 check('theme: light mode actually repaints the page background', (await readBgAvg()) > 200, `avg ${await readBgAvg()}`);
 
 for (let i = 0; i < 3 && (await readTheme()) !== 'dark'; i++) {
   await themeButton.click();
-  await page.waitForTimeout(250);
+  await page.waitForTimeout(900);
 }
 check('theme: can cycle back to dark mode', (await readTheme()) === 'dark');
 check('theme: dark mode repaints the page background back', (await readBgAvg()) < 40, `avg ${await readBgAvg()}`);

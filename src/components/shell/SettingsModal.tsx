@@ -7,7 +7,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Select } from '@/components/ui/Field';
 import { cn, formatBytes } from '@/lib/utils';
 import { getDisplayName, useAuth } from '@/state/authStore';
-import { useTheme } from '@/state/themeStore';
+import { originOf, useTheme } from '@/state/themeStore';
 import { useLanguage, type Language } from '@/state/languageStore';
 import { MAX_TOTAL_CLOUD_BYTES, totalCloudBytes } from '@/data/attachments';
 import { useWorkspace } from '@/state/workspaceStore';
@@ -88,7 +88,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps): JSX.E
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setPreference('light')}
+              onClick={(e) => setPreference('light', originOf(e.currentTarget))}
               className={cn(
                 'flex flex-1 items-center justify-center gap-2 rounded-[6px] px-3 py-2 text-[12px] font-medium transition-colors duration-150',
                 preference === 'light'
@@ -101,7 +101,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps): JSX.E
             </button>
             <button
               type="button"
-              onClick={() => setPreference('dark')}
+              onClick={(e) => setPreference('dark', originOf(e.currentTarget))}
               className={cn(
                 'flex flex-1 items-center justify-center gap-2 rounded-[6px] px-3 py-2 text-[12px] font-medium transition-colors duration-150',
                 preference === 'dark'

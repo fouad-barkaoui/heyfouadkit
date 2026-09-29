@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { useUI } from '@/state/uiStore';
+import { FullscreenButton } from './FullscreenButton';
 import { NotificationBell } from './NotificationBell';
 
 /**
@@ -38,12 +39,14 @@ export function MenuButton({
     </button>
   );
   // As the phone-width opener in a module header, the notification bell
-  // rides along right next to it — so it's on every screen of the app.
+  // rides along right next to it, with the full-screen switch — so both are
+  // on every screen of the app.
   if (onClick) return button;
   return (
     <>
       {button}
       <NotificationBell className={className} />
+      <FullscreenButton className={className} />
     </>
   );
 }

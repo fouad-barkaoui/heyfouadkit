@@ -24,6 +24,7 @@ import {
   useRowFlag,
   type RowFlag,
 } from './navShared';
+import { FullscreenButton } from './FullscreenButton';
 import { NotificationBell } from './NotificationBell';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -399,6 +400,7 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
         </RailTip>
 
         <NotificationBell variant="rail" expanded={expanded} />
+        <FullscreenButton variant="rail" expanded={expanded} />
 
         <div
           ref={scrollRef}

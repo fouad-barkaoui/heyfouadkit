@@ -1,5 +1,7 @@
 import {
   Archive,
+  ArrowRight,
+  ArrowUpRight,
   BadgeCheck,
   Bug,
   Check,
@@ -12,6 +14,7 @@ import {
   Lightbulb,
   Linkedin,
   Loader2,
+  Lock,
   Mail,
   MapPin,
   MessageSquareHeart,
@@ -23,7 +26,15 @@ import {
   Trash2,
   type LucideIcon,
 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+  type FormEvent,
+  type PointerEvent,
+} from 'react';
 import { MenuButton } from '@/components/shell/MenuButton';
 import { Button } from '@/components/ui/Button';
 import { cloudConfigured } from '@/data/supabaseClient';
@@ -41,7 +52,7 @@ import {
 import { isAdminUser } from '@/lib/access';
 import { cn, relativeTime } from '@/lib/utils';
 import { getDisplayName, useAuth } from '@/state/authStore';
-import { useTheme } from '@/state/themeStore';
+import { originOf, useTheme } from '@/state/themeStore';
 
 /* ── Who I am ─────────────────────────────────────────────────────────── */
 
@@ -63,35 +74,71 @@ const ROLE_MS = 2600;
 interface Social {
   id: string;
   name: string;
-  /** No url = not live yet (renders as a disabled pill). */
+  /** Second line on the tile. */
+  handle: string;
+  /** No url = not live yet (renders as a locked tile). */
   url?: string;
   icon: LucideIcon;
+  /** Icon tile fill + hover glow colour. */
+  tile: string;
+  glow: string;
   /** Diagonal corner ribbon, for things that aren't finished. */
   ribbon?: string;
-  /** Longer explanation for tooltips and screen readers. */
+  /** Longer explanation, shown as a tooltip and read to screen readers. */
   note?: string;
 }
 
 const SOCIALS: Social[] = [
-  { id: 'resume', name: 'Resume', icon: FileText, ribbon: 'Coming soon', note: 'My resume is coming soon.' },
+  {
+    id: 'resume',
+    name: 'Resume',
+    handle: 'PDF · on its way',
+    icon: FileText,
+    tile: 'linear-gradient(135deg, #f7c948 0%, #e8890c 100%)',
+    glow: '#f0a60f',
+    ribbon: 'Coming soon',
+    note: 'My resume is coming soon.',
+  },
   {
     id: 'github',
     name: 'GitHub',
+    handle: 'fouad-barkaoui',
     url: 'https://github.com/fouad-barkaoui',
     icon: Github,
+    tile: 'linear-gradient(135deg, #4b5263 0%, #16181d 100%)',
+    glow: '#8b949e',
     ribbon: 'Building',
     note: 'Under construction — a brand-new account, repositories are on their way.',
   },
   {
     id: 'linkedin',
     name: 'LinkedIn',
+    handle: 'fouad-barkaoui',
     url: 'https://www.linkedin.com/in/fouad-barkaoui/',
     icon: Linkedin,
+    tile: 'linear-gradient(135deg, #2c8cf4 0%, #0a4f9c 100%)',
+    glow: '#0a66c2',
     ribbon: 'In progress',
     note: 'In development — the profile is still being put together.',
   },
-  { id: 'instagram', name: 'Instagram', url: 'https://www.instagram.com/heyfouad/', icon: Instagram },
-  { id: 'facebook', name: 'Facebook', url: 'https://www.facebook.com/share/16E8VLshmwD/', icon: Facebook },
+  {
+    id: 'instagram',
+    name: 'Instagram',
+    handle: '@heyfouad',
+    url: 'https://www.instagram.com/heyfouad/',
+    icon: Instagram,
+    tile: 'linear-gradient(135deg, #feda75 0%, #fa7e1e 25%, #d62976 55%, #962fbf 80%, #4f5bd5 100%)',
+    glow: '#d62976',
+  },
+  {
+    id: 'facebook',
+    name: 'Facebook',
+    handle: 'Fouad Barkaoui',
+    url: 'https://www.facebook.com/share/16E8VLshmwD/',
+    icon: Facebook,
+    tile: 'linear-gradient(135deg, #3b8cff 0%, #0b4fb3 100%)',
+    glow: '#1877f2',
+  },
 ];
 
 const TOPICS: { id: ContactTopic; label: string; icon: LucideIcon; hint: string }[] = [
@@ -153,27 +200,57 @@ function RotatingRole(): JSX.Element {
   );
 }
 
-function SocialPill({ s }: { s: Social }): JSX.Element {
+/** Cursor-following spotlight: cheap, CSS-variable driven. */
+function trackPointer(e: PointerEvent<HTMLElement>): void {
+  const el = e.currentTarget;
+  const r = el.getBoundingClientRect();
+  el.style.setProperty('--mx', `${e.clientX - r.left}px`);
+  el.style.setProperty('--my', `${e.clientY - r.top}px`);
+}
+
+function SocialPill({ s, index }: { s: Social; index: number }): JSX.Element {
   const Icon = s.icon;
+  const live = Boolean(s.url);
+  const tipId = s.note ? `cp-tip-${s.id}` : undefined;
   const body = (
     <>
-      <Icon size={16} strokeWidth={1.8} aria-hidden />
-      <span>{s.name}</span>
+      <span className="cp-pill-fx" aria-hidden />
+      <span className="cp-pill-icon" style={{ background: s.tile }} aria-hidden>
+        <Icon size={17} strokeWidth={1.9} />
+      </span>
+      <span className="cp-pill-text">
+        <span className="cp-pill-name">{s.name}</span>
+        <span className="cp-pill-handle">{s.handle}</span>
+      </span>
+      {live ? (
+        <ArrowUpRight className="cp-pill-go" size={15} strokeWidth={2} aria-hidden />
+      ) : (
+        <Lock className="cp-pill-go is-lock" size={13} strokeWidth={2} aria-hidden />
+      )}
       {s.ribbon ? (
         <span className="cp-ribbon" aria-hidden>
           <span>{s.ribbon}</span>
         </span>
       ) : null}
-      {s.note ? <span className="sr-only"> — {s.note}</span> : null}
+      {s.note ? (
+        <span id={tipId} role="tooltip" className="cp-tip">
+          {s.note}
+        </span>
+      ) : null}
     </>
   );
-  const cls = cn('cp-pill', s.ribbon && 'has-ribbon');
-  return s.url ? (
-    <a className={cls} href={s.url} target="_blank" rel="noopener noreferrer" title={s.note}>
+  const common = {
+    className: cn('cp-pill', s.ribbon && 'has-ribbon', !live && 'is-locked'),
+    style: { '--glow': s.glow, '--i': index } as CSSProperties,
+    onPointerMove: trackPointer,
+    'aria-describedby': tipId,
+  };
+  return live ? (
+    <a {...common} href={s.url} target="_blank" rel="noopener noreferrer">
       {body}
     </a>
   ) : (
-    <button type="button" className={cls} aria-disabled="true" title={s.note} onClick={(e) => e.preventDefault()}>
+    <button {...common} type="button" aria-disabled="true" onClick={(e) => e.currentTarget.focus()}>
       {body}
     </button>
   );
@@ -227,8 +304,9 @@ function ProfileCard(): JSX.Element {
         <button
           type="button"
           className="cp-theme"
-          onClick={toggle}
-          aria-label={`Switch to ${preference === 'light' ? 'dark' : 'light'} theme`}
+          onClick={(e) => toggle(originOf(e.currentTarget))}
+          aria-label={`Switch the whole app to ${preference === 'light' ? 'dark' : 'light'} theme`}
+          title={`Switch the whole app to ${preference === 'light' ? 'dark' : 'light'}`}
         >
           <ThemeIcon size={16} strokeWidth={1.7} aria-hidden />
         </button>
@@ -246,13 +324,21 @@ function ProfileCard(): JSX.Element {
         </p>
 
         <div className="cp-cta-row">
-          <button type="button" className="cp-cta" onClick={goToForm}>
-            <MessageSquareHeart size={16} strokeWidth={1.8} aria-hidden />
-            Send a Message
+          <button type="button" className="cp-cta is-primary" onClick={goToForm} onPointerMove={trackPointer}>
+            <span className="cp-cta-fx" aria-hidden />
+            <span className="cp-cta-icon" aria-hidden>
+              <MessageSquareHeart size={16} strokeWidth={1.9} />
+            </span>
+            <span className="cp-cta-label">Send a Message</span>
+            <ArrowRight className="cp-cta-go" size={16} strokeWidth={2} aria-hidden />
           </button>
-          <a className="cp-cta" href={`mailto:${EMAIL}`}>
-            <Mail size={16} strokeWidth={1.8} aria-hidden />
-            Send an Email
+          <a className="cp-cta is-ghost" href={`mailto:${EMAIL}`} onPointerMove={trackPointer}>
+            <span className="cp-cta-fx" aria-hidden />
+            <span className="cp-cta-icon" aria-hidden>
+              <Mail size={16} strokeWidth={1.9} />
+            </span>
+            <span className="cp-cta-label">Send an Email</span>
+            <ArrowUpRight className="cp-cta-go" size={16} strokeWidth={2} aria-hidden />
           </a>
         </div>
 
@@ -260,12 +346,117 @@ function ProfileCard(): JSX.Element {
           Here are my <strong>socials</strong>
         </p>
         <div className="cp-pills">
-          {SOCIALS.map((s) => (
-            <SocialPill key={s.id} s={s} />
+          {SOCIALS.map((s, i) => (
+            <SocialPill key={s.id} s={s} index={i} />
           ))}
         </div>
       </div>
     </>
+  );
+}
+
+/* ── Sent: the message gets stamped ───────────────────────────────────── */
+
+/** Ink droplets thrown out when the stamp hits the paper. */
+const SPLATTER = Array.from({ length: 16 }, (_, i) => {
+  const angle = (i / 16) * 360 + ((i * 37) % 23) - 11;
+  return { angle, dist: 90 + ((i * 53) % 70), size: 3 + ((i * 29) % 6) };
+});
+
+const STAMP_IMPACT_MS = 900;
+
+function StampedLetter({
+  draft,
+  topic,
+  onAnother,
+}: {
+  draft: ContactDraft;
+  topic: string;
+  onAnother: () => void;
+}): JSX.Element {
+  // Bumping the key replays the whole stamp — tap it again for fun.
+  const [run, setRun] = useState(0);
+  const sentAt = useMemo(
+    () => new Date().toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }),
+    [],
+  );
+
+  useEffect(() => {
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (calm) return;
+    // A tiny thud on phones that support it, right as the stamp lands.
+    const id = window.setTimeout(() => navigator.vibrate?.([18, 40, 12]), STAMP_IMPACT_MS);
+    return () => window.clearTimeout(id);
+  }, [run]);
+
+  return (
+    <div className="stamp-scene" role="status">
+      <p className="sr-only">
+        Message sent and stamped private and confidential. I will reply to {draft.email}.
+      </p>
+
+      <div key={run} className="stamp-stage" aria-hidden>
+        <article className="stamp-letter">
+          <header className="stamp-letter-head">
+            <span className="stamp-letter-kicker">Heyfouad Library · Private message</span>
+            <span className="stamp-letter-date">{sentAt}</span>
+          </header>
+          <dl className="stamp-letter-meta">
+            <div>
+              <dt>To</dt>
+              <dd>Fouad Barkaoui</dd>
+            </div>
+            <div>
+              <dt>From</dt>
+              <dd>
+                {draft.name} &lt;{draft.email}&gt;
+              </dd>
+            </div>
+            <div>
+              <dt>Re</dt>
+              <dd>
+                {draft.subject} <span className="stamp-letter-topic">{topic}</span>
+              </dd>
+            </div>
+          </dl>
+          <p className="stamp-letter-body">{draft.message}</p>
+          <footer className="stamp-letter-sign">— sent from the Contact page</footer>
+
+          <span className="stamp-shadow" />
+          <span className="stamp-ring" />
+          <span className="stamp-splatter">
+            {SPLATTER.map((d, i) => (
+              <i
+                key={i}
+                style={{ '--a': `${d.angle}deg`, '--d': `${d.dist}px`, '--s': `${d.size}px` } as CSSProperties}
+              />
+            ))}
+          </span>
+          <button
+            type="button"
+            className="stamp-mark"
+            tabIndex={-1}
+            onClick={() => setRun((n) => n + 1)}
+            title="Stamp it again"
+          >
+            <img src="/stamp-confidential.webp" alt="" width={500} height={282} draggable={false} />
+          </button>
+        </article>
+      </div>
+
+      <div key={`done-${run}`} className="stamp-done">
+        <span className="stamp-done-mark" aria-hidden>
+          <Check size={20} strokeWidth={2.6} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h3 className="stamp-done-title">Sealed &amp; delivered — thank you!</h3>
+          <p className="stamp-done-text">
+            It went straight to my private inbox. I'll reply to <span>{draft.email}</span> as soon as I can.
+          </p>
+        </div>
+        <Button onClick={onAnother}>Send another message</Button>
+      </div>
+    </div>
   );
 }
 
@@ -335,25 +526,15 @@ function ContactForm(): JSX.Element {
 
   if (state === 'sent') {
     return (
-      <div className="contact-sent" role="status">
-        <span className="contact-sent-mark" aria-hidden>
-          <Check size={26} strokeWidth={2.4} />
-        </span>
-        <h3 className="text-[17px] font-medium text-paper">Message sent — thank you!</h3>
-        <p className="mt-1.5 max-w-[340px] text-[13px] leading-[1.6] text-fog">
-          It went straight to my inbox. I'll reply to <span className="text-mist">{draft.email}</span> as soon as I can.
-        </p>
-        <Button
-          className="mt-5"
-          onClick={() => {
-            setDraft((d) => ({ ...d, subject: '', message: '' }));
-            setTouched({});
-            setState('idle');
-          }}
-        >
-          Send another message
-        </Button>
-      </div>
+      <StampedLetter
+        draft={draft}
+        topic={topic.label}
+        onAnother={() => {
+          setDraft((d) => ({ ...d, subject: '', message: '' }));
+          setTouched({});
+          setState('idle');
+        }}
+      />
     );
   }
 
