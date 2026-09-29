@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { MenuButton } from '@/components/shell/MenuButton';
 import { Button } from '@/components/ui/Button';
 import {
+  announceContactChange,
   deleteContactMessage,
   listContactMessages,
   setContactStatus,
@@ -37,6 +38,7 @@ export function InboxModule(): JSX.Element {
     setBusy(true);
     try {
       setItems(await listContactMessages());
+      announceContactChange();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not load messages');
       setItems((prev) => prev ?? []);
@@ -57,6 +59,7 @@ export function InboxModule(): JSX.Element {
   const act = async (fn: () => Promise<void>, rollback: () => void): Promise<void> => {
     try {
       await fn();
+      announceContactChange();
     } catch (e) {
       rollback();
       setError(e instanceof Error ? e.message : 'That change did not save');

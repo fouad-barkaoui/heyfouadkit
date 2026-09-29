@@ -32,7 +32,9 @@
 }
 .cp-frame {
   position: relative;
-  font-family: var(--font-mono);
+  font-family: 'IBM Plex Mono', var(--font-mono);
+  font-feature-settings: 'zero' 0, 'calt' 0;
+  letter-spacing: 0;
   max-width: 760px;
   margin: 0 auto;
   border-inline: 1px dashed var(--color-smoke);
@@ -653,7 +655,7 @@
 .stamp-letter-meta dt {
   width: 34px;
   flex-shrink: 0;
-  font-family: var(--font-mono);
+  font-family: 'IBM Plex Mono', var(--font-mono);
   font-size: 10.5px;
   line-height: 19px;
   text-transform: uppercase;
@@ -683,14 +685,14 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 6;
   white-space: pre-wrap;
-  font-family: var(--font-mono);
+  font-family: 'IBM Plex Mono', var(--font-mono);
   font-size: 12.5px;
   line-height: 26px;
   color: #332b20;
 }
 .stamp-letter-sign {
   margin-top: 10px;
-  font-family: var(--font-mono);
+  font-family: 'IBM Plex Mono', var(--font-mono);
   font-size: 11px;
   color: #8a7a5e;
 }

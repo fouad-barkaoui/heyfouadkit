@@ -1,5 +1,5 @@
 import * as Popover from '@radix-ui/react-popover';
-import { Bell, BellRing, CheckCheck, Flame, ListChecks, Target, X } from 'lucide-react';
+import { Bell, BellRing, CheckCheck, Flame, ListChecks, Mail, Target, X } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import type { Reminder, ReminderKind } from '@/lib/reminders';
 import { cn } from '@/lib/utils';
@@ -14,6 +14,7 @@ const KIND_ICON: Record<ReminderKind, typeof Bell> = {
   'habit-today': Flame,
   'goal-overdue': Target,
   'step-overdue': Target,
+  'message-new': Mail,
 };
 
 function Row({
@@ -92,8 +93,9 @@ export function NotificationBell({
     setOpen(next);
   };
 
-  const missed = items.filter((r) => r.missed);
-  const today = items.filter((r) => !r.missed);
+  const messages = items.filter((r) => r.kind === 'message-new');
+  const missed = items.filter((r) => r.missed && r.kind !== 'message-new');
+  const today = items.filter((r) => !r.missed && r.kind !== 'message-new');
   const badge = unread > 99 ? '99+' : String(unread);
   const label = unread ? `${t('notif.open')} (${unread})` : t('notif.open');
   const BellIcon = unread ? BellRing : Bell;
@@ -171,6 +173,20 @@ export function NotificationBell({
               </div>
             ) : (
               <>
+                {messages.length ? (
+                  <Section title={`${t('notif.messages')} · ${messages.length}`}>
+                    {messages.map((r) => (
+                      <Row
+                        key={r.key}
+                        r={r}
+                        fresh={freshKeys.has(r.key)}
+                        onOpen={() => go(r)}
+                        onDismiss={() => dismiss(r.key)}
+                        dismissLabel={t('notif.dismiss')}
+                      />
+                    ))}
+                  </Section>
+                ) : null}
                 {missed.length ? (
                   <Section title={`${t('notif.missed')} · ${missed.length}`}>
                     {missed.map((r) => (

@@ -8,7 +8,16 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { isAdminUser } from '@/lib/access';
 import { collectReminders, type Reminder } from '@/lib/reminders';
+import {
+  CONTACT_CHANGED_EVENT,
+  listNewContactMessages,
+  watchContactInserts,
+  type ContactMessage,
+} from '@/data/contact';
+import { TOPIC_LABEL } from '@/modules/contact/topics';
+import { useAuth } from './authStore';
 import { useWorkspace } from './workspaceStore';
 
 /**
@@ -46,6 +55,15 @@ function load(): Persisted {
   } catch {
     return EMPTY;
   }
+}
+
+function relativeTime(iso: string, now: Date): string {
+  const mins = Math.max(0, Math.round((now.getTime() - new Date(iso).getTime()) / 60_000));
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.round(hours / 24)}d ago`;
 }
 
 function save(p: Persisted): void {
@@ -132,7 +150,50 @@ export function NotificationsProvider({ children }: { children: ReactNode }): JS
     };
   }, []);
 
-  const all = useMemo(() => (ready ? collectReminders(workspace, now) : []), [ready, workspace, now]);
+  /* ── Admin only: new contact messages show up in the bell ───────────── */
+  const { user } = useAuth();
+  const admin = isAdminUser(user);
+  const [inbox, setInbox] = useState<ContactMessage[]>([]);
+  useEffect(() => {
+    if (!admin) {
+      setInbox([]);
+      return;
+    }
+    let alive = true;
+    const pull = (): void => {
+      void listNewContactMessages().then((list) => {
+        if (alive) setInbox(list);
+      });
+    };
+    pull();
+    const id = window.setInterval(pull, 45_000);
+    window.addEventListener(CONTACT_CHANGED_EVENT, pull);
+    window.addEventListener('focus', pull);
+    const stop = watchContactInserts(pull);
+    return () => {
+      alive = false;
+      window.clearInterval(id);
+      window.removeEventListener(CONTACT_CHANGED_EVENT, pull);
+      window.removeEventListener('focus', pull);
+      stop();
+    };
+  }, [admin]);
+
+  const all = useMemo(() => {
+    const base = ready ? collectReminders(workspace, now) : [];
+    const messages: Reminder[] = inbox.map((m) => ({
+      key: `msg:${m.id}`,
+      kind: 'message-new',
+      title: `${m.name} · ${TOPIC_LABEL[m.topic]}`,
+      detail: m.subject,
+      module: 'inbox',
+      recordId: m.id,
+      at: m.createdAt,
+      missed: false,
+      when: relativeTime(m.createdAt, now),
+    }));
+    return [...messages, ...base];
+  }, [ready, workspace, now, inbox]);
 
   const update = useCallback((fn: (p: Persisted) => Persisted) => {
     setState((prev) => {
@@ -170,12 +231,23 @@ export function NotificationsProvider({ children }: { children: ReactNode }): JS
   useEffect(() => {
     if (!ready || !state.alerts || support !== 'granted' || alerting.current) return;
     const seen = new Set(state.alerted);
-    const fresh = items.filter((r) => r.missed && !seen.has(r.key) && !readSet.has(r.key));
+    const fresh = items.filter((r) => (r.missed || r.kind === 'message-new') && !seen.has(r.key) && !readSet.has(r.key));
     if (!fresh.length) return;
     alerting.current = true;
     const first = fresh[0]!;
+    const allMessages = fresh.every((r) => r.kind === 'message-new');
     const run =
-      fresh.length === 1
+      allMessages && fresh.length > 1
+        ? showSystemAlert(
+            `${fresh.length} new messages`,
+            fresh
+              .slice(0, 3)
+              .map((r) => `• ${r.title}`)
+              .join('\n'),
+            'inbox',
+            'heyfouad-messages-summary',
+          )
+        : fresh.length === 1
         ? showSystemAlert(first.title, first.detail, first.module, first.key)
         : showSystemAlert(
             `You missed ${fresh.length} things`,

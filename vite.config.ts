@@ -21,11 +21,14 @@ function serviceWorker(): Plugin {
         .filter((f) => !f.endsWith('.map') && f !== 'sw.js')
         .map((f) => `/${f}`);
       const publicDir = fileURLToPath(new URL('./public', import.meta.url));
-      const statics = readdirSync(publicDir)
-        .filter((f) => f !== 'avatar-256.png')
-        .map((f) => `/${f}`);
+      const staticFiles = readdirSync(publicDir).filter((f) => f !== 'avatar-256.png');
+      const statics = staticFiles.map((f) => `/${f}`);
       const precache = ['/', ...built, ...statics];
-      const version = createHash('sha256').update(precache.join('|')).digest('hex').slice(0, 12);
+      // Hash the *contents* of public files too, so swapping a logo/icon under
+      // the same name still rolls out a new worker and refreshes the cache.
+      const hash = createHash('sha256').update(precache.join('|'));
+      for (const f of staticFiles) hash.update(readFileSync(`${publicDir}/${f}`));
+      const version = hash.digest('hex').slice(0, 12);
       const template = readFileSync(fileURLToPath(new URL('./scripts/sw.template.js', import.meta.url)), 'utf8');
       this.emitFile({
         type: 'asset',
@@ -42,12 +45,19 @@ export default defineConfig({
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
   build: {
+    // three.js is ~800 kB on its own and only loads for the 3D backdrop.
+    chunkSizeWarningLimit: 900,
     rollupOptions: {
       output: {
-        manualChunks: {
-          three: ['three', '@react-three/fiber'],
-          editor: ['@tiptap/react', '@tiptap/starter-kit'],
-          pdf: ['pdfjs-dist'],
+        manualChunks(id: string) {
+          if (!id.includes('node_modules')) return undefined;
+          if (/[\\/](three|@react-three)[\\/]/.test(id)) return 'three';
+          if (/[\\/](@tiptap|prosemirror-[^\\/]+)[\\/]/.test(id)) return 'editor';
+          if (id.includes('pdfjs-dist')) return 'pdf';
+          if (id.includes('@supabase')) return 'supabase';
+          if (id.includes('@radix-ui')) return 'radix';
+          if (/[\\/](react|react-dom|scheduler)[\\/]/.test(id)) return 'react';
+          return undefined;
         },
       },
     },

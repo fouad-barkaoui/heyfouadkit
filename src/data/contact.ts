@@ -117,3 +117,46 @@ export async function deleteContactMessage(id: string): Promise<void> {
   const { error } = await sb.from('contact_messages').delete().eq('id', id);
   if (error) throw new Error(friendly(error.message));
 }
+
+/** Fired (on window) whenever the admin triages messages, so the bell can re-check. */
+export const CONTACT_CHANGED_EVENT = 'heyfouad:contact-changed';
+export function announceContactChange(): void {
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(CONTACT_CHANGED_EVENT));
+}
+
+/** Only the messages nobody has opened yet — what the admin bell shows. Admin-only (RLS). */
+export async function listNewContactMessages(): Promise<ContactMessage[]> {
+  const sb = getSupabase();
+  if (!sb) return [];
+  const { data, error } = await sb
+    .from('contact_messages')
+    .select('id, created_at, name, email, topic, subject, message, status, page')
+    .eq('status', 'new')
+    .order('created_at', { ascending: false })
+    .limit(50);
+  if (error) return [];
+  return ((data ?? []) as Row[]).map((r) => ({
+    id: r.id,
+    createdAt: r.created_at,
+    name: r.name,
+    email: r.email,
+    topic: r.topic,
+    subject: r.subject,
+    message: r.message,
+    status: r.status,
+    page: r.page,
+  }));
+}
+
+/** Live pings for new messages (Supabase realtime). Returns an unsubscribe. */
+export function watchContactInserts(onInsert: () => void): () => void {
+  const sb = getSupabase();
+  if (!sb) return () => undefined;
+  const channel = sb
+    .channel('contact-inserts')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'contact_messages' }, onInsert)
+    .subscribe();
+  return () => {
+    void sb.removeChannel(channel);
+  };
+}

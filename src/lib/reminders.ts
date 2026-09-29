@@ -11,7 +11,7 @@ import { addDays, dayKey, isScheduled, stepDone } from '@/modules/habits/habitMa
  * silence tomorrow's, and rescheduling a task brings its reminder back.
  */
 
-export type ReminderKind = 'task-overdue' | 'task-today' | 'habit-missed' | 'habit-today' | 'goal-overdue' | 'step-overdue';
+export type ReminderKind = 'task-overdue' | 'task-today' | 'habit-missed' | 'habit-today' | 'goal-overdue' | 'step-overdue' | 'message-new';
 
 export interface Reminder {
   key: string;
