@@ -71,6 +71,7 @@ const VALID: ModuleId[] = [
   'vault',
   'reporting',
   'trash',
+  'contact',
 ];
 
 function moduleFromHash(): ModuleId {

@@ -136,11 +136,13 @@
   --color-paper: #08090a;
   --color-accent: #636a06;
   --tint-rgb: 0 0 0;
-  color-scheme: light;
+  /* "only" = never let the browser's auto-dark repaint the light theme. */
+  color-scheme: only light;
 }
 
 :root[data-theme='dark'] {
-  color-scheme: dark;
+  /* "only" = this is already dark; phone browsers must not darken it again. */
+  color-scheme: only dark;
 }
 
 @layer base {
@@ -150,7 +152,7 @@
 
   html {
     background: var(--color-void);
-    color-scheme: dark;
+    color-scheme: only dark;
     -webkit-text-size-adjust: 100%;
   }
 

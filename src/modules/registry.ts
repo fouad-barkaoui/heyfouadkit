@@ -17,6 +17,7 @@ import {
   Pill,
   Sparkles,
   Trash2,
+  MessageSquareHeart,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -47,6 +48,7 @@ export const MODULES: ModuleMeta[] = [
   { id: 'reporting', label: 'Reporting', short: 'Reporting', icon: LayoutDashboard },
   { id: 'analytics', label: 'Analytics', short: 'Analytics', icon: BarChart3 },
   { id: 'trash', label: 'Trash', short: 'Trash', icon: Trash2 },
+  { id: 'contact', label: 'Contact', short: 'Contact', icon: MessageSquareHeart },
 ];
 
 export const MODULE_MAP: Record<ModuleId, ModuleMeta> = Object.fromEntries(

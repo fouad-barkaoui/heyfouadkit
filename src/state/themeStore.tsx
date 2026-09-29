@@ -40,7 +40,13 @@ export function ThemeProvider({ children }: { children: ReactNode }): JSX.Elemen
     const root = document.documentElement;
     root.dataset.theme = preference;
     // Lets native form controls (scrollbars, checkboxes) pick the right chrome.
-    root.style.colorScheme = preference;
+    // "only" forbids the browser's own auto-dark from repainting the page on
+    // top of our theme (phones with "dark theme for sites" switched on).
+    root.style.colorScheme = `only ${preference}`;
+    document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', `only ${preference}`);
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', preference === 'light' ? '#fbfbfa' : '#06070b');
   }, [preference]);
 
   const setPreference = useCallback((next: ThemePreference) => {

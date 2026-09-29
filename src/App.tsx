@@ -2,6 +2,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AppShell } from '@/components/shell/AppShell';
 import { AuthProvider } from '@/state/authStore';
 import { LanguageProvider } from '@/state/languageStore';
+import { NotificationsProvider } from '@/state/notificationsStore';
 import { TeamProvider } from '@/state/teamStore';
 import { ThemeProvider } from '@/state/themeStore';
 import { UIProvider } from '@/state/uiStore';
@@ -16,7 +17,9 @@ export default function App(): JSX.Element {
             <TeamProvider>
               <WorkspaceProvider>
                 <UIProvider>
-                  <AppShell />
+                  <NotificationsProvider>
+                    <AppShell />
+                  </NotificationsProvider>
                 </UIProvider>
               </WorkspaceProvider>
             </TeamProvider>

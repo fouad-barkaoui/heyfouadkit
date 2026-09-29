@@ -127,3 +127,22 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data === 'skip-waiting') self.skipWaiting();
 });
+
+// Reminder alerts from the notification bell: tapping one brings the app to
+// the front (or opens it) on the page the reminder is about.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = (event.notification.data && event.notification.data.url) || '/';
+  event.waitUntil(
+    (async () => {
+      const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      const client = all.find((c) => new URL(c.url).origin === self.location.origin);
+      if (client) {
+        await client.focus();
+        client.postMessage({ type: 'heyfouad:navigate', url: target });
+        return;
+      }
+      await self.clients.openWindow(target);
+    })(),
+  );
+});

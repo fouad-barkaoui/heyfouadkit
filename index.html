@@ -1,12 +1,28 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en" class="dark" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover"
     />
-    <meta name="color-scheme" content="dark" />
+    <!--
+      "only dark" tells phone browsers (Chrome's "dark theme for sites",
+      Samsung Internet, MIUI/HyperOS, Android WebView) that this page already
+      paints its own dark theme, so they must not auto-darken it on top — that
+      double-darkening is what turned white chips grey and made some icons
+      and labels disappear. themeStore.tsx keeps this in sync with the toggle.
+    -->
+    <meta name="color-scheme" content="only dark" />
+    <meta name="supported-color-schemes" content="dark light" />
+    <script>
+      try {
+        var t = localStorage.getItem('heyfouad.theme.v1') === 'light' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = t;
+        document.documentElement.style.colorScheme = 'only ' + t;
+        document.querySelector('meta[name="color-scheme"]').setAttribute('content', 'only ' + t);
+      } catch (e) {}
+    </script>
     <meta name="theme-color" content="#08090a" />
     <meta name="description" content="Notes, tasks, articles, courses, documents and analytics on one spatial canvas." />
     <meta name="mobile-web-app-capable" content="yes" />

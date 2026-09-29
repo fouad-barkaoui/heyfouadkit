@@ -29,6 +29,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'nav.notebook': 'Notebook',
     'nav.badges': 'Badges',
     'nav.trash': 'Trash',
+    'nav.contact': 'Contact',
     'nav.essentials': 'Essentials',
     'nav.habits': 'Habits & Goals',
     'nav.group.plan': 'Plan',
@@ -48,6 +49,19 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'shell.syncFailed': 'Sync failed',
     'shell.onThisDevice': 'On this device',
     'shell.account': 'Account',
+    'notif.title': 'Notifications',
+    'notif.open': 'Notifications',
+    'notif.missed': 'Missed',
+    'notif.today': 'Coming up today',
+    'notif.markRead': 'Mark all read',
+    'notif.clear': 'Clear all',
+    'notif.dismiss': 'Dismiss',
+    'notif.empty': "You're all caught up",
+    'notif.emptyHint': 'Overdue tasks, missed habits and goal deadlines will show up here.',
+    'notif.alerts': 'Phone & desktop alerts',
+    'notif.alertsHint': 'Get an alert on this device when something is missed.',
+    'notif.alertsDenied': 'Blocked — allow notifications for this site in your browser settings.',
+    'notif.alertsUnsupported': 'This browser can’t show alerts. On iPhone, add the app to your Home Screen first.',
 
     // Settings modal
     'settings.title': 'Settings',
@@ -65,6 +79,8 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
 
     // Contact (embedded in Settings)
     'contact.instagram': 'Message me on Instagram',
+    'contact.open': 'Contact & socials',
+    'contact.openHint': 'Send a message, or find me on Instagram, GitHub, LinkedIn and Facebook',
 
     // Trash
     'trash.title': 'Trash',
@@ -136,6 +152,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'nav.notebook': 'دفتر الملاحظات',
     'nav.badges': 'الشارات',
     'nav.trash': 'سلة المحذوفات',
+    'nav.contact': 'تواصل معي',
     'nav.essentials': 'الأساسيات',
     'nav.habits': 'العادات والأهداف',
     'nav.group.plan': 'التخطيط',
@@ -155,6 +172,19 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'shell.syncFailed': 'فشلت المزامنة',
     'shell.onThisDevice': 'على هذا الجهاز',
     'shell.account': 'الحساب',
+    'notif.title': 'الإشعارات',
+    'notif.open': 'الإشعارات',
+    'notif.missed': 'فائتة',
+    'notif.today': 'اليوم',
+    'notif.markRead': 'تعليم الكل كمقروء',
+    'notif.clear': 'مسح الكل',
+    'notif.dismiss': 'إخفاء',
+    'notif.empty': 'لا شيء فاتك',
+    'notif.emptyHint': 'ستظهر هنا المهام المتأخرة والعادات الفائتة ومواعيد الأهداف.',
+    'notif.alerts': 'تنبيهات الهاتف والحاسوب',
+    'notif.alertsHint': 'احصل على تنبيه على هذا الجهاز عندما يفوتك شيء.',
+    'notif.alertsDenied': 'محظورة — اسمح بالإشعارات لهذا الموقع من إعدادات المتصفح.',
+    'notif.alertsUnsupported': 'هذا المتصفح لا يدعم التنبيهات. على الآيفون، أضف التطبيق إلى الشاشة الرئيسية أولاً.',
 
     // Settings modal
     'settings.title': 'الإعدادات',
@@ -172,6 +202,8 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
 
     // Contact (embedded in Settings)
     'contact.instagram': 'راسلني على إنستغرام',
+    'contact.open': 'التواصل والشبكات',
+    'contact.openHint': 'أرسل رسالة، أو تابعني على إنستغرام وغيت هاب ولينكدإن وفيسبوك',
 
     // Trash
     'trash.title': 'سلة المحذوفات',

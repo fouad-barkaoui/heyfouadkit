@@ -1,4 +1,4 @@
-import { Instagram, LogOut, Moon, Orbit, Sparkles, Sun, Waves, Wind } from 'lucide-react';
+import { ArrowUpRight, Facebook, Github, Instagram, Linkedin, LogOut, Moon, Orbit, Sparkles, Sun, Waves, Wind } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { AvatarEditor } from '@/components/profile/AvatarEditor';
 import { Button } from '@/components/ui/Button';
@@ -20,7 +20,6 @@ const BG_OPTIONS: { id: BgStyle; label: string; hint: string; icon: typeof Waves
   { id: 'orbit', label: 'Orbit', hint: 'Each page forms its own shape', icon: Orbit },
 ];
 
-const INSTAGRAM_URL = 'https://www.instagram.com/heyfouad/';
 
 interface SettingsModalProps {
   open: boolean;
@@ -32,7 +31,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps): JSX.E
   const { preference, setPreference } = useTheme();
   const { language, setLanguage, t } = useLanguage();
   const { workspace } = useWorkspace();
-  const { bgStyle, setBgStyle } = useUI();
+  const { bgStyle, setBgStyle, setModule } = useUI();
   const storageUsed = totalCloudBytes(workspace.attachments);
   const storageLimitBytes = MAX_TOTAL_CLOUD_BYTES;
   const [signingOut, setSigningOut] = useState(false);
@@ -185,27 +184,41 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps): JSX.E
           </div>
         </div>
 
-        {/* Contact Section — a single link out to Instagram */}
+        {/* Contact — the full page (form, socials, inbox) lives on its own screen. */}
         <div className="border-t border-graphite pt-4">
           <p className="mb-2.5 text-[11px] font-medium uppercase tracking-[0.08em] text-ash">
             {t('settings.contact')}
           </p>
-          <a
-            href={INSTAGRAM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(
-              'flex items-center gap-3 rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 shadow-[inset_0_0_0_1px_var(--color-graphite)] transition-colors duration-150 hover:bg-[rgb(var(--tint-rgb)/0.05)] hover:shadow-[inset_0_0_0_1px_var(--color-smoke)]',
-            )}
+          <button
+            type="button"
+            onClick={() => {
+              onOpenChange(false);
+              setModule('contact');
+            }}
+            className="flex w-full items-center gap-3 rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 text-start shadow-[inset_0_0_0_1px_var(--color-graphite)] transition-colors duration-150 hover:bg-[rgb(var(--tint-rgb)/0.05)] hover:shadow-[inset_0_0_0_1px_var(--color-smoke)]"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] bg-gradient-to-br from-[#f58529] via-[#dd2a7b] to-[#8134af] text-white">
-              <Instagram size={17} strokeWidth={1.8} />
+            <span className="flex -space-x-1.5" aria-hidden>
+              {[
+                { Icon: Instagram, bg: 'linear-gradient(135deg,#f58529,#dd2a7b,#8134af)' },
+                { Icon: Github, bg: 'linear-gradient(135deg,#3a3f4b,#16181d)' },
+                { Icon: Linkedin, bg: 'linear-gradient(135deg,#0a66c2,#004182)' },
+                { Icon: Facebook, bg: 'linear-gradient(135deg,#1877f2,#0b4fb3)' },
+              ].map(({ Icon, bg }, i) => (
+                <span
+                  key={i}
+                  className="flex h-7 w-7 items-center justify-center rounded-full text-white shadow-[0_0_0_2px_var(--color-carbon)]"
+                  style={{ background: bg }}
+                >
+                  <Icon size={13} strokeWidth={1.9} />
+                </span>
+              ))}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[13px] text-paper">{t('contact.instagram')}</span>
-              <span className="block truncate text-[11.5px] text-ash">@heyfouad</span>
+              <span className="block truncate text-[13px] text-paper">{t('contact.open')}</span>
+              <span className="block truncate text-[11.5px] text-ash">{t('contact.openHint')}</span>
             </span>
-          </a>
+            <ArrowUpRight size={15} strokeWidth={1.8} className="shrink-0 text-ash rtl:-scale-x-100" aria-hidden />
+          </button>
         </div>
       </div>
     </Modal>

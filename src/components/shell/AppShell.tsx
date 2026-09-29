@@ -46,6 +46,9 @@ const AnalyticsModule = lazy(async () => ({
   default: (await import('@/modules/analytics/AnalyticsModule')).AnalyticsModule,
 }));
 const VaultModule = lazy(async () => ({ default: (await import('@/modules/vault/VaultModule')).VaultModule }));
+const ContactModule = lazy(async () => ({
+  default: (await import('@/modules/contact/ContactModule')).ContactModule,
+}));
 const TrashPage = lazy(async () => ({ default: (await import('@/modules/trash/TrashPage')).TrashPage }));
 const SaveItModule = lazy(async () => ({
   default: (await import('@/modules/saveit/SaveItModule')).SaveItModule,
@@ -199,6 +202,8 @@ export function AppShell(): JSX.Element {
         return <NotebookModule />;
       case 'trash':
         return <TrashPage />;
+      case 'contact':
+        return <ContactModule />;
       case 'home':
       default:
         return <HomeModule />;

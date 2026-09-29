@@ -28,6 +28,7 @@ export const NAV_KEY: Record<string, string> = {
   reporting: 'nav.reporting',
   analytics: 'nav.analytics',
   trash: 'nav.trash',
+  contact: 'nav.contact',
 };
 
 export const SYNC_LOOK_KEY: Record<SyncState, { icon: typeof Cloud; color: string; key: string }> = {

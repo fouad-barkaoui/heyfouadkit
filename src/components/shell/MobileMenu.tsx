@@ -1,5 +1,5 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import { CloudOff, Search, Settings } from 'lucide-react';
+import { CloudOff, MessageSquareHeart, Search, Settings } from 'lucide-react';
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { PlanChip } from '@/components/ui/PlanChip';
@@ -159,7 +159,7 @@ export function MobileMenu(): JSX.Element {
 
           <footer className="menu-foot relative px-4 pt-3 pb-[max(14px,env(safe-area-inset-bottom))]">
             <ThemeToggle expanded />
-            <div className="grid grid-cols-[auto_1fr] gap-2">
+            <div className="grid grid-cols-[auto_auto_1fr] gap-2">
               <button
                 type="button"
                 onClick={() => {
@@ -170,6 +170,15 @@ export function MobileMenu(): JSX.Element {
                 className="menu-foot-btn aspect-square justify-center"
               >
                 <Settings size={17} strokeWidth={1.6} aria-hidden />
+              </button>
+              <button
+                type="button"
+                onClick={() => setModule('contact')}
+                aria-label={t('nav.contact')}
+                data-active={module === 'contact'}
+                className="menu-foot-btn aspect-square justify-center"
+              >
+                <MessageSquareHeart size={17} strokeWidth={1.6} aria-hidden />
               </button>
               <button
                 type="button"

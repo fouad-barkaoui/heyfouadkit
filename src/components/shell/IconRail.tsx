@@ -24,6 +24,7 @@ import {
   useRowFlag,
   type RowFlag,
 } from './navShared';
+import { NotificationBell } from './NotificationBell';
 import { ThemeToggle } from './ThemeToggle';
 
 const TIP_CLASS =
@@ -397,6 +398,8 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
           </button>
         </RailTip>
 
+        <NotificationBell variant="rail" expanded={expanded} />
+
         <div
           ref={scrollRef}
           onScroll={updateEdges}
@@ -468,6 +471,14 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
 
         <div className="rail-foot">
           <ThemeToggle expanded={expanded} />
+
+          <RailRow
+            meta={MODULE_MAP.contact}
+            label={labelFor('contact')}
+            active={module === 'contact'}
+            expanded={expanded}
+            onSelect={() => go('contact')}
+          />
 
           <RailTip enabled={!expanded} label={t('shell.settings')}>
             <button

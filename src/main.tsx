@@ -10,6 +10,8 @@ import './styles/whatsnew.css';
 import './styles/theme.css';
 import './styles/nav.css';
 import './styles/habits.css';
+import './styles/notifications.css';
+import './styles/contact.css';
 
 /** Warm the connection to the cloud project as early as possible — a
  * preconnect here shaves the DNS + TLS handshake off whichever request
@@ -77,5 +79,10 @@ createRoot(root).render(
 if (import.meta.env.PROD && 'serviceWorker' in navigator && window.isSecureContext) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(() => undefined);
+    // A tapped reminder alert asks the open tab to jump to its page.
+    navigator.serviceWorker.addEventListener('message', (event: MessageEvent<{ type?: string; url?: string }>) => {
+      const url = event.data?.url;
+      if (event.data?.type === 'heyfouad:navigate' && url?.startsWith('/#/')) window.location.hash = url.slice(2);
+    });
   });
 }

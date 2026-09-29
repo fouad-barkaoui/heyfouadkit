@@ -14,7 +14,8 @@ export type ModuleId =
   | 'vault'
   | 'reporting'
   | 'analytics'
-  | 'trash';
+  | 'trash'
+  | 'contact';
 
 export type ItemType = 'note' | 'article' | 'todo' | 'doc' | 'course' | 'news' | 'medicine' | 'link' | 'habit' | 'goal';
 

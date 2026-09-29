@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { useUI } from '@/state/uiStore';
+import { NotificationBell } from './NotificationBell';
 
 /**
  * Morphing hamburger: three uneven bars (full · short · medium) that even out
@@ -19,7 +20,7 @@ export function MenuButton({
   label?: string;
 }): JSX.Element {
   const { setMobileNavOpen, mobileNavOpen } = useUI();
-  return (
+  const button = (
     <button
       type="button"
       className={cn('menu-btn', className)}
@@ -35,5 +36,14 @@ export function MenuButton({
         <i />
       </span>
     </button>
+  );
+  // As the phone-width opener in a module header, the notification bell
+  // rides along right next to it — so it's on every screen of the app.
+  if (onClick) return button;
+  return (
+    <>
+      {button}
+      <NotificationBell className={className} />
+    </>
   );
 }
