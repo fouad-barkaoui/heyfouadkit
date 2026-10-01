@@ -1151,8 +1151,8 @@ a.cp-venture-name:hover {
   margin: 0;
   padding: 40px 40px 30px;
   overflow: hidden;
-  border-radius: 14px;
-  background: rgb(var(--tint-rgb) / 0.035);
+  border-radius: 0;
+  background: none;
 }
 .cp-motto-mark {
   position: absolute;

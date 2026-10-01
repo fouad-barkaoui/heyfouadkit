@@ -1,6 +1,6 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { Check, ChevronDown, ChevronLeft, Search, Settings, UserRound } from 'lucide-react';
+import { Check, ChevronDown, ChevronLeft, Search, UserRound } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { PlanChip } from '@/components/ui/PlanChip';
@@ -24,9 +24,9 @@ import {
   useRowFlag,
   type RowFlag,
 } from './navShared';
+import { AccountMenu } from './AccountMenu';
 import { NotificationBell } from './NotificationBell';
 import { useNotifications } from '@/state/notificationsStore';
-import { ThemeToggle } from './ThemeToggle';
 
 const TIP_CLASS =
   'z-[60] rounded-[7px] bg-obsidian px-2 py-1 text-[12px] text-mist shadow-[inset_0_0_0_1px_var(--color-graphite),0_4px_14px_rgba(0,0,0,0.45)] data-[state=delayed-open]:animate-[nx-fade_120ms_var(--ease-out-quint)_both]';
@@ -218,7 +218,7 @@ const GROUP_OPEN_KEY = 'kanz.navGroupOpen.v1';
  * A single glossy chip slides between rows to mark the active module.
  */
 export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Element {
-  const { module, setModule, railExpanded, toggleRail, setRailExpanded, setPaletteOpen, setAccountOpen, setSettingsOpen } =
+  const { module, setModule, railExpanded, toggleRail, setRailExpanded, setPaletteOpen, } =
     useUI();
   const { live, syncState } = useWorkspace();
   const { user, configured, avatarUrl } = useAuth();
@@ -534,8 +534,6 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
         </div>
 
         <div className="rail-foot">
-          <ThemeToggle expanded={expanded} />
-
           <RailRow
             meta={MODULE_MAP.contact}
             label={labelFor('contact')}
@@ -544,23 +542,10 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
             onSelect={() => go('contact')}
           />
 
-          <RailTip enabled={!expanded} label={t('shell.settings')}>
+          <AccountMenu side="right" align="end">
             <button
               type="button"
-              onClick={() => setSettingsOpen(true)}
-              aria-label={t('shell.settings')}
-              className={cn('nav-row', !expanded && 'is-compact')}
-            >
-              <Settings size={16} strokeWidth={1.6} className="shrink-0" aria-hidden />
-              {expanded ? <span className="flex-1 text-start">{t('shell.settings')}</span> : null}
-            </button>
-          </RailTip>
-
-          <RailTip enabled={!expanded} label={`${accountName} · ${user ? syncLabel : t('shell.thisDevice')}`}>
-            <button
-              type="button"
-              onClick={() => setAccountOpen(true)}
-              aria-label={t('shell.account')}
+              aria-label={`${t('shell.account')} — ${accountName}`}
               className={cn('nav-row', expanded ? 'rail-account' : 'is-compact')}
             >
               <span className="relative shrink-0">
@@ -594,7 +579,7 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
                 </>
               ) : null}
             </button>
-          </RailTip>
+          </AccountMenu>
         </div>
       </nav>
     </Tooltip.Provider>

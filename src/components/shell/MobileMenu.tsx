@@ -1,5 +1,5 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import { CloudOff, MessageSquareHeart, Search, Settings } from 'lucide-react';
+import { CloudOff, MessageSquareHeart, Search } from 'lucide-react';
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { PlanChip } from '@/components/ui/PlanChip';
@@ -11,9 +11,9 @@ import { getDisplayName, useAuth } from '@/state/authStore';
 import { useLanguage } from '@/state/languageStore';
 import { useUI } from '@/state/uiStore';
 import { useWorkspace } from '@/state/workspaceStore';
+import { AccountMenu } from './AccountMenu';
 import { MenuButton } from './MenuButton';
 import { FLAG_TOOLTIP, FlagPill, NAV_KEY, SYNC_LOOK_KEY, TeamSwitcher, useRowFlag } from './navShared';
-import { ThemeToggle } from './ThemeToggle';
 
 /** Where the last tap/click landed — the menu grows out of that point. */
 const lastTap = { x: 28, y: 28 };
@@ -37,7 +37,7 @@ function listenForTaps(): void {
  * tile. The WebGL field keeps glowing through the frosted backdrop.
  */
 export function MobileMenu(): JSX.Element {
-  const { module, setModule, mobileNavOpen, setMobileNavOpen, setPaletteOpen, setAccountOpen, setSettingsOpen } =
+  const { module, setModule, mobileNavOpen, setMobileNavOpen, setPaletteOpen } =
     useUI();
   const { live, syncState } = useWorkspace();
   const { user, configured, avatarUrl } = useAuth();
@@ -158,19 +158,7 @@ export function MobileMenu(): JSX.Element {
           </nav>
 
           <footer className="menu-foot relative px-4 pt-3 pb-[max(14px,env(safe-area-inset-bottom))]">
-            <ThemeToggle expanded />
-            <div className="grid grid-cols-[auto_auto_1fr] gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  close();
-                  setSettingsOpen(true);
-                }}
-                aria-label={t('shell.settings')}
-                className="menu-foot-btn aspect-square justify-center"
-              >
-                <Settings size={17} strokeWidth={1.6} aria-hidden />
-              </button>
+            <div className="grid grid-cols-[auto_1fr] gap-2">
               <button
                 type="button"
                 onClick={() => setModule('contact')}
@@ -180,15 +168,8 @@ export function MobileMenu(): JSX.Element {
               >
                 <MessageSquareHeart size={17} strokeWidth={1.6} aria-hidden />
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  close();
-                  setAccountOpen(true);
-                }}
-                aria-label={t('shell.account')}
-                className="menu-foot-btn"
-              >
+              <AccountMenu side="top" align="end">
+              <button type="button" aria-label={`${t('shell.account')} — ${accountName}`} className="menu-foot-btn">
                 <span className="relative shrink-0">
                   <Avatar src={avatarUrl} name={user ? accountName : 'Guest'} size={30} pro={pro} />
                   <span className="absolute -bottom-0.5 -end-0.5 flex h-[14px] w-[14px] items-center justify-center rounded-full bg-void" aria-hidden>
@@ -210,6 +191,7 @@ export function MobileMenu(): JSX.Element {
                   </span>
                 </span>
               </button>
+              </AccountMenu>
             </div>
           </footer>
         </Dialog.Content>

@@ -238,8 +238,8 @@ function SocialPill({ s }: { s: Social }): JSX.Element {
 }
 
 function ProfileCard(): JSX.Element {
-  const { preference, toggle } = useTheme();
-  const ThemeIcon = preference === 'light' ? Sun : Moon;
+  const { resolved, toggle } = useTheme();
+  const ThemeIcon = resolved === 'light' ? Sun : Moon;
   const greeting = useMemo(() => greetingFor(new Date().getHours()), []);
   const { setModule } = useUI();
 
@@ -250,8 +250,8 @@ function ProfileCard(): JSX.Element {
           type="button"
           className="cp-theme"
           onClick={(e) => toggle(originOf(e.currentTarget))}
-          aria-label={`Switch the whole app to ${preference === 'light' ? 'dark' : 'light'} theme`}
-          title={`Switch the whole app to ${preference === 'light' ? 'dark' : 'light'}`}
+          aria-label={`Switch the whole app to ${resolved === 'light' ? 'dark' : 'light'} theme`}
+          title={`Switch the whole app to ${resolved === 'light' ? 'dark' : 'light'}`}
         >
           <ThemeIcon size={16} strokeWidth={1.7} aria-hidden />
         </button>

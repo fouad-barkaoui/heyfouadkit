@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -389,6 +390,29 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
     },
     [session, supabase],
   );
+
+  // A picture saved on this device before signing in (or creating an account)
+  // moves to the account once, if the account has none yet — so a new user
+  // never loses the photo they just added. An explicit removal ('' in
+  // avatar_custom) is respected and nothing is uploaded.
+  const carried = useRef<string | null>(null);
+  useEffect(() => {
+    const current = session?.user;
+    if (!current || !supabase || !localAvatar) return;
+    const meta = current.user_metadata ?? {};
+    if ('avatar_custom' in meta || getAvatarUrl(current)) return;
+    if (carried.current === current.id) return;
+    carried.current = current.id;
+    void (async () => {
+      try {
+        const blob = await (await fetch(localAvatar)).blob();
+        const result = await setAvatar(blob);
+        if (result.ok) writeLocalAvatar(null);
+      } catch {
+        carried.current = null; // try again next time
+      }
+    })();
+  }, [session, supabase, localAvatar, setAvatar]);
 
   const updateMeta = useCallback(
     async (data: Record<string, unknown>): Promise<boolean> => {

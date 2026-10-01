@@ -198,7 +198,7 @@ export function AuthOverlay({
       role="dialog"
       aria-modal="true"
       aria-labelledby="auth-heading"
-      className="fixed inset-0 z-[70] flex overflow-y-auto bg-[#06070b] animate-[nx-fade_200ms_var(--ease-out-quint)_both]"
+      className="fixed inset-0 z-[70] flex items-start overflow-y-auto bg-[#06070b] animate-[nx-fade_200ms_var(--ease-out-quint)_both]"
     >
       <button
         type="button"
@@ -258,8 +258,8 @@ export function AuthOverlay({
       </aside>
 
       {/* ── Form ─────────────────────────────────────────────────────── */}
-      <section className="flex min-h-full flex-1 items-center justify-center px-4 py-16 sm:px-8">
-        <div className="w-full max-w-[380px]">
+      <section className="flex min-h-full flex-1 justify-center px-4 pb-12 pt-16 sm:px-8 sm:py-16">
+        <div className="my-auto w-full max-w-[380px]">
           <div className="mb-8 flex flex-col items-center gap-3 lg:hidden">
             <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[#0b0c10] shadow-[0_8px_24px_rgba(228,242,34,0.22),0_0_0_3px_#e4f222,0_0_0_6px_#06070b]">
               <img src={MARK_SRC} alt="" width={56} height={56} className="h-full w-full object-cover" aria-hidden />

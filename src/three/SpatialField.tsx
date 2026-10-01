@@ -105,7 +105,7 @@ function Field({
 }): JSX.Element {
   const points = useRef<THREE.Points>(null);
   const { size } = useThree();
-  const { preference } = useTheme();
+  const { resolved: preference } = useTheme();
   const COUNT = useMemo(particleCount, []);
 
   const seeds = useMemo(() => buildSeeds(COUNT), [COUNT]);

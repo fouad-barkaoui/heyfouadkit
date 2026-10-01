@@ -38,3 +38,20 @@ export function hasMedicationsAccess(user: User | null): boolean {
 export function isProUser(user: User | null): boolean {
   return isAdminUser(user) || isSubscribed(user);
 }
+
+/**
+ * The three kinds of account the UI distinguishes:
+ * - admin: the owner (gold banner);
+ * - pro: an active subscription, or `plan: 'pro'` set on the account's
+ *   app_metadata from the Supabase dashboard / SQL (green banner) — app
+ *   metadata can't be edited by the user, so it can't be self-granted;
+ * - beta: everyone else during the beta (no banner).
+ */
+export type AccountTier = 'admin' | 'pro' | 'beta';
+
+export function accountTier(user: User | null): AccountTier {
+  if (isAdminUser(user)) return 'admin';
+  const plan = (user?.app_metadata as { plan?: unknown } | undefined)?.plan;
+  if (isSubscribed(user) || plan === 'pro') return 'pro';
+  return 'beta';
+}

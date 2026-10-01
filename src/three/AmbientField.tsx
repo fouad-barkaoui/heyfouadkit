@@ -171,7 +171,7 @@ export function AmbientField({
   pointer: React.MutableRefObject<PointerState>;
 }): JSX.Element {
   const { size, camera } = useThree();
-  const { preference } = useTheme();
+  const { resolved: preference } = useTheme();
   const points = useRef<THREE.Points>(null);
 
   const { cols, rows } = useMemo(counts, []);

@@ -17,7 +17,8 @@
     <meta name="supported-color-schemes" content="dark light" />
     <script>
       try {
-        var t = localStorage.getItem('kanz.theme.v1') === 'light' ? 'light' : 'dark';
+        var p = localStorage.getItem('kanz.theme.v1') || localStorage.getItem('heyfouad.theme.v1');
+        var t = p === 'light' ? 'light' : p === 'system' && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
         document.documentElement.dataset.theme = t;
         document.documentElement.style.colorScheme = 'only ' + t;
         document.querySelector('meta[name="color-scheme"]').setAttribute('content', 'only ' + t);

@@ -10,7 +10,10 @@ import {
 } from 'react';
 import { flushSync } from 'react-dom';
 
-export type ThemePreference = 'light' | 'dark';
+/** What the person picked. "system" follows the device's light/dark setting. */
+export type ThemePreference = 'light' | 'dark' | 'system';
+/** What is actually painted. */
+export type ResolvedTheme = 'light' | 'dark';
 
 /** Where the switch was pressed — the new theme spreads out from here. */
 export interface ThemeOrigin {
@@ -21,8 +24,10 @@ export interface ThemeOrigin {
 interface ThemeContextValue {
   /** What the person chose. */
   preference: ThemePreference;
+  /** The theme on screen right now (system resolved against the device). */
+  resolved: ResolvedTheme;
   setPreference: (next: ThemePreference, origin?: ThemeOrigin) => void;
-  /** Flips between the two. */
+  /** Flips between light and dark (an explicit choice, overriding the device). */
   toggle: (origin?: ThemeOrigin) => void;
 }
 
@@ -30,13 +35,23 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 const STORAGE_KEY = 'kanz.theme.v1';
 
+const isPreference = (v: unknown): v is ThemePreference => v === 'light' || v === 'dark' || v === 'system';
+
 function readStored(): ThemePreference {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw === 'light' || raw === 'dark' ? raw : 'dark';
+    return isPreference(raw) ? raw : 'dark';
   } catch {
     return 'dark';
   }
+}
+
+const DARK_QUERY = '(prefers-color-scheme: dark)';
+function deviceTheme(): ResolvedTheme {
+  return typeof window !== 'undefined' && window.matchMedia?.(DARK_QUERY).matches === false ? 'light' : 'dark';
+}
+export function resolveTheme(preference: ThemePreference, device: ResolvedTheme = deviceTheme()): ResolvedTheme {
+  return preference === 'system' ? device : preference;
 }
 
 /**
@@ -44,7 +59,7 @@ function readStored(): ThemePreference {
  * reads its colours from these root attributes, so this is the one switch
  * for the entire platform.
  */
-function applyTheme(preference: ThemePreference): void {
+function applyTheme(preference: ResolvedTheme): void {
   const root = document.documentElement;
   root.dataset.theme = preference;
   root.classList.toggle('dark', preference === 'dark');
@@ -78,6 +93,8 @@ export function ThemeProvider({ children }: { children: ReactNode }): JSX.Elemen
   const [preference, setPreferenceState] = useState<ThemePreference>(() =>
     typeof window === 'undefined' ? 'dark' : readStored(),
   );
+  const [device, setDevice] = useState<ResolvedTheme>(() => (typeof window === 'undefined' ? 'dark' : deviceTheme()));
+  const resolved = resolveTheme(preference, device);
   // What the theme is (or is about to be) — updated on click, before the
   // reveal animation has painted, so quick double-taps stay in step.
   const current = useRef(preference);
@@ -85,14 +102,23 @@ export function ThemeProvider({ children }: { children: ReactNode }): JSX.Elemen
 
   useEffect(() => {
     current.current = preference;
-    applyTheme(preference);
-  }, [preference]);
+    applyTheme(resolved);
+  }, [preference, resolved]);
+
+  // The device flipped light/dark — only matters while following the system.
+  useEffect(() => {
+    const mq = window.matchMedia?.(DARK_QUERY);
+    if (!mq) return;
+    const onChange = (): void => setDevice(mq.matches ? 'dark' : 'light');
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
 
   // Another tab (or the installed app) switched theme — follow it.
   useEffect(() => {
     const onStorage = (e: StorageEvent): void => {
       if (e.key !== STORAGE_KEY) return;
-      if (e.newValue === 'light' || e.newValue === 'dark') setPreferenceState(e.newValue);
+      if (isPreference(e.newValue)) setPreferenceState(e.newValue);
     };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
@@ -100,12 +126,18 @@ export function ThemeProvider({ children }: { children: ReactNode }): JSX.Elemen
 
   const setPreference = useCallback((next: ThemePreference, origin?: ThemeOrigin) => {
     if (next === current.current) return;
+    const before = resolveTheme(current.current);
     current.current = next;
     store(next);
     const commit = (): void => {
       flushSync(() => setPreferenceState(next));
-      applyTheme(next);
+      applyTheme(resolveTheme(next));
     };
+    // Same colours either way (e.g. dark → system on a dark device): no reveal.
+    if (resolveTheme(next) === before) {
+      commit();
+      return;
+    }
     // A second tap while the reveal is still starting: jump straight there.
     if (running.current) {
       running.current.skipTransition();
@@ -152,13 +184,13 @@ export function ThemeProvider({ children }: { children: ReactNode }): JSX.Elemen
   }, []);
 
   const toggle = useCallback(
-    (origin?: ThemeOrigin) => setPreference(current.current === 'light' ? 'dark' : 'light', origin),
+    (origin?: ThemeOrigin) => setPreference(resolveTheme(current.current) === 'light' ? 'dark' : 'light', origin),
     [setPreference],
   );
 
   const value = useMemo<ThemeContextValue>(
-    () => ({ preference, setPreference, toggle }),
-    [preference, setPreference, toggle],
+    () => ({ preference, resolved, setPreference, toggle }),
+    [preference, resolved, setPreference, toggle],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
