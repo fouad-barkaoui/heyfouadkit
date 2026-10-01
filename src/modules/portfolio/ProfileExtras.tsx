@@ -15,6 +15,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
+import { KanzStar } from '@/components/ui/KanzWordmark';
 import { HOME_TZ, describeGap, formatDuration, formatMonth, tzOffsetMinutes } from './localTime';
 
 /* ── Cover: the Kanz star drawn as an isometric prism ─────────────────── */
@@ -240,7 +241,7 @@ export function Note({ children }: { children: ReactNode }): JSX.Element {
   );
 }
 
-/* ── Experience ───────────────────────────────────────────────────────── */
+/* ── Projects ───────────────────────────────────────────────────────── */
 
 interface Role {
   title: string;
@@ -260,7 +261,7 @@ interface Venture {
   roles: Role[];
 }
 
-const EXPERIENCE: Venture[] = [
+const PROJECTS: Venture[] = [
   {
     name: 'ASSAS',
     where: 'Morocco (Remote)',
@@ -356,15 +357,15 @@ function RoleItem({ role }: { role: Role }): JSX.Element {
   );
 }
 
-export function Experience(): JSX.Element {
+export function Projects(): JSX.Element {
   return (
-    <section className="cp-section" aria-labelledby="cp-experience">
+    <section className="cp-section" aria-labelledby="cp-projects">
       <Note>what I'm building</Note>
-      <h3 id="cp-experience" className="cp-section-title">
-        Experience
+      <h3 id="cp-projects" className="cp-section-title">
+        Projects <sup className="cp-count">({PROJECTS.length})</sup>
       </h3>
       <div className="cp-exp">
-        {EXPERIENCE.map((v) => (
+        {PROJECTS.map((v) => (
           <article key={v.name} className="cp-venture">
             <header className="cp-venture-head">
               {v.url ? (
@@ -443,6 +444,61 @@ export function Rule(): JSX.Element {
     <div className="cp-rule" aria-hidden>
       <i className="cp-plus" data-side="start" />
       <i className="cp-plus" data-side="end" />
+    </div>
+  );
+}
+
+/* ── Coming soon: Experience, Recognition ─────────────────────────────── */
+
+/** A hatched placeholder panel with a Soon badge, for sections still being filled. */
+function SoonPanel({ children }: { children: ReactNode }): JSX.Element {
+  return (
+    <div className="cp-soon">
+      <span className="cp-status">Soon</span>
+      <p>{children}</p>
+    </div>
+  );
+}
+
+export function ExperienceSoon(): JSX.Element {
+  return (
+    <section className="cp-section" aria-labelledby="cp-experience">
+      <Note>where I've worked</Note>
+      <h3 id="cp-experience" className="cp-section-title">
+        Experience
+      </h3>
+      <SoonPanel>Roles, internships and positions will be listed here.</SoonPanel>
+    </section>
+  );
+}
+
+export function RecognitionSoon(): JSX.Element {
+  return (
+    <section className="cp-section" aria-labelledby="cp-recognition">
+      <Note>milestones</Note>
+      <h3 id="cp-recognition" className="cp-section-title">
+        Recognition
+      </h3>
+      <SoonPanel>Certificates, awards and programs will be listed here.</SoonPanel>
+    </section>
+  );
+}
+
+/* ── Motto ────────────────────────────────────────────────────────────── */
+
+export function Motto(): JSX.Element {
+  return (
+    <div className="cp-motto-wrap">
+      <figure className="cp-motto">
+        <span className="cp-motto-mark" aria-hidden>
+          &ldquo;
+        </span>
+        <KanzStar size={26} className="cp-motto-sticker" />
+        <blockquote>
+          <p>&ldquo;Inspired by the fear of being average.&rdquo;</p>
+        </blockquote>
+        <figcaption>— Fouad Barkaoui</figcaption>
+      </figure>
     </div>
   );
 }

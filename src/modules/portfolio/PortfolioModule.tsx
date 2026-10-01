@@ -17,7 +17,19 @@ import { cn } from '@/lib/utils';
 import { originOf, useTheme } from '@/state/themeStore';
 import { useUI } from '@/state/uiStore';
 import { greetingFor } from './localTime';
-import { BuiltWith, Experience, Hatch, KanzCover, Note, Overview, Rule, Stack } from './ProfileExtras';
+import {
+  BuiltWith,
+  ExperienceSoon,
+  Hatch,
+  KanzCover,
+  Motto,
+  Note,
+  Overview,
+  Projects,
+  RecognitionSoon,
+  Rule,
+  Stack,
+} from './ProfileExtras';
 
 /* ── Who I am ─────────────────────────────────────────────────────────── */
 
@@ -242,11 +254,13 @@ function ProfileCard(): JSX.Element {
         <div className="cp-head-text">
           <h2 className="cp-name">
             <span>Fouad Barkaoui</span>
-            <BadgeCheck className="cp-verified" size={22} strokeWidth={1.6} aria-label="Verified" role="img" />
+            <BadgeCheck className="cp-verified" size={26} strokeWidth={1.6} aria-label="Verified" role="img" />
           </h2>
           <SkillTicker />
         </div>
       </header>
+
+      <Motto />
 
       <Hatch />
       <Overview email={EMAIL} flag={<MoroccoFlag />} />
@@ -281,7 +295,9 @@ function ProfileCard(): JSX.Element {
       </section>
 
       <Rule />
-      <Experience />
+      <ExperienceSoon />
+      <Rule />
+      <Projects />
       <Rule />
       <Stack />
       <Hatch />
@@ -299,6 +315,9 @@ function ProfileCard(): JSX.Element {
           ))}
         </div>
       </section>
+
+      <Hatch />
+      <RecognitionSoon />
     </>
   );
 }
