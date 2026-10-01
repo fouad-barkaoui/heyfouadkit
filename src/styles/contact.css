@@ -262,7 +262,7 @@
   margin-top: 24px;
 }
 
-/* Primary: the Kanz yellow-green. Secondary: an outlined twin. */
+/* The one call to action, in the Kanz yellow-green. */
 .cp-cta {
   display: inline-flex;
   align-items: center;
@@ -296,15 +296,6 @@
 }
 .cp-cta:active {
   transform: translateY(1px) scale(0.985);
-}
-.cp-cta.is-quiet {
-  color: var(--color-paper);
-  background: rgb(var(--tint-rgb) / 0.04);
-  box-shadow: inset 0 0 0 1px var(--color-smoke);
-}
-.cp-cta.is-quiet:hover {
-  background: rgb(var(--tint-rgb) / 0.08);
-  box-shadow: inset 0 0 0 1px var(--color-ash);
 }
 .cp-cta:focus-visible,
 .cp-pill:focus-visible {
@@ -587,34 +578,6 @@
   padding-bottom: 4px;
 }
 
-.cp-say {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  margin-inline-start: -2px;
-  border-radius: 8px;
-  color: var(--color-ash);
-  transition:
-    color 150ms var(--ease-snap),
-    background-color 150ms var(--ease-snap);
-}
-.cp-say:hover,
-.cp-say[data-speaking] {
-  color: var(--color-paper);
-  background: rgb(var(--tint-rgb) / 0.06);
-}
-.cp-say[data-speaking] svg {
-  animation: cp-say-pulse 900ms var(--ease-snap) infinite alternate;
-}
-@keyframes cp-say-pulse {
-  to {
-    opacity: 0.45;
-  }
-}
-.cp-say:focus-visible,
 .cp-copy:focus-visible {
   outline: 2px solid var(--color-acid);
   outline-offset: 2px;
@@ -1341,7 +1304,6 @@ ul.cp-bio > li::before {
 @media (prefers-reduced-motion: reduce) {
   .cp-skill-word,
   .cp-skill-window,
-  .cp-say svg,
   .cp-cta,
   .cp-pill,
   .cp-pill-go,

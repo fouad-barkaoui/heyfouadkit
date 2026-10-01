@@ -4,10 +4,10 @@ import {
   Clock,
   Copy,
   Globe,
+  Sparkles,
   Languages,
   Mail,
   MapPin,
-  Volume2,
   type LucideIcon,
 } from 'lucide-react';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
@@ -88,33 +88,6 @@ export function KanzCover({ children }: { children?: ReactNode }): JSX.Element {
 
 /* ── Small pieces ─────────────────────────────────────────────────────── */
 
-/** Says the name out loud with the browser's own voice. */
-export function PronounceName({ name }: { name: string }): JSX.Element | null {
-  const supported = typeof window !== 'undefined' && 'speechSynthesis' in window;
-  const [speaking, setSpeaking] = useState(false);
-  if (!supported) return null;
-  return (
-    <button
-      type="button"
-      className="cp-say"
-      data-speaking={speaking || undefined}
-      aria-label={`Hear how to say ${name}`}
-      title="Hear it"
-      onClick={() => {
-        const say = new SpeechSynthesisUtterance(name);
-        say.rate = 0.85;
-        say.onend = () => setSpeaking(false);
-        say.onerror = () => setSpeaking(false);
-        window.speechSynthesis.cancel();
-        setSpeaking(true);
-        window.speechSynthesis.speak(say);
-      }}
-    >
-      <Volume2 size={17} strokeWidth={1.8} aria-hidden />
-    </button>
-  );
-}
-
 /** A band of diagonal hatching between sections, running off both edges. */
 export function Hatch(): JSX.Element {
   return <div className="cp-hatch" aria-hidden />;
@@ -191,6 +164,7 @@ export function Overview({ email, flag }: { email: string; flag: ReactNode }): J
       </h3>
       <ul className="cp-ov">
         <Row icon={Briefcase}>SOC analyst &amp; fullstack developer</Row>
+        <Row icon={Sparkles}>Vibe coder &amp; prompt engineer</Row>
         <Row icon={Clock}>
           <LocalTime />
         </Row>
@@ -217,8 +191,8 @@ const STACK: { group: string; items: string[] }[] = [
   { group: 'Security', items: ['ELK Stack', 'OpenSearch', 'Kibana', 'Threat intel (CTI)', 'OSINT'] },
   { group: 'Languages', items: ['Python', 'TypeScript', 'JavaScript', 'SQL'] },
   { group: 'Frontend', items: ['React', 'Vite', 'Tailwind CSS', 'Three.js'] },
-  { group: 'Backend & data', items: ['Flask', 'Supabase', 'PostgreSQL', 'IndexedDB'] },
-  { group: 'Infra & tools', items: ['Rocky Linux', 'Git', 'GitHub', 'Vercel', 'Claude'] },
+  { group: 'Backend & data', items: ['REST APIs', 'Supabase', 'PostgreSQL', 'IndexedDB'] },
+  { group: 'Infra & tools', items: ['Kali Linux', 'Docker', 'Git', 'GitHub', 'Vercel', 'Claude'] },
 ];
 
 export function Stack(): JSX.Element {

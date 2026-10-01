@@ -8,7 +8,6 @@ import {
   Instagram,
   Linkedin,
   Loader2,
-  Mail,
   MessageSquareText,
   Moon,
   Send,
@@ -29,12 +28,12 @@ import { cn } from '@/lib/utils';
 import { getDisplayName, useAuth } from '@/state/authStore';
 import { originOf, useTheme } from '@/state/themeStore';
 import { greetingFor } from './localTime';
-import { Hatch, KanzCover, Overview, PronounceName, Stack } from './ProfileExtras';
+import { Hatch, KanzCover, Overview, Stack } from './ProfileExtras';
 import { TOPICS } from './topics';
 
 /* ── Who I am ─────────────────────────────────────────────────────────── */
 
-const EMAIL = 'lmorfouad3@gmail.com';
+const EMAIL = 'fouadbr2001@gmail.com';
 
 /** The line under the name cycles through these. */
 const ROLES = [
@@ -42,6 +41,7 @@ const ROLES = [
   'Fullstack Web Developer',
   'Programmer',
   'Vibe Coder',
+  'Prompt Engineer',
   'Problem Solver',
   'Analytical Thinker',
   'Cybersecurity Enthusiast',
@@ -274,7 +274,6 @@ function ProfileCard(): JSX.Element {
           <h2 className="cp-name">
             <span>Fouad Barkaoui</span>
             <BadgeCheck className="cp-verified" size={22} strokeWidth={1.6} aria-label="Verified" role="img" />
-            <PronounceName name="Fouad Barkaoui" />
           </h2>
           <SkillTicker />
         </div>
@@ -294,8 +293,8 @@ function ProfileCard(): JSX.Element {
             <strong>fullstack web developer</strong> from Morocco.
           </li>
           <li>
-            A <strong>programmer</strong> and <strong>vibe coder</strong> who turns ideas into working products — fast,
-            clean and <strong>secure by default</strong>.
+            A <strong>programmer</strong>, <strong>vibe coder</strong> and <strong>prompt engineer</strong> who turns
+            ideas into working products — fast, clean and <strong>secure by default</strong>.
           </li>
           <li>
             My edge is <strong>problem solving</strong>: I break big, messy problems into small steps, stay curious, and
@@ -304,12 +303,8 @@ function ProfileCard(): JSX.Element {
         </ul>
 
         <div className="cp-cta-row">
-          <a className="cp-cta" href={`mailto:${EMAIL}`}>
-            <Mail size={16} strokeWidth={1.9} aria-hidden />
-            Email me
-          </a>
           <a
-            className="cp-cta is-quiet"
+            className="cp-cta"
             href="#contact-form-card"
             onClick={(e) => {
               e.preventDefault();
