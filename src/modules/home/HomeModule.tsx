@@ -12,10 +12,8 @@ import {
 import { useMemo } from 'react';
 import { useStagger } from '@/components/motion/ViewTransition';
 import { StatTile } from '@/components/charts/StatTile';
-import { AvatarPrompt } from '@/components/profile/AvatarPrompt';
 import { ProSpotlight } from '@/components/profile/ProSpotlight';
 import { Avatar } from '@/components/ui/Avatar';
-import { PlanChip } from '@/components/ui/PlanChip';
 import { isProUser } from '@/lib/access';
 import { Timeline, type TimelineEntry } from '@/components/ui/Timeline';
 import type { ModuleId, Workspace } from '@/lib/types';
@@ -54,7 +52,7 @@ export function HomeModule(): JSX.Element {
   const { user, avatarUrl } = useAuth();
   const pro = isProUser(user);
   const { activeTeam, members } = useTeam();
-  const { setModule, setAccountOpen } = useUI();
+  const { setModule } = useUI();
   const { t } = useLanguage();
 
   const QUICK_LINKS: { id: ModuleId; labelKey: string; hintKey: string; icon: typeof ListChecks }[] = [
@@ -105,21 +103,15 @@ export function HomeModule(): JSX.Element {
     <div className="flex h-full min-h-0 w-full min-w-0 flex-col">
       <header className="flex items-center gap-3 border-b border-graphite px-4 py-3.5 md:px-7 md:py-4">
         <MenuButton className="md:hidden" />
-        <button
-          type="button"
-          onClick={() => setAccountOpen(true)}
-          aria-label="Open your profile"
-          className="home-hello-avatar hidden shrink-0 rounded-full sm:block"
-        >
+        <span className="home-hello-avatar hidden shrink-0 rounded-full sm:block">
           <Avatar src={avatarUrl} name={getDisplayName(user) || 'You'} size={42} pro={pro} />
-        </button>
+        </span>
         <div className="min-w-0 flex-1">
           <h1 className="flex min-w-0 items-center gap-2 truncate text-[19px] font-medium leading-tight tracking-[-0.016em] text-paper md:text-[21px]">
             <span className="truncate">
               {t(greetingKey())}
               {name ? `, ${name}` : ''}
             </span>
-            <PlanChip user={user} className="shrink-0" />
           </h1>
           <p className="mt-1 text-[12.5px] text-ash">
             {live
@@ -132,7 +124,6 @@ export function HomeModule(): JSX.Element {
       <div className="scroll-y min-h-0 flex-1 px-4 py-5 md:px-7 md:py-6">
         <ScrollIndex />
         <div ref={gridRef} className="mx-auto max-w-[1080px] space-y-4">
-          <AvatarPrompt />
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <StatTile
               icon={<ListChecks size={14} strokeWidth={1.7} />}

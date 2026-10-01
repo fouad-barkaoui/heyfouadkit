@@ -1,12 +1,10 @@
 import { AlertTriangle, Cloud, KeyRound, Loader2, LogOut, RotateCcw, UserRound, Users } from 'lucide-react';
-import { AvatarEditor } from '@/components/profile/AvatarEditor';
 import { ProSpotlight } from '@/components/profile/ProSpotlight';
 import { isProUser } from '@/lib/access';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Label, TextInput } from '@/components/ui/Field';
 import { Modal } from '@/components/ui/Modal';
-import { PlanChip } from '@/components/ui/PlanChip';
 import { MAX_TOTAL_CLOUD_BYTES, totalCloudBytes } from '@/data/attachments';
 import { cn, formatBytes } from '@/lib/utils';
 import { getDisplayName, useAuth } from '@/state/authStore';
@@ -91,13 +89,10 @@ export function AccountPanel({
         <div className="space-y-4">
           {isProUser(user) ? <ProSpotlight compact className="mx-auto max-w-[440px]" /> : null}
 
-          <AvatarEditor name={getDisplayName(user)} pro={isProUser(user)} />
-
           <div className="flex items-start gap-3 rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
             <div className="min-w-0 flex-1">
               <p className="flex items-center gap-1.5 truncate text-[13px] text-paper">
                 {getDisplayName(user)}
-                <PlanChip user={user} />
               </p>
               <p className="mt-0.5 flex items-center gap-1.5 text-[11.5px] text-ash">
                 {syncState === 'syncing' ? (

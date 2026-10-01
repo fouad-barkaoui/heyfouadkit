@@ -1,9 +1,8 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { Check, ChevronDown, ChevronLeft, Search, UserRound } from 'lucide-react';
+import { Check, ChevronDown, ChevronLeft, Search } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
-import { PlanChip } from '@/components/ui/PlanChip';
 import { isAdminUser, isProUser } from '@/lib/access';
 import type { ModuleId } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -377,7 +376,6 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
 
   const sync = SYNC_LOOK_KEY[live ? syncState : 'offline'];
   const SyncIcon = sync.icon;
-  const syncLabel = t(sync.key);
   const accountName = user ? getDisplayName(user) : configured ? t('shell.signIn') : t('shell.localOnly');
 
   const rows = (ids: ModuleId[], indent = false): JSX.Element[] =>
@@ -567,18 +565,7 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
                 ) : null}
               </span>
               {expanded ? (
-                <>
-                  <span className="min-w-0 flex-1 text-start">
-                    <span className="flex items-center gap-1.5">
-                      <span className="block truncate text-[12.5px] text-mist">{accountName}</span>
-                      <PlanChip user={user} />
-                    </span>
-                    <span className="mono block truncate text-[10px] uppercase tracking-[0.07em] text-ash">
-                      {user ? syncLabel : t('shell.thisDevice')}
-                    </span>
-                  </span>
-                  <UserRound size={13} strokeWidth={1.7} className="shrink-0 text-ash" aria-hidden />
-                </>
+                <span className="min-w-0 flex-1 truncate text-start text-[13px] text-mist">{accountName}</span>
               ) : null}
             </button>
           </AccountMenu>

@@ -2,16 +2,14 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import {
   Camera,
   Crown,
-  LifeBuoy,
+  Languages,
   LogIn,
   LogOut,
   Monitor,
   Moon,
   Palette,
-  Settings,
   Sun,
   UserRound,
-  Users,
   Zap,
   type LucideIcon,
 } from 'lucide-react';
@@ -24,6 +22,7 @@ import { MAX_TOTAL_CLOUD_BYTES, totalCloudBytes } from '@/data/attachments';
 import { accountTier, isProUser, type AccountTier } from '@/lib/access';
 import { cn, formatBytes } from '@/lib/utils';
 import { getDisplayName, useAuth } from '@/state/authStore';
+import { useLanguage, type Language } from '@/state/languageStore';
 import { originOf, useTheme, type ThemePreference } from '@/state/themeStore';
 import { useUI } from '@/state/uiStore';
 import { useWorkspace } from '@/state/workspaceStore';
@@ -57,6 +56,35 @@ function ThemeSwitch(): JSX.Element {
           onClick={(e) => setPreference(id, originOf(e.currentTarget))}
         >
           <Icon size={14} strokeWidth={1.8} aria-hidden />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+const LANGUAGES: { id: Language; label: string; short: string }[] = [
+  { id: 'en', label: 'English', short: 'EN' },
+  { id: 'ar', label: 'العربية', short: 'ع' },
+];
+
+/** English / Arabic, same pill as the theme switch. */
+function LanguageSwitch(): JSX.Element {
+  const { language, setLanguage } = useLanguage();
+  return (
+    <div className="am-theme am-lang" role="radiogroup" aria-label="Language">
+      {LANGUAGES.map(({ id, label, short }) => (
+        <button
+          key={id}
+          type="button"
+          role="radio"
+          aria-checked={language === id}
+          aria-label={label}
+          title={label}
+          lang={id}
+          data-active={language === id || undefined}
+          onClick={() => setLanguage(id)}
+        >
+          {short}
         </button>
       ))}
     </div>
@@ -117,7 +145,7 @@ export function AccountMenu({
 }): JSX.Element {
   const { user, configured, avatarUrl, signOut } = useAuth();
   const { workspace } = useWorkspace();
-  const { setAccountOpen, setSettingsOpen, setModule, setMobileNavOpen } = useUI();
+  const { setAccountOpen, setMobileNavOpen } = useUI();
   const [pictureOpen, setPictureOpen] = useState(false);
 
   const tier = accountTier(user);
@@ -197,23 +225,11 @@ export function AccountMenu({
                 Profile &amp; account
               </Item>
             ) : null}
-            <Item icon={Camera} onSelect={go(() => setPictureOpen(true))}>
-              Profile picture
-            </Item>
-            <Item icon={Settings} onSelect={go(() => setSettingsOpen(true))}>
-              Settings
-            </Item>
-            {user ? (
-              <Item icon={Users} onSelect={go(() => setModule('team'))}>
-                Team
-              </Item>
-            ) : null}
-            <Item icon={LifeBuoy} onSelect={go(() => setModule('contact'))}>
-              Support
-            </Item>
-
-            <DropdownMenu.Separator className="am-sep" />
-
+            <div className="am-row">
+              <Languages size={16} strokeWidth={1.7} aria-hidden />
+              <span className="flex-1">Language</span>
+              <LanguageSwitch />
+            </div>
             <div className="am-row">
               <Palette size={16} strokeWidth={1.7} aria-hidden />
               <span className="flex-1">Theme</span>

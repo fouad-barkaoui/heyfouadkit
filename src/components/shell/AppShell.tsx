@@ -16,7 +16,6 @@ import { IconRail } from './IconRail';
 import { MobileMenu } from './MobileMenu';
 import { OfflinePill } from './OfflinePill';
 import { useMediaQuery } from './navShared';
-import { SettingsModal } from './SettingsModal';
 
 /**
  * Every module — and the WebGL field — is code-split, so a session only ever
@@ -87,8 +86,6 @@ export function AppShell(): JSX.Element {
     setRailExpanded,
     accountOpen,
     setAccountOpen,
-    settingsOpen,
-    setSettingsOpen,
   } = useUI();
 
   // Wide screens dock the labelled sidebar beside the content; laptops and
@@ -276,7 +273,6 @@ export function AppShell(): JSX.Element {
       ) : (
         <AccountPanel open={accountOpen} onOpenChange={setAccountOpen} />
       )}
-      <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
       <OnboardingFlow />
       <OfflinePill />
       <CookieConsentModal />

@@ -2,7 +2,6 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { CloudOff, MessageSquareHeart, Search } from 'lucide-react';
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
-import { PlanChip } from '@/components/ui/PlanChip';
 import { isProUser } from '@/lib/access';
 import type { ModuleId } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -183,15 +182,7 @@ export function MobileMenu(): JSX.Element {
                     />
                   </span>
                 </span>
-                <span className="min-w-0 flex-1 text-start">
-                  <span className="flex items-center gap-1.5">
-                    <span className="block truncate text-[13px] text-mist">{accountName}</span>
-                    <PlanChip user={user} />
-                  </span>
-                  <span className="mono block truncate text-[10px] uppercase tracking-[0.07em] text-ash">
-                    {user ? t(sync.key) : t('shell.thisDevice')}
-                  </span>
-                </span>
+                <span className="min-w-0 flex-1 truncate text-start text-[13px] text-mist">{accountName}</span>
               </button>
               </AccountMenu>
             </div>

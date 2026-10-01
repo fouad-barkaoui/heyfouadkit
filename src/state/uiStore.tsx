@@ -29,8 +29,6 @@ interface UIContextValue {
   accountOpen: boolean;
   setAccountOpen: (open: boolean) => void;
   /** Theme / language / storage / contact panel, opened from the rail's gear icon. */
-  settingsOpen: boolean;
-  setSettingsOpen: (open: boolean) => void;
   /** Cross-module deep link: set by search, consumed by the target module. */
   focusRequest: { module: ModuleId; id: string } | null;
   requestFocus: (module: ModuleId, id: string) => void;
@@ -82,7 +80,6 @@ export function UIProvider({ children }: { children: ReactNode }): JSX.Element {
   const [panelExpanded, setPanelExpanded] = useState(true);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [focusRequest, setFocusRequest] = useState<{ module: ModuleId; id: string } | null>(null);
 
   const setModule = useCallback((next: ModuleId) => {
@@ -148,8 +145,6 @@ export function UIProvider({ children }: { children: ReactNode }): JSX.Element {
       setMobileNavOpen,
       accountOpen,
       setAccountOpen,
-      settingsOpen,
-      setSettingsOpen,
       focusRequest,
       requestFocus,
       clearFocus: () => setFocusRequest(null),
@@ -163,7 +158,6 @@ export function UIProvider({ children }: { children: ReactNode }): JSX.Element {
       panelExpanded,
       mobileNavOpen,
       accountOpen,
-      settingsOpen,
       focusRequest,
       requestFocus,
     ],

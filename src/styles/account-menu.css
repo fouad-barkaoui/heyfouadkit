@@ -384,3 +384,14 @@
     animation: none;
   }
 }
+
+/* Language pill: same shape as the theme pill, letters instead of icons. */
+.am-lang > button {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.am-lang > button[lang='ar'] {
+  font-size: 15px;
+  line-height: 1;
+}
