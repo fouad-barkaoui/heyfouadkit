@@ -193,7 +193,7 @@ export function Overview({ email, flag }: { email: string; flag: ReactNode }): J
 /* ── Stack ────────────────────────────────────────────────────────────── */
 
 const STACK: { group: string; items: string[] }[] = [
-  { group: 'Security', items: ['ELK Stack', 'OpenSearch', 'Kibana', 'Threat intel (CTI)', 'OSINT'] },
+  { group: 'Security', items: ['ELK Stack', 'OpenSearch', 'Kibana', 'Threat intel (CTI)', 'OSINT', 'Firecrawl'] },
   { group: 'Languages', items: ['Python', 'TypeScript', 'JavaScript', 'SQL'] },
   { group: 'Frontend', items: ['React', 'Vite', 'Tailwind CSS', 'Three.js'] },
   { group: 'Backend & data', items: ['REST APIs', 'Supabase', 'PostgreSQL', 'IndexedDB'] },
@@ -275,9 +275,10 @@ const EXPERIENCE: Venture[] = [
           'A SaaS that scans a full codebase for threats, bugs and violations of security rules.',
           'Checks authentication, encryption, session handling, input validation, rate limiting and error handling.',
           'Covers logging, backups, monitoring and dependency scanning, then reports every finding in one place.',
+          'Monitors live targets with Firecrawl, crawling sites to catch new exposures as they appear.',
           'Built as a multi-tenant cloud service, one workspace per team.',
         ],
-        tags: ['Python', 'Static analysis', 'Dependency scanning', 'REST APIs', 'Docker', 'SaaS'],
+        tags: ['Python', 'Static analysis', 'Dependency scanning', 'Firecrawl', 'REST APIs', 'Docker', 'SaaS'],
       },
     ],
   },
@@ -392,11 +393,25 @@ export function Experience(): JSX.Element {
 
 /* ── Built with ───────────────────────────────────────────────────────── */
 
+/**
+ * Official logo files dropped into ./logos (see logos/README.md) are picked
+ * up at build time; a company without a file shows its name instead.
+ */
+const LOGO_FILES = import.meta.glob<string>('./logos/*.{svg,png,webp}', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+});
+const logoFor = (slug: string): string | undefined =>
+  Object.entries(LOGO_FILES).find(([path]) => path.replace(/^.*\//, '').replace(/\.[a-z]+$/, '') === slug)?.[1];
+
 const BUILT_WITH = [
-  { name: 'Supabase', url: 'https://supabase.com' },
-  { name: 'Claude', url: 'https://claude.ai' },
-  { name: 'Claude Code', url: 'https://claude.com/claude-code' },
-  { name: 'Vercel', url: 'https://vercel.com' },
+  { name: 'Supabase', slug: 'supabase', url: 'https://supabase.com' },
+  { name: 'Claude', slug: 'claude', url: 'https://claude.ai' },
+  { name: 'Claude Code', slug: 'claude-code', url: 'https://claude.com/claude-code' },
+  { name: 'Vercel', slug: 'vercel', url: 'https://vercel.com' },
+  { name: 'GitHub', slug: 'github', url: 'https://github.com' },
+  { name: 'MITRE ATT&CK', slug: 'mitre-attack', url: 'https://attack.mitre.org' },
 ];
 
 export function BuiltWith(): JSX.Element {
@@ -407,13 +422,16 @@ export function BuiltWith(): JSX.Element {
         Built with
       </h3>
       <ul className="cp-built-grid">
-        {BUILT_WITH.map((b) => (
-          <li key={b.name}>
-            <a href={b.url} target="_blank" rel="noopener noreferrer" className="cp-built-name">
-              {b.name}
-            </a>
-          </li>
-        ))}
+        {BUILT_WITH.map((b) => {
+          const logo = logoFor(b.slug);
+          return (
+            <li key={b.slug}>
+              <a href={b.url} target="_blank" rel="noopener noreferrer" className="cp-built-name">
+                {logo ? <img src={logo} alt={b.name} className="cp-built-logo" loading="lazy" /> : b.name}
+              </a>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );
