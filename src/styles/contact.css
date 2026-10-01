@@ -222,14 +222,6 @@
 .cp-skill-count > span {
   color: var(--color-ash);
 }
-.cp-location {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 10px 0 0;
-  font-size: 13.5px;
-  color: var(--color-ash);
-}
 .cp-flag {
   flex-shrink: 0;
   border-radius: 2px;
@@ -252,9 +244,6 @@
   background: rgb(var(--tint-rgb) / 0.06);
 }
 
-.cp-body {
-  padding: 26px 28px 30px;
-}
 .cp-bio {
   max-width: 62ch;
   margin: 0;
@@ -323,12 +312,6 @@
   outline-offset: 2px;
 }
 
-.cp-socials-title {
-  margin: 30px 0 12px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-fog);
-}
 
 /* Social tiles: outlined cards, a neutral icon, an arrow that leans in. */
 .cp-pills {
@@ -512,12 +495,6 @@
   .cp-skill-count {
     display: none;
   }
-  .cp-location {
-    font-size: 13px;
-  }
-  .cp-body {
-    padding: 20px 16px 24px;
-  }
   .cp-bio {
     font-size: 15.5px;
   }
@@ -531,6 +508,326 @@
   }
   .cp-lower {
     padding: 18px 16px;
+  }
+}
+
+
+/* ── Profile: cover, hatching, overview, about, stack ─────────────────── */
+
+.cp-cover {
+  position: relative;
+  height: 210px;
+  overflow: hidden;
+  border-bottom: 1px dashed var(--color-smoke);
+  background:
+    radial-gradient(60% 90% at 62% 40%, color-mix(in oklab, var(--color-acid) 7%, transparent), transparent 70%);
+}
+.cp-cover-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.cp-cover-guide {
+  stroke: var(--color-graphite);
+  stroke-width: 1;
+  stroke-dasharray: 3 6;
+}
+.cp-cover-side {
+  fill: var(--color-void);
+  stroke: var(--color-ash);
+  stroke-width: 1;
+  stroke-linejoin: round;
+}
+.cp-cover-lid {
+  fill: var(--color-void);
+  stroke: var(--color-mist);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+.cp-cover-hatch {
+  stroke: var(--color-smoke);
+  stroke-width: 1;
+}
+.cp-cover-fig {
+  position: absolute;
+  right: 16px;
+  bottom: 10px;
+  font-size: 12px;
+  color: var(--color-ash);
+}
+.cp-cover-fig > span {
+  color: var(--color-fog);
+}
+.cp-cover .cp-theme {
+  background: color-mix(in oklab, var(--color-void) 70%, transparent);
+  box-shadow: inset 0 0 0 1px var(--color-graphite);
+  backdrop-filter: blur(6px);
+}
+
+.cp-head {
+  align-items: flex-end;
+  gap: 22px;
+  padding: 0 28px 22px;
+}
+.cp-head .cp-avatar {
+  margin-top: -64px;
+  border-radius: 999px;
+  padding: 5px;
+  background: var(--color-void);
+}
+.cp-head .cp-avatar img {
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+}
+.cp-head-text {
+  min-width: 0;
+  flex: 1;
+  padding-bottom: 4px;
+}
+
+.cp-say {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin-inline-start: -2px;
+  border-radius: 8px;
+  color: var(--color-ash);
+  transition:
+    color 150ms var(--ease-snap),
+    background-color 150ms var(--ease-snap);
+}
+.cp-say:hover,
+.cp-say[data-speaking] {
+  color: var(--color-paper);
+  background: rgb(var(--tint-rgb) / 0.06);
+}
+.cp-say[data-speaking] svg {
+  animation: cp-say-pulse 900ms var(--ease-snap) infinite alternate;
+}
+@keyframes cp-say-pulse {
+  to {
+    opacity: 0.45;
+  }
+}
+.cp-say:focus-visible,
+.cp-copy:focus-visible {
+  outline: 2px solid var(--color-acid);
+  outline-offset: 2px;
+}
+
+/* Hatched band: diagonal stripes between two dashed rules, edge to edge. */
+.cp-hatch {
+  position: relative;
+  height: 26px;
+}
+.cp-hatch::before {
+  content: '';
+  position: absolute;
+  inset: 0 -100vw;
+  border-block: 1px dashed var(--color-smoke);
+  background: repeating-linear-gradient(-45deg, var(--color-graphite) 0 1px, transparent 1px 8px);
+}
+
+.cp-section {
+  padding: 24px 28px 28px;
+}
+.cp-section-title {
+  margin: 0 0 14px;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--color-paper);
+}
+
+/* Overview: two columns of icon + fact. */
+.cp-ov {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cp-ov-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+.cp-ov-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--color-fog);
+  background: rgb(var(--tint-rgb) / 0.05);
+  box-shadow: inset 0 0 0 1px var(--color-graphite);
+}
+.cp-ov-text {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  color: var(--color-mist);
+}
+.cp-ov-time {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--color-paper);
+}
+.cp-ov-comment {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  white-space: pre;
+  color: var(--color-ash);
+}
+.cp-ov-link {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-mist);
+  text-decoration: underline;
+  text-decoration-color: var(--color-smoke);
+  text-underline-offset: 3px;
+}
+.cp-ov-link:hover {
+  color: var(--color-paper);
+  text-decoration-color: var(--color-acid);
+}
+.cp-copy {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  color: var(--color-ash);
+  transition:
+    color 150ms var(--ease-snap),
+    background-color 150ms var(--ease-snap);
+}
+.cp-copy:hover {
+  color: var(--color-paper);
+  background: rgb(var(--tint-rgb) / 0.06);
+}
+.cp-copy[data-copied] {
+  color: var(--color-acid);
+}
+
+/* About: greeting for the visitor's hour, then the bio as bullets. */
+.cp-greeting {
+  margin: 0 0 12px;
+  font-size: 26px;
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-paper);
+}
+ul.cp-bio {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+  list-style: none;
+}
+ul.cp-bio > li {
+  position: relative;
+  padding-inline-start: 18px;
+}
+ul.cp-bio > li::before {
+  content: '';
+  position: absolute;
+  top: 0.68em;
+  inset-inline-start: 2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  transform: rotate(45deg);
+  background: var(--color-smoke);
+}
+
+/* Stack: group on the left, chips on the right. */
+.cp-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+}
+.cp-stack-row {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+}
+.cp-stack-row dt {
+  font-size: 14px;
+  color: var(--color-ash);
+}
+.cp-stack-row dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+}
+.cp-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 11px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-mist);
+  background: rgb(var(--tint-rgb) / 0.035);
+  box-shadow: inset 0 0 0 1px var(--color-graphite);
+}
+
+.cp-section .cp-pills {
+  margin-top: 0;
+}
+
+@media (max-width: 639px) {
+  .cp-cover {
+    height: 150px;
+  }
+  .cp-cover-fig {
+    display: none;
+  }
+  .cp-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 0 16px 18px;
+  }
+  .cp-head .cp-avatar {
+    margin-top: -52px;
+  }
+  .cp-head .cp-avatar img {
+    width: 96px;
+    height: 96px;
+  }
+  .cp-section {
+    padding: 20px 16px 24px;
+  }
+  .cp-ov {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cp-greeting {
+    font-size: 23px;
+  }
+  .cp-stack-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
   }
 }
 
@@ -1044,6 +1341,7 @@
 @media (prefers-reduced-motion: reduce) {
   .cp-skill-word,
   .cp-skill-window,
+  .cp-say svg,
   .cp-cta,
   .cp-pill,
   .cp-pill-go,

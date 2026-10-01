@@ -10,7 +10,6 @@ import {
   Loader2,
   Mail,
   MessageSquareText,
-  MapPin,
   Moon,
   Send,
   Sun,
@@ -29,6 +28,8 @@ import {
 import { cn } from '@/lib/utils';
 import { getDisplayName, useAuth } from '@/state/authStore';
 import { originOf, useTheme } from '@/state/themeStore';
+import { greetingFor } from './localTime';
+import { Hatch, KanzCover, Overview, PronounceName, Stack } from './ProfileExtras';
 import { TOPICS } from './topics';
 
 /* ── Who I am ─────────────────────────────────────────────────────────── */
@@ -243,31 +244,11 @@ function Rule(): JSX.Element {
 function ProfileCard(): JSX.Element {
   const { preference, toggle } = useTheme();
   const ThemeIcon = preference === 'light' ? Sun : Moon;
+  const greeting = useMemo(() => greetingFor(new Date().getHours()), []);
 
   return (
     <>
-      <header className="cp-head">
-        <div className="cp-avatar">
-          <img
-            src="/fouad-portrait-512.jpg"
-            alt="Portrait of Fouad Barkaoui"
-            width={100}
-            height={100}
-            decoding="async"
-          />
-        </div>
-        <div className="min-w-0 flex-1">
-          <h2 className="cp-name">
-            <span>Fouad Barkaoui</span>
-            <BadgeCheck className="cp-verified" size={22} strokeWidth={1.6} aria-label="Verified" role="img" />
-          </h2>
-          <SkillTicker />
-          <p className="cp-location">
-            <MapPin size={13} strokeWidth={1.9} aria-hidden />
-            <span>Morocco-based</span>
-            <MoroccoFlag />
-          </p>
-        </div>
+      <KanzCover>
         <button
           type="button"
           className="cp-theme"
@@ -277,18 +258,50 @@ function ProfileCard(): JSX.Element {
         >
           <ThemeIcon size={16} strokeWidth={1.7} aria-hidden />
         </button>
+      </KanzCover>
+
+      <header className="cp-head">
+        <div className="cp-avatar">
+          <img
+            src="/fouad-portrait-512.jpg"
+            alt="Portrait of Fouad Barkaoui"
+            width={120}
+            height={120}
+            decoding="async"
+          />
+        </div>
+        <div className="cp-head-text">
+          <h2 className="cp-name">
+            <span>Fouad Barkaoui</span>
+            <BadgeCheck className="cp-verified" size={22} strokeWidth={1.6} aria-label="Verified" role="img" />
+            <PronounceName name="Fouad Barkaoui" />
+          </h2>
+          <SkillTicker />
+        </div>
       </header>
 
-      <Rule />
+      <Hatch />
+      <Overview email={EMAIL} flag={<MoroccoFlag />} />
+      <Hatch />
 
-      <div className="cp-body">
-        <p className="cp-bio">
-          Hey, I'm <strong>Fouad Barkaoui</strong>, a <strong>beginner SOC analyst</strong> and{' '}
-          <strong>fullstack web developer</strong> from Morocco. I'm a <strong>programmer</strong> and a{' '}
-          <strong>vibe coder</strong> who loves turning ideas into working products — fast, clean and{' '}
-          <strong>secure by default</strong>. My edge is <strong>problem solving</strong>: I break big, messy problems
-          into small steps, stay curious, and keep learning how systems get built — and how they get attacked.
-        </p>
+      <section className="cp-section" aria-labelledby="cp-about">
+        <h3 id="cp-about" className="cp-greeting">
+          {greeting}
+        </h3>
+        <ul className="cp-bio">
+          <li>
+            I'm <strong>Fouad Barkaoui</strong> — a <strong>beginner SOC analyst</strong> and{' '}
+            <strong>fullstack web developer</strong> from Morocco.
+          </li>
+          <li>
+            A <strong>programmer</strong> and <strong>vibe coder</strong> who turns ideas into working products — fast,
+            clean and <strong>secure by default</strong>.
+          </li>
+          <li>
+            My edge is <strong>problem solving</strong>: I break big, messy problems into small steps, stay curious, and
+            keep learning how systems get built — and how they get attacked.
+          </li>
+        </ul>
 
         <div className="cp-cta-row">
           <a className="cp-cta" href={`mailto:${EMAIL}`}>
@@ -309,16 +322,22 @@ function ProfileCard(): JSX.Element {
             Write here
           </a>
         </div>
+      </section>
 
-        <p className="cp-socials-title">
-          Here are my <strong>socials</strong>
-        </p>
+      <Rule />
+      <Stack />
+      <Rule />
+
+      <section className="cp-section" aria-labelledby="cp-socials">
+        <h3 id="cp-socials" className="cp-section-title">
+          Socials
+        </h3>
         <div className="cp-pills">
           {SOCIALS.map((s) => (
             <SocialPill key={s.id} s={s} />
           ))}
         </div>
-      </div>
+      </section>
     </>
   );
 }
