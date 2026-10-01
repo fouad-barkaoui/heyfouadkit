@@ -7,6 +7,8 @@ import {
   type ReactNode,
 } from 'react';
 
+import type { Dictionary } from '@/i18n/types';
+
 export type Language = 'en' | 'ar';
 
 export const TRANSLATIONS: Record<Language, Record<string, string>> = {
@@ -264,10 +266,44 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
   },
 };
 
+/* Each area keeps its own phrases in src/i18n/<area>.ts; merge them all in. */
+const AREAS = import.meta.glob<{ default: Dictionary }>('../i18n/*.ts', { eager: true });
+for (const [path, mod] of Object.entries(AREAS)) {
+  if (path.endsWith('/types.ts') || !mod.default) continue;
+  Object.assign(TRANSLATIONS.en, mod.default.en);
+  Object.assign(TRANSLATIONS.ar, mod.default.ar);
+}
+
+export type TranslateVars = Record<string, string | number>;
+
+function fill(text: string, vars?: TranslateVars): string {
+  if (!vars) return text;
+  return text.replace(/\{(\w+)\}/g, (m, k: string) => (k in vars ? String(vars[k]) : m));
+}
+
+/** The language currently on screen — for code outside React (errors, toasts). */
+let currentLanguage: Language = 'en';
+
+/**
+ * Translate outside a component: `translate('todo.saved')` or
+ * `translate('files.tooBig', { name })`. Falls back to English, then the key.
+ */
+export function translate(key: string, vars?: TranslateVars): string {
+  return fill(TRANSLATIONS[currentLanguage][key] ?? TRANSLATIONS.en[key] ?? key, vars);
+}
+
+/** BCP-47 tag for dates and numbers in the current language (Latin digits). */
+export function localeTag(lang: Language = currentLanguage): string {
+  return lang === 'ar' ? 'ar-MA' : 'en-US';
+}
+
 interface LanguageContextValue {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  /** `t('key')` or `t('key', { name: 'Fouad' })` for phrases with {name} slots. */
+  t: (key: string, vars?: TranslateVars) => string;
+  /** Locale tag for toLocaleString / Intl in the current language. */
+  locale: string;
   isArabic: boolean;
 }
 
@@ -284,6 +320,7 @@ function readStored(): Language {
 }
 
 function applyDirection(lang: Language): void {
+  currentLanguage = lang;
   if (typeof document === 'undefined') return;
   document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
   document.documentElement.lang = lang;
@@ -307,9 +344,8 @@ export function LanguageProvider({ children }: { children: ReactNode }): JSX.Ele
   }, []);
 
   const t = useCallback(
-    (key: string): string => {
-      return TRANSLATIONS[language][key] ?? key;
-    },
+    (key: string, vars?: TranslateVars): string =>
+      fill(TRANSLATIONS[language][key] ?? TRANSLATIONS.en[key] ?? key, vars),
     [language],
   );
 
@@ -318,6 +354,7 @@ export function LanguageProvider({ children }: { children: ReactNode }): JSX.Ele
       language,
       setLanguage,
       t,
+      locale: localeTag(language),
       isArabic: language === 'ar',
     }),
     [language, setLanguage, t],
