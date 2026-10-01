@@ -148,7 +148,7 @@ export function MobileMenu(): JSX.Element {
           ) : null}
 
           <nav aria-label="Modules" className="scroll-y relative min-h-0 flex-1 px-4 pb-4">
-            <div className="menu-grid mt-1">{tiles([HOME_ID])}</div>
+            <div className="menu-grid mt-1">{tiles([HOME_ID, 'portfolio'])}</div>
             {NAV_GROUPS.map((g) => (
               <div key={g.id}>
                 <p className="menu-section-head">{t(g.labelKey)}</p>

@@ -20,6 +20,7 @@ export const MODULE_SHAPE: Record<ModuleId, ShapeName> = {
   reporting: 'spiral',
   analytics: 'spiral',
   trash: 'grid',
+  portfolio: 'lattice',
   contact: 'ring',
   inbox: 'ring',
 };
@@ -42,6 +43,7 @@ export const MODULE_TINT: Record<ModuleId, [number, number, number]> = {
   reporting: [0.2, 0.7, 0.3],
   analytics: [0.15, 0.65, 0.27],
   trash: [0.7, 0.4, 0.2],
+  portfolio: [0.78, 0.82, 0.3],
   contact: [0.86, 0.16, 0.48],
   inbox: [0.86, 0.16, 0.48],
 };

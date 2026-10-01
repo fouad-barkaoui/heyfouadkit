@@ -71,6 +71,7 @@ const VALID: ModuleId[] = [
   'vault',
   'reporting',
   'trash',
+  'portfolio',
   'contact',
   'inbox',
 ];

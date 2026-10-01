@@ -459,7 +459,7 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
             />
 
             <section className="rail-section">
-              <div className="rail-stack">{rows([HOME_ID])}</div>
+              <div className="rail-stack">{rows([HOME_ID, 'portfolio'])}</div>
             </section>
 
             {NAV_GROUPS.map((g) => {

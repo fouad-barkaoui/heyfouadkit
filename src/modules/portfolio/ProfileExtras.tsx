@@ -436,3 +436,13 @@ export function BuiltWith(): JSX.Element {
     </section>
   );
 }
+
+/** Dashed rule across the frame, with a plus mark where it meets each edge. */
+export function Rule(): JSX.Element {
+  return (
+    <div className="cp-rule" aria-hidden>
+      <i className="cp-plus" data-side="start" />
+      <i className="cp-plus" data-side="end" />
+    </div>
+  );
+}

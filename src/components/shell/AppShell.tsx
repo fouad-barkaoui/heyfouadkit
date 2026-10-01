@@ -49,6 +49,9 @@ const VaultModule = lazy(async () => ({ default: (await import('@/modules/vault/
 const InboxModule = lazy(async () => ({
   default: (await import('@/modules/inbox/InboxModule')).InboxModule,
 }));
+const PortfolioModule = lazy(async () => ({
+  default: (await import('@/modules/portfolio/PortfolioModule')).PortfolioModule,
+}));
 const ContactModule = lazy(async () => ({
   default: (await import('@/modules/contact/ContactModule')).ContactModule,
 }));
@@ -205,6 +208,8 @@ export function AppShell(): JSX.Element {
         return <NotebookModule />;
       case 'trash':
         return <TrashPage />;
+      case 'portfolio':
+        return <PortfolioModule />;
       case 'contact':
         return <ContactModule />;
       case 'inbox':

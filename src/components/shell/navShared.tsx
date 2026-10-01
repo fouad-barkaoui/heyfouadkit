@@ -28,6 +28,7 @@ export const NAV_KEY: Record<string, string> = {
   reporting: 'nav.reporting',
   analytics: 'nav.analytics',
   trash: 'nav.trash',
+  portfolio: 'nav.portfolio',
   contact: 'nav.contact',
   inbox: 'nav.inbox',
 };
