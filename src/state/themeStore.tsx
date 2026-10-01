@@ -28,7 +28,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-const STORAGE_KEY = 'heyfouad.theme.v1';
+const STORAGE_KEY = 'kanz.theme.v1';
 
 function readStored(): ThemePreference {
   try {

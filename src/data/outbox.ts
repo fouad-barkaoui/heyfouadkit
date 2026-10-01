@@ -28,7 +28,7 @@ export type NewOp =
 /** An op before the store stamps who/where it belongs to. */
 export type OpInput = NewOp extends infer T ? (T extends unknown ? Omit<T, 'teamId' | 'userId'> : never) : never;
 
-const KEY = 'heyfouad.outbox.v1';
+const KEY = 'kanz.outbox.v1';
 
 /* ── Pure queue logic (unit-tested) ─────────────────────────────────────── */
 

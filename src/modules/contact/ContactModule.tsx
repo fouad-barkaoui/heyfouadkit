@@ -104,7 +104,7 @@ const SOCIALS: Social[] = [
   },
 ];
 
-const DRAFT_KEY = 'heyfouad.contact.draft.v1';
+const DRAFT_KEY = 'kanz.contact.draft.v1';
 
 function loadDraft(): Partial<ContactDraft> {
   try {

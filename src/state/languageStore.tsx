@@ -270,7 +270,7 @@ interface LanguageContextValue {
 }
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
-const STORAGE_KEY = 'heyfouad.language.v1';
+const STORAGE_KEY = 'kanz.language.v1';
 
 function readStored(): Language {
   try {

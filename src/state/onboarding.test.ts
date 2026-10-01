@@ -22,7 +22,7 @@ describe('lifetime consents', () => {
   });
 
   it('honours decisions made on this device, including the old "1" format', () => {
-    localStorage.setItem('heyfouad.cloudTerms.u1', '1');
+    localStorage.setItem('kanz.cloudTerms.u1', '1');
     expect(consentDecision('terms', user())).toBe('accepted');
     rememberConsentLocally('cookies', 'declined', null);
     expect(consentDecision('cookies', user())).toBe('declined');

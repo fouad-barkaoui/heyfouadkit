@@ -33,7 +33,7 @@ import { useWorkspace } from './workspaceStore';
  * exist (task done, day moved on) is pruned automatically.
  */
 
-const STORAGE_KEY = 'heyfouad.notifications.v1';
+const STORAGE_KEY = 'kanz.notifications.v1';
 const TICK_MS = 60_000;
 
 interface Persisted {
@@ -245,7 +245,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }): JS
               .map((r) => `• ${r.title}`)
               .join('\n'),
             'inbox',
-            'heyfouad-messages-summary',
+            'kanz-messages-summary',
           )
         : fresh.length === 1
         ? showSystemAlert(first.title, first.detail, first.module, first.key)
@@ -256,7 +256,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }): JS
               .map((r) => `• ${r.title}`)
               .join('\n') + (fresh.length > 3 ? `\n+${fresh.length - 3} more` : ''),
             first.module,
-            'heyfouad-missed-summary',
+            'kanz-missed-summary',
           );
     void run.finally(() => {
       alerting.current = false;
@@ -298,7 +298,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }): JS
       setSupport(perm as AlertSupport);
       if (perm !== 'granted') return;
       update((p) => ({ ...p, alerts: true }));
-      void showSystemAlert('Reminders are on', "We'll alert you here when something is missed.", 'home', 'heyfouad-alerts-on');
+      void showSystemAlert('Reminders are on', "We'll alert you here when something is missed.", 'home', 'kanz-alerts-on');
     },
     [update],
   );

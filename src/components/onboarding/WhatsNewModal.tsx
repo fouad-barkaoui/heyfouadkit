@@ -1,7 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { BookmarkPlus, Camera, Crown, Orbit, Play, Sparkles, Users, X, type LucideIcon } from 'lucide-react';
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { AVATAR_SRC } from '@/components/ui/BrandMark';
+import { MARK_SRC } from '@/components/ui/BrandMark';
 import { cn } from '@/lib/utils';
 
 export type WhatsNewAction = 'saveit' | 'account' | null;
@@ -92,7 +92,7 @@ function ProfileArt(): JSX.Element {
     <div className="wn-art-profile">
       <span className="wn-seal">
         <span className="wn-seal-ring">
-          <img src={AVATAR_SRC} alt="" />
+          <img src={MARK_SRC} alt="" />
         </span>
       </span>
       <span className="wn-chip">

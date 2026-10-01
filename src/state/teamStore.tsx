@@ -3,7 +3,7 @@ import type { Team, TeamInvite, TeamMember, TeamRole } from '@/lib/types';
 import { getSupabase } from '@/data/supabaseClient';
 import { useAuth } from './authStore';
 
-const ACTIVE_TEAM_KEY = 'heyfouad.activeTeam.v1';
+const ACTIVE_TEAM_KEY = 'kanz.activeTeam.v1';
 
 function readStoredTeam(): string | null {
   try {
@@ -100,7 +100,7 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
 
   const refreshTeams = useCallback(async (): Promise<Team[]> => {
     if (!supabase || !user) return [];
-    const cacheKey = `heyfouad.teams.${user.id}`;
+    const cacheKey = `kanz.teams.${user.id}`;
     // Offline (or a stalled link): fall back to the list we saw last time, so
     // the right team opens and your role still lets you edit.
     const fromCache = (): Team[] => {

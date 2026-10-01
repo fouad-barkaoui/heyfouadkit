@@ -4,7 +4,7 @@ import { AvatarEditor } from '@/components/profile/AvatarEditor';
 import { isProUser } from '@/lib/access';
 import { getDisplayName, useAuth } from '@/state/authStore';
 
-const DISMISS_KEY = 'heyfouad.avatarPrompt.dismissed.';
+const DISMISS_KEY = 'kanz.avatarPrompt.dismissed.';
 
 function readDismissed(id: string): boolean {
   try {

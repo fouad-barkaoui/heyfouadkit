@@ -44,7 +44,7 @@ const UIContext = createContext<UIContextValue | null>(null);
 /** Full-screen background styles for the WebGL field. */
 export type BgStyle = 'waves' | 'starfield' | 'flow' | 'orbit';
 export const BG_STYLES: BgStyle[] = ['waves', 'starfield', 'flow', 'orbit'];
-const BG_KEY = 'heyfouad.bgStyle.v1';
+const BG_KEY = 'kanz.bgStyle.v1';
 function readBgStyle(): BgStyle {
   try {
     const raw = window.localStorage.getItem(BG_KEY);

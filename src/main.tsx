@@ -37,7 +37,7 @@ try {
   const params = new URLSearchParams(window.location.search);
   const shared = [params.get('url'), params.get('text'), params.get('title')].filter(Boolean).join(' ');
   if (shared && /https?:\/\/|\w\.\w/.test(shared)) {
-    sessionStorage.setItem('heyfouad.saveit.incoming', shared.slice(0, 8000));
+    sessionStorage.setItem('kanz.saveit.incoming', shared.slice(0, 8000));
     window.history.replaceState(null, '', `${window.location.pathname}#/saveit`);
   }
 } catch {
@@ -83,7 +83,7 @@ if (import.meta.env.PROD && 'serviceWorker' in navigator && window.isSecureConte
     // A tapped reminder alert asks the open tab to jump to its page.
     navigator.serviceWorker.addEventListener('message', (event: MessageEvent<{ type?: string; url?: string }>) => {
       const url = event.data?.url;
-      if (event.data?.type === 'heyfouad:navigate' && url?.startsWith('/#/')) window.location.hash = url.slice(2);
+      if (event.data?.type === 'kanz:navigate' && url?.startsWith('/#/')) window.location.hash = url.slice(2);
     });
   });
 }

@@ -16,13 +16,13 @@ export type ConsentValue = 'accepted' | 'declined';
 export const WHATS_NEW_RELEASE = '2026-09-saveit';
 
 /** Kept for AuthOverlay, which still flags a fresh sign-in in this tab. */
-export const JUST_AUTHED_KEY = 'heyfouad.justAuthed.v1';
+export const JUST_AUTHED_KEY = 'kanz.justAuthed.v1';
 
-const LEGACY_COOKIE_KEY = 'heyfouad.cookieConsent.v1';
-const legacyTermsKey = (uid: string): string => `heyfouad.cloudTerms.${uid}`;
+const LEGACY_COOKIE_KEY = 'kanz.cookieConsent.v1';
+const legacyTermsKey = (uid: string): string => `kanz.cloudTerms.${uid}`;
 const localKey = (key: ConsentKey, uid: string | null): string =>
   key === 'cookies' ? LEGACY_COOKIE_KEY : legacyTermsKey(uid ?? 'guest');
-const whatsNewKey = (uid: string): string => `heyfouad.whatsNew.${uid}`;
+const whatsNewKey = (uid: string): string => `kanz.whatsNew.${uid}`;
 
 function safeGet(key: string): string | null {
   try {

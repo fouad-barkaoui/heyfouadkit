@@ -9,8 +9,8 @@ export const AVATAR_EDGE = 512;
 export const MAX_AVATAR_SOURCE_BYTES = 12 * 1024 * 1024;
 export const AVATAR_ACCEPT = 'image/png,image/jpeg,image/webp,image/gif,image/avif';
 
-const LOCAL_KEY = 'heyfouad.avatar.local.v1';
-export const AVATAR_EVENT = 'heyfouad:avatar-local';
+const LOCAL_KEY = 'kanz.avatar.local.v1';
+export const AVATAR_EVENT = 'kanz:avatar-local';
 
 export interface CropState {
   /** Zoom factor on top of "cover" fit — 1 means the short edge fills the circle. */

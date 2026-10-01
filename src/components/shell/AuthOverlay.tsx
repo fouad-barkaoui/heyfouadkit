@@ -1,5 +1,5 @@
 import { ArrowLeft, Check, Eye, EyeOff, Loader2, Lock, Mail, type LucideIcon, User, X } from 'lucide-react';
-import { AVATAR_SRC } from '@/components/ui/BrandMark';
+import { MARK_SRC } from '@/components/ui/BrandMark';
 import { KanzWordmark } from '@/components/ui/KanzWordmark';
 import { useEffect, useState, type InputHTMLAttributes, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
@@ -222,8 +222,8 @@ export function AuthOverlay({
         />
 
         <div className="relative flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-[11px] bg-[#f4f3f1] shadow-[0_0_0_1px_rgba(228,242,34,0.45)]">
-            <img src={AVATAR_SRC} alt="" width={36} height={36} className="h-full w-full object-cover" aria-hidden />
+          <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-[11px] bg-[#0b0c10] shadow-[0_0_0_1px_rgba(228,242,34,0.45)]">
+            <img src={MARK_SRC} alt="" width={36} height={36} className="h-full w-full object-cover" aria-hidden />
           </span>
           <KanzWordmark height={20} gem="#e4f222" className="text-white" />
           <span lang="ar" dir="rtl" className="text-[17px] leading-none text-[#4f5566]" title="Kanz means treasure in Arabic">
@@ -261,8 +261,8 @@ export function AuthOverlay({
       <section className="flex min-h-full flex-1 items-center justify-center px-4 py-16 sm:px-8">
         <div className="w-full max-w-[380px]">
           <div className="mb-8 flex flex-col items-center gap-3 lg:hidden">
-            <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[#f4f3f1] shadow-[0_8px_24px_rgba(228,242,34,0.22),0_0_0_3px_#e4f222,0_0_0_6px_#06070b]">
-              <img src={AVATAR_SRC} alt="" width={56} height={56} className="h-full w-full object-cover" aria-hidden />
+            <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[#0b0c10] shadow-[0_8px_24px_rgba(228,242,34,0.22),0_0_0_3px_#e4f222,0_0_0_6px_#06070b]">
+              <img src={MARK_SRC} alt="" width={56} height={56} className="h-full w-full object-cover" aria-hidden />
             </span>
             <KanzWordmark height={17} gem="#e4f222" className="text-white" />
           </div>

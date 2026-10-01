@@ -21,7 +21,7 @@ function serviceWorker(): Plugin {
         .filter((f) => !f.endsWith('.map') && f !== 'sw.js')
         .map((f) => `/${f}`);
       const publicDir = fileURLToPath(new URL('./public', import.meta.url));
-      const staticFiles = readdirSync(publicDir).filter((f) => f !== 'avatar-256.png');
+      const staticFiles = readdirSync(publicDir).filter((f) => f !== 'kanz-mark-256.png');
       const statics = staticFiles.map((f) => `/${f}`);
       const precache = ['/', ...built, ...statics];
       // Hash the *contents* of public files too, so swapping a logo/icon under

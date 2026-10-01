@@ -5,10 +5,73 @@
  * (old browsers, private modes that block it, the test runner).
  */
 
-const DB_NAME = 'heyfouad';
+const DB_NAME = 'kanz';
+const LEGACY_DB_NAME = 'heyfouad';
 const STORE = 'kv';
 
 let dbPromise: Promise<IDBDatabase | null> | null = null;
+
+/**
+ * Pulls everything out of the pre-rename "heyfouad" database into this one,
+ * once, then deletes it. Never creates the old database when it is absent.
+ */
+function copyFromLegacyDb(target: IDBDatabase): Promise<void> {
+  return new Promise((resolve) => {
+    try {
+      const req = indexedDB.open(LEGACY_DB_NAME);
+      let missing = false;
+      req.onupgradeneeded = () => {
+        // The database did not exist — opening just started creating it.
+        missing = true;
+        req.transaction?.abort();
+      };
+      req.onerror = () => resolve();
+      req.onblocked = () => resolve();
+      req.onsuccess = () => {
+        const old = req.result;
+        if (missing || !old.objectStoreNames.contains(STORE)) {
+          old.close();
+          resolve();
+          return;
+        }
+        const read = old.transaction(STORE, 'readonly').objectStore(STORE);
+        const keysReq = read.getAllKeys();
+        const valuesReq = read.getAll();
+        valuesReq.onerror = () => {
+          old.close();
+          resolve();
+        };
+        valuesReq.onsuccess = () => {
+          const keys = keysReq.result;
+          const values = valuesReq.result;
+          old.close();
+          if (!keys.length) {
+            indexedDB.deleteDatabase(LEGACY_DB_NAME);
+            resolve();
+            return;
+          }
+          const write = target.transaction(STORE, 'readwrite');
+          const store = write.objectStore(STORE);
+          keys.forEach((k, i) => {
+            // A value already saved under the new name is newer — keep it.
+            const exists = store.count(k);
+            exists.onsuccess = () => {
+              if (exists.result === 0) store.put(values[i], k);
+            };
+          });
+          write.oncomplete = () => {
+            indexedDB.deleteDatabase(LEGACY_DB_NAME);
+            resolve();
+          };
+          write.onerror = () => resolve();
+          write.onabort = () => resolve();
+        };
+      };
+    } catch {
+      resolve();
+    }
+  });
+}
 
 function openDb(): Promise<IDBDatabase | null> {
   if (dbPromise) return dbPromise;
@@ -17,7 +80,10 @@ function openDb(): Promise<IDBDatabase | null> {
       if (typeof indexedDB === 'undefined') return resolve(null);
       const req = indexedDB.open(DB_NAME, 1);
       req.onupgradeneeded = () => req.result.createObjectStore(STORE);
-      req.onsuccess = () => resolve(req.result);
+      req.onsuccess = () => {
+        const db = req.result;
+        void copyFromLegacyDb(db).then(() => resolve(db));
+      };
       req.onerror = () => resolve(null);
       req.onblocked = () => resolve(null);
     } catch {
@@ -46,7 +112,7 @@ export async function kvGet<T>(key: string): Promise<T | undefined> {
     }
   }
   try {
-    const raw = window.localStorage.getItem(`heyfouad.kv.${key}`);
+    const raw = window.localStorage.getItem(`kanz.kv.${key}`);
     return raw ? (JSON.parse(raw) as T) : undefined;
   } catch {
     return undefined;
@@ -64,7 +130,7 @@ export async function kvSet(key: string, value: unknown): Promise<void> {
     }
   }
   try {
-    window.localStorage.setItem(`heyfouad.kv.${key}`, JSON.stringify(value));
+    window.localStorage.setItem(`kanz.kv.${key}`, JSON.stringify(value));
   } catch {
     /* quota — the cache is an optimisation, never a requirement */
   }
@@ -80,7 +146,7 @@ export async function kvDel(key: string): Promise<void> {
     }
   }
   try {
-    window.localStorage.removeItem(`heyfouad.kv.${key}`);
+    window.localStorage.removeItem(`kanz.kv.${key}`);
   } catch {
     /* ignore */
   }

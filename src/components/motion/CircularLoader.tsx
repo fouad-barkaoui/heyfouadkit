@@ -9,7 +9,7 @@ import {
   Pill,
   type LucideIcon,
 } from 'lucide-react';
-import { AVATAR_SRC } from '@/components/ui/BrandMark';
+import { MARK_SRC } from '@/components/ui/BrandMark';
 
 /** Icons orbiting the mark — a cross-section of the app's own modules, not
  * generic decoration, so the loader still reads as "this app" mid-spin. */
@@ -67,10 +67,10 @@ export function CircularLoader({
         })}
 
         <span
-          className="absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-[#f4f3f1] shadow-[0_0_0_2px_rgba(228,242,34,0.55),0_2px_18px_rgba(228,242,34,0.3)]"
+          className="absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-[#0b0c10] shadow-[0_0_0_2px_rgba(228,242,34,0.55),0_2px_18px_rgba(228,242,34,0.3)]"
           aria-hidden
         >
-          <img src={AVATAR_SRC} alt="" width={48} height={48} className="h-full w-full object-cover" />
+          <img src={MARK_SRC} alt="" width={48} height={48} className="h-full w-full object-cover" />
         </span>
       </div>
 

@@ -194,7 +194,7 @@ function offsetWithin(el: HTMLElement, root: HTMLElement): { x: number; y: numbe
   return { x, y };
 }
 
-const GROUP_OPEN_KEY = 'heyfouad.navGroupOpen.v1';
+const GROUP_OPEN_KEY = 'kanz.navGroupOpen.v1';
 
 /**
  * Desktop / tablet navigation rail. Two states:

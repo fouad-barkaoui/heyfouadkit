@@ -33,7 +33,7 @@ type View = 'grid' | 'list' | 'space';
 type Smart = 'all' | 'unread' | 'favorites' | 'recent';
 type Sort = 'newest' | 'oldest' | 'unread' | 'az';
 
-const VIEW_KEY = 'heyfouad.saveit.view.v1';
+const VIEW_KEY = 'kanz.saveit.view.v1';
 
 interface Toast {
   id: number;
@@ -238,8 +238,8 @@ export function SaveItModule(): JSX.Element {
     consumedIncoming.current = true;
     let incoming: string | null = null;
     try {
-      incoming = sessionStorage.getItem('heyfouad.saveit.incoming');
-      sessionStorage.removeItem('heyfouad.saveit.incoming');
+      incoming = sessionStorage.getItem('kanz.saveit.incoming');
+      sessionStorage.removeItem('kanz.saveit.incoming');
     } catch {
       /* ignore */
     }

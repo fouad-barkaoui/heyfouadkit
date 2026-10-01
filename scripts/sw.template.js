@@ -139,7 +139,7 @@ self.addEventListener('notificationclick', (event) => {
       const client = all.find((c) => new URL(c.url).origin === self.location.origin);
       if (client) {
         await client.focus();
-        client.postMessage({ type: 'heyfouad:navigate', url: target });
+        client.postMessage({ type: 'kanz:navigate', url: target });
         return;
       }
       await self.clients.openWindow(target);

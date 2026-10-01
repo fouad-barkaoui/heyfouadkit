@@ -20,7 +20,7 @@ export function getSupabase(): SupabaseClient | null {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
-        storageKey: 'heyfouad.auth',
+        storageKey: 'kanz.auth',
       },
     });
   }

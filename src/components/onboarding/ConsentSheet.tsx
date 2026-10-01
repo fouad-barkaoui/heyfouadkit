@@ -1,7 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { Check, CheckCircle2, ChevronDown, Loader2, X, type LucideIcon } from 'lucide-react';
 import { useEffect, useId, useRef, useState, type PointerEvent, type ReactNode } from 'react';
-import { AVATAR_SRC } from '@/components/ui/BrandMark';
+import { MARK_SRC } from '@/components/ui/BrandMark';
 import { KanzWordmark } from '@/components/ui/KanzWordmark';
 import { cn } from '@/lib/utils';
 
@@ -132,7 +132,7 @@ export function ConsentSheet({
 
             <div className="consent-brand absolute flex items-center gap-2">
               <span className="consent-brand-mark overflow-hidden rounded-[7px]">
-                <img src={AVATAR_SRC} alt="" width={26} height={26} draggable={false} />
+                <img src={MARK_SRC} alt="" width={26} height={26} draggable={false} />
               </span>
               <KanzWordmark height={15} gem="currentColor" className="text-white" />
             </div>

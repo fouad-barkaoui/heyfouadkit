@@ -119,7 +119,7 @@ export async function deleteContactMessage(id: string): Promise<void> {
 }
 
 /** Fired (on window) whenever the admin triages messages, so the bell can re-check. */
-export const CONTACT_CHANGED_EVENT = 'heyfouad:contact-changed';
+export const CONTACT_CHANGED_EVENT = 'kanz:contact-changed';
 export function announceContactChange(): void {
   if (typeof window !== 'undefined') window.dispatchEvent(new Event(CONTACT_CHANGED_EVENT));
 }

@@ -18,7 +18,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
     // eslint-disable-next-line no-console
-    console.error('[heyfouad] render error', error, info.componentStack);
+    console.error('[kanz] render error', error, info.componentStack);
   }
 
   render(): ReactNode {

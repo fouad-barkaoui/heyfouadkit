@@ -1,12 +1,12 @@
 import { cn } from '@/lib/utils';
 
-/** Public path of the avatar used as the app's logo (head-and-shoulders crop). */
-export const AVATAR_SRC = '/avatar-256.png';
+/** Public path of the Kanz star used as the app's logo. */
+export const MARK_SRC = '/kanz-mark-256.png';
 
 export const BRAND_NAME = 'Kanz';
 
 /**
- * The app's logo: Fouad's avatar on a soft paper tile. A light sheen sweeps
+ * The app's logo: the faceted Kanz star on its dark tile. A light sheen sweeps
  * across it on hover, and the tile lifts a touch.
  */
 export function BrandMark({
@@ -25,7 +25,7 @@ export function BrandMark({
       aria-hidden
     >
       <img
-        src={AVATAR_SRC}
+        src={MARK_SRC}
         alt=""
         width={size}
         height={size}

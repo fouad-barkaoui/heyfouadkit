@@ -1,36 +1,43 @@
 /**
  * One-time migration, run once at app boot before anything else touches
- * storage. Earlier builds of this app used a "nexus." prefix for every
- * local/session storage key (workspace cache, theme, language, active team,
- * auth session, onboarding flags…). The app is branded "heyfouad" now, so
- * every one of those keys has moved to a "heyfouad." prefix — this copies
- * any value still sitting under an old nexus.* key over to its new name,
- * once, so nothing already saved on this device quietly resets after the
- * rename (including an existing signed-in session). Old keys are left in
- * place untouched; this only ever adds a key, never removes one.
+ * storage. Earlier builds of this app stored every local/session key (the
+ * workspace cache, theme, language, active team, auth session, onboarding
+ * flags…) under a "nexus." and later a "heyfouad." prefix. The app is called
+ * Kanz now and every key lives under "kanz.", so this moves any value still
+ * sitting under an old name to its new one — which keeps an existing
+ * signed-in session and everything saved on this device exactly as it was.
+ *
+ * A key that already exists under its new name is never overwritten (the
+ * newer build wins), and an old key is only removed once its value has been
+ * read back from the new name.
  */
-function migrate(storage: Storage): void {
+const PREFIX = 'kanz.';
+// Newest first: when both an old "heyfouad.x" and an older "nexus.x" exist,
+// the "heyfouad." one is the more recent and takes the new name.
+const LEGACY_PREFIXES = ['heyfouad.', 'nexus.'] as const;
+
+export function migrateStorage(storage: Storage): void {
   const legacyKeys: string[] = [];
   for (let i = 0; i < storage.length; i++) {
     const key = storage.key(i);
-    if (key && key.startsWith('nexus.')) legacyKeys.push(key);
+    if (key && LEGACY_PREFIXES.some((p) => key.startsWith(p))) legacyKeys.push(key);
   }
+  legacyKeys.sort((a, b) => Number(b.startsWith('heyfouad.')) - Number(a.startsWith('heyfouad.')));
   for (const oldKey of legacyKeys) {
-    const newKey = `heyfouad.${oldKey.slice('nexus.'.length)}`;
-    if (storage.getItem(newKey) !== null) continue;
+    const prefix = LEGACY_PREFIXES.find((p) => oldKey.startsWith(p));
+    if (!prefix) continue;
+    const newKey = `${PREFIX}${oldKey.slice(prefix.length)}`;
     const value = storage.getItem(oldKey);
-    if (value !== null) storage.setItem(newKey, value);
+    if (value === null) continue;
+    if (storage.getItem(newKey) === null) storage.setItem(newKey, value);
+    if (storage.getItem(newKey) !== null) storage.removeItem(oldKey);
   }
 }
 
-try {
-  migrate(window.localStorage);
-} catch {
-  /* private mode / storage unavailable — nothing to migrate */
-}
-
-try {
-  migrate(window.sessionStorage);
-} catch {
-  /* private mode / storage unavailable — nothing to migrate */
+for (const area of ['localStorage', 'sessionStorage'] as const) {
+  try {
+    migrateStorage(window[area]);
+  } catch {
+    /* private mode / storage unavailable — nothing to migrate */
+  }
 }

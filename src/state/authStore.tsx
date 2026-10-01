@@ -161,7 +161,7 @@ function isOfflineAuthError(error: { name?: string; message?: string; status?: n
 /** The last session this device saw (supabase-js keeps it under our storage key). */
 function readStoredSession(): Session | null {
   try {
-    const raw = window.localStorage.getItem('heyfouad.auth');
+    const raw = window.localStorage.getItem('kanz.auth');
     const parsed = raw ? (JSON.parse(raw) as Session) : null;
     return parsed?.user && parsed.access_token ? parsed : null;
   } catch {

@@ -14,7 +14,7 @@
  *      to the sign-in screen as a plain sentence.
  */
 
-const RETURN_KEY = 'heyfouad.oauth.return.v1';
+const RETURN_KEY = 'kanz.oauth.return.v1';
 /** A parked route older than this belongs to an abandoned attempt. */
 const RETURN_TTL_MS = 15 * 60 * 1000;
 
