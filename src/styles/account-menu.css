@@ -121,9 +121,16 @@
 }
 .am-avatar {
   position: relative;
+  display: flex;
   flex-shrink: 0;
-  padding: 2px;
-  border-radius: 999px;
+  align-items: center;
+  justify-content: center;
+  /* Exactly square (44px photo + 3px gap each side) so the ring is a true circle. */
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  line-height: 0;
+  border-radius: 50%;
   box-shadow: 0 0 0 1.5px var(--color-smoke);
   transition: transform 160ms cubic-bezier(0.2, 0, 0, 1);
 }
