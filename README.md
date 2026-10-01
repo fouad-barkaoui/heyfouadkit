@@ -1,4 +1,4 @@
-# heyfouad — Spatial Workspace
+# Kanz — Spatial Workspace
 
 A single-screen personal workspace: notebook, task engine, article & PDF hub, course
 repository, document storage, analytics, universal search and a curated vault — all on

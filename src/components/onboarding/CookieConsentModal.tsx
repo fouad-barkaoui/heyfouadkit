@@ -44,11 +44,11 @@ export function CookieConsentModal(): JSX.Element {
       partner="THIS DEVICE"
       zIndex={85}
       title="Keep Your Workspace"
-      body={<p>Heyfouad saves your work in this browser, so everything is exactly how you left it next time.</p>}
+      body={<p>Kanz saves your work in this browser, so everything is exactly how you left it next time.</p>}
       boxIcon={Cookie}
       box={(link) => (
         <p>
-          By continuing, you accept that Heyfouad {link('stores your data locally')} in this browser and reuses it on your
+          By continuing, you accept that Kanz {link('stores your data locally')} in this browser and reuses it on your
           next visit.
         </p>
       )}

@@ -455,7 +455,7 @@ export function SaveItModule(): JSX.Element {
         <span className="hidden sm:inline">
           Tip: press <kbd className="rail-kbd">Ctrl V</kbd> anywhere on this page to save what's on your clipboard
         </span>
-        <span className="sm:hidden">Tip: share a link to Heyfouad from any app to save it here</span>
+        <span className="sm:hidden">Tip: share a link to Kanz from any app to save it here</span>
         <span className="hidden md:inline">· or drag a link in from another tab</span>
         <span className="hidden md:inline">
           · <kbd className="rail-kbd">/</kbd> to type

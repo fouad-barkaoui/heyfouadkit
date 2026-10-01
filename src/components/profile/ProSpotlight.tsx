@@ -136,10 +136,10 @@ export function ProSpotlight({ className, compact = false }: { className?: strin
   const share = async (): Promise<void> => {
     setFlipKey((k) => k + 1);
     const url = window.location.origin;
-    const text = `${name} is a Heyfouad Pro member.`;
+    const text = `${name} is a Kanz Pro member.`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'Heyfouad Pro', text, url });
+        await navigator.share({ title: 'Kanz Pro', text, url });
         setShared('shared');
       } else {
         await navigator.clipboard.writeText(`${text} ${url}`);
@@ -231,7 +231,7 @@ export function ProSpotlight({ className, compact = false }: { className?: strin
         <p className="truncate text-[22px] font-semibold leading-tight tracking-[-0.024em] pro-ink">{name}</p>
         <p className="mt-1 flex items-center justify-center gap-1.5 text-[12.5px] pro-sub">
           <Crown size={12.5} strokeWidth={2} className="pro-crown" aria-hidden />
-          {isAdminUser(user) ? 'Admin · ' : ''}Heyfouad Pro{since ? ` · since ${since}` : ''}
+          {isAdminUser(user) ? 'Admin · ' : ''}Kanz Pro{since ? ` · since ${since}` : ''}
         </p>
       </div>
 

@@ -3,8 +3,7 @@ import { cn } from '@/lib/utils';
 /** Public path of the avatar used as the app's logo (head-and-shoulders crop). */
 export const AVATAR_SRC = '/avatar-256.png';
 
-export const BRAND_NAME = 'Heyfouad';
-export const BRAND_TAGLINE = 'Library';
+export const BRAND_NAME = 'Kanz';
 
 /**
  * The app's logo: Fouad's avatar on a soft paper tile. A light sheen sweeps

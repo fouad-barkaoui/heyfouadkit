@@ -209,7 +209,7 @@ export function WhatsNewModal({
               <Sparkles size={11} strokeWidth={2.2} aria-hidden /> What's new
             </span>
             <Dialog.Title className="mt-3 text-[22px] font-semibold leading-[1.2] tracking-[-0.024em] text-paper md:text-[24px]">
-              Here's what we just added to Heyfouad
+              Here's what we just added to Kanz
             </Dialog.Title>
             <div
               ref={listRef}

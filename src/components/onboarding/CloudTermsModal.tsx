@@ -41,13 +41,13 @@ export function CloudTermsModal({
       title="Turn On Cloud Sync"
       body={
         <p>
-          Heyfouad uses a private cloud for your library, so your notes, tasks and files are on every device right away.
+          Kanz uses a private cloud for your library, so your notes, tasks and files are on every device right away.
         </p>
       }
       boxIcon={Lock}
       box={(link) => (
         <p>
-          By continuing, you accept {link('Heyfouad’s terms of use')} and agree to your cloud storage being limited to{' '}
+          By continuing, you accept {link('Kanz’s terms of use')} and agree to your cloud storage being limited to{' '}
           {humanLimit(MAX_TOTAL_CLOUD_BYTES)}, with each file up to {humanLimit(MAX_CLOUD_BYTES)}.
         </p>
       )}

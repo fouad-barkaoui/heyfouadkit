@@ -294,7 +294,7 @@ function StampedLetter({
 
       <article className="stamp-letter" aria-hidden>
         <header className="stamp-letter-head">
-          <span className="stamp-letter-kicker">Heyfouad Library · Private message</span>
+          <span className="stamp-letter-kicker">Kanz · Private message</span>
           <span className="stamp-letter-date">{sentAt}</span>
         </header>
         <dl className="stamp-letter-meta">
