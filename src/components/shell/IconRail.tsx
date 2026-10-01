@@ -25,6 +25,7 @@ import {
   type RowFlag,
 } from './navShared';
 import { NotificationBell } from './NotificationBell';
+import { useNotifications } from '@/state/notificationsStore';
 import { ThemeToggle } from './ThemeToggle';
 
 const TIP_CLASS =
@@ -53,6 +54,7 @@ function RailRow({
   onSelect,
   indent = false,
   flag,
+  count = 0,
 }: {
   meta: ModuleMeta;
   label: string;
@@ -61,8 +63,11 @@ function RailRow({
   onSelect: () => void;
   indent?: boolean;
   flag?: RowFlag;
+  /** Unread count shown as a badge (e.g. new messages). */
+  count?: number;
 }): JSX.Element {
   const Icon = meta.icon;
+  const countLabel = count > 99 ? '99+' : String(count);
   return (
     <RailTip
       enabled={!expanded}
@@ -81,14 +86,22 @@ function RailRow({
         type="button"
         onClick={onSelect}
         data-active={active}
-        aria-label={flag ? `${label} — ${FLAG_TOOLTIP[flag]}` : label}
+        aria-label={flag ? `${label} — ${FLAG_TOOLTIP[flag]}` : count ? `${label} (${count} new)` : label}
         aria-current={active ? 'page' : undefined}
         onPointerEnter={() => prefetchModule(meta.id)}
         onFocus={() => prefetchModule(meta.id)}
         className={cn('nav-row', !expanded && 'is-compact', indent && expanded && 'is-child ps-8')}
       >
-        <Icon size={indent && expanded ? 14 : 16} strokeWidth={1.6} className="shrink-0" aria-hidden />
-        {expanded ? <span className="truncate">{label}</span> : null}
+        <span className="relative inline-flex shrink-0">
+          <Icon size={indent && expanded ? 14 : 16} strokeWidth={1.6} aria-hidden />
+          {count && !expanded ? <span className="notif-badge is-dot" aria-hidden /> : null}
+        </span>
+        {expanded ? <span className="flex-1 truncate text-start">{label}</span> : null}
+        {count && expanded ? (
+          <span className="notif-badge mono" aria-hidden>
+            {countLabel}
+          </span>
+        ) : null}
         {flag ? expanded ? <FlagPill flag={flag} className="ms-auto" /> : <FlagDot flag={flag} /> : null}
       </button>
     </RailTip>
@@ -209,6 +222,7 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
     useUI();
   const { live, syncState } = useWorkspace();
   const { user, configured, avatarUrl } = useAuth();
+  const { inboxNew } = useNotifications();
   const pro = isProUser(user);
   const { t } = useLanguage();
   const flagFor = useRowFlag();
@@ -427,6 +441,16 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
         </RailTip>
 
         <NotificationBell variant="rail" expanded={expanded} />
+        {isAdminUser(user) ? (
+          <RailRow
+            meta={MODULE_MAP.inbox}
+            label={labelFor('inbox')}
+            active={module === 'inbox'}
+            expanded={expanded}
+            onSelect={() => go('inbox')}
+            count={inboxNew}
+          />
+        ) : null}
 
         <div
           ref={scrollRef}
@@ -511,16 +535,6 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
 
         <div className="rail-foot">
           <ThemeToggle expanded={expanded} />
-
-          {isAdminUser(user) ? (
-            <RailRow
-              meta={MODULE_MAP.inbox}
-              label={labelFor('inbox')}
-              active={module === 'inbox'}
-              expanded={expanded}
-              onSelect={() => go('inbox')}
-            />
-          ) : null}
 
           <RailRow
             meta={MODULE_MAP.contact}

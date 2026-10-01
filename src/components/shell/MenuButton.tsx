@@ -1,6 +1,37 @@
+import { Inbox } from 'lucide-react';
+import { isAdminUser } from '@/lib/access';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/state/authStore';
+import { useLanguage } from '@/state/languageStore';
+import { useNotifications } from '@/state/notificationsStore';
 import { useUI } from '@/state/uiStore';
 import { NotificationBell } from './NotificationBell';
+
+/** Admin only: the message inbox, beside the bell, with its new-message count. */
+function InboxButton({ className }: { className?: string }): JSX.Element | null {
+  const { user } = useAuth();
+  const { inboxNew } = useNotifications();
+  const { module, setModule } = useUI();
+  const { t } = useLanguage();
+  if (!isAdminUser(user)) return null;
+  const label = inboxNew ? `${t('nav.inbox')} (${inboxNew} new)` : t('nav.inbox');
+  return (
+    <button
+      type="button"
+      className={cn('menu-btn', className)}
+      aria-label={label}
+      data-active={module === 'inbox'}
+      onClick={() => setModule('inbox')}
+    >
+      <Inbox size={17} strokeWidth={1.7} aria-hidden />
+      {inboxNew ? (
+        <span className="notif-badge is-floating mono" aria-hidden>
+          {inboxNew > 99 ? '99+' : inboxNew}
+        </span>
+      ) : null}
+    </button>
+  );
+}
 
 /**
  * Morphing hamburger: three uneven bars (full · short · medium) that even out
@@ -44,6 +75,7 @@ export function MenuButton({
     <>
       {button}
       <NotificationBell className={className} />
+      <InboxButton className={className} />
     </>
   );
 }

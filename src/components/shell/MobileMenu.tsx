@@ -1,9 +1,9 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import { CloudOff, Inbox, MessageSquareHeart, Search, Settings } from 'lucide-react';
+import { CloudOff, MessageSquareHeart, Search, Settings } from 'lucide-react';
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { PlanChip } from '@/components/ui/PlanChip';
-import { isAdminUser, isProUser } from '@/lib/access';
+import { isProUser } from '@/lib/access';
 import type { ModuleId } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { HOME_ID, MODULE_MAP, NAV_GROUPS } from '@/modules/registry';
@@ -159,7 +159,7 @@ export function MobileMenu(): JSX.Element {
 
           <footer className="menu-foot relative px-4 pt-3 pb-[max(14px,env(safe-area-inset-bottom))]">
             <ThemeToggle expanded />
-            <div className={cn("grid gap-2", isAdminUser(user) ? "grid-cols-[auto_auto_auto_1fr]" : "grid-cols-[auto_auto_1fr]")}>
+            <div className="grid grid-cols-[auto_auto_1fr] gap-2">
               <button
                 type="button"
                 onClick={() => {
@@ -171,17 +171,6 @@ export function MobileMenu(): JSX.Element {
               >
                 <Settings size={17} strokeWidth={1.6} aria-hidden />
               </button>
-              {isAdminUser(user) ? (
-                <button
-                  type="button"
-                  onClick={() => setModule('inbox')}
-                  aria-label={t('nav.inbox')}
-                  data-active={module === 'inbox'}
-                  className="menu-foot-btn aspect-square justify-center"
-                >
-                  <Inbox size={17} strokeWidth={1.6} aria-hidden />
-                </button>
-              ) : null}
               <button
                 type="button"
                 onClick={() => setModule('contact')}

@@ -120,6 +120,8 @@ interface NotificationsValue {
   alertsOn: boolean;
   alertSupport: AlertSupport;
   setAlertsOn: (on: boolean) => Promise<void>;
+  /** Admin only: contact messages still marked new (0 for everyone else). */
+  inboxNew: number;
 }
 
 const NotificationsContext = createContext<NotificationsValue | null>(null);
@@ -314,8 +316,9 @@ export function NotificationsProvider({ children }: { children: ReactNode }): JS
       alertsOn: state.alerts && support === 'granted',
       alertSupport: support,
       setAlertsOn,
+      inboxNew: inbox.length,
     }),
-    [items, unread, readSet, markAllRead, dismiss, dismissAll, state.alerts, support, setAlertsOn],
+    [items, unread, readSet, markAllRead, dismiss, dismissAll, state.alerts, support, setAlertsOn, inbox.length],
   );
 
   return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;
