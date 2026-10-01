@@ -1,6 +1,6 @@
 import type { User } from '@supabase/supabase-js';
 import { describe, expect, it } from 'vitest';
-import { getDisplayName } from './authStore';
+import { getAvatarUrl, getDisplayName } from './authStore';
 
 function makeUser(over: { email?: string | null; username?: string }): User {
   return {
@@ -29,5 +29,29 @@ describe('getDisplayName', () => {
 
   it('falls back to a generic greeting when there is no email either', () => {
     expect(getDisplayName(makeUser({ email: null }))).toBe('there');
+  });
+
+  it('uses the Google account name when no username was chosen', () => {
+    const user = { id: 'u2', email: 'a@b.co', user_metadata: { full_name: 'Fouad Barkaoui', name: 'Fouad' } } as unknown as User;
+    expect(getDisplayName(user)).toBe('Fouad Barkaoui');
+  });
+});
+
+describe('getAvatarUrl', () => {
+  const withMeta = (meta: Record<string, unknown>): User => ({ id: 'u3', user_metadata: meta }) as unknown as User;
+
+  it('prefers a picture the person uploaded over the Google photo', () => {
+    expect(getAvatarUrl(withMeta({ avatar_custom: 'https://x/mine.webp', avatar_url: 'https://lh3/google.jpg' }))).toBe(
+      'https://x/mine.webp',
+    );
+  });
+
+  it('respects an explicit removal even when Google sends a photo', () => {
+    expect(getAvatarUrl(withMeta({ avatar_custom: '', avatar_url: 'https://lh3/google.jpg' }))).toBeNull();
+  });
+
+  it('falls back to the Google photo', () => {
+    expect(getAvatarUrl(withMeta({ avatar_url: 'https://lh3/google.jpg' }))).toBe('https://lh3/google.jpg');
+    expect(getAvatarUrl(withMeta({ picture: 'https://lh3/pic.jpg' }))).toBe('https://lh3/pic.jpg');
   });
 });

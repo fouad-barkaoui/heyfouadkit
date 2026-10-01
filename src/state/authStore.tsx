@@ -16,11 +16,34 @@ import {
   uploadCloudAvatar,
   writeLocalAvatar,
 } from '@/data/avatar';
-import { cloudConfigured, getSupabase } from '@/data/supabaseClient';
+import { cloudConfigured, fetchEnabledProviders, getSupabase } from '@/data/supabaseClient';
+import { parseOAuthRedirectError, rememberReturnRoute, takeReturnRoute } from './oauthReturn';
 
 export type AuthResult =
   | { ok: true; message?: string; signedIn?: boolean }
   | { ok: false; error: string };
+
+/** Whether the Google button should be offered: switched on in Supabase,
+ * switched off, still asking, or unknown because the check couldn't run. */
+export type GoogleStatus = 'checking' | 'on' | 'off' | 'unknown';
+
+/**
+ * A failed Google round-trip comes back as error parameters in the URL.
+ * Read them once, before the router or the Supabase client look at the
+ * address bar, clean them out, and keep the message for the sign-in screen.
+ */
+const initialOAuthError: string | null = (() => {
+  if (typeof window === 'undefined') return null;
+  const parsed = parseOAuthRedirectError(window.location.href);
+  if (!parsed) return null;
+  const back = takeReturnRoute();
+  try {
+    window.history.replaceState(window.history.state, '', back ? `${parsed.cleanedUrl.split('#')[0]}${back}` : parsed.cleanedUrl);
+  } catch {
+    /* sandboxed frame — the stale parameters are harmless */
+  }
+  return parsed.message;
+})();
 
 interface AuthContextValue {
   configured: boolean;
@@ -29,7 +52,12 @@ interface AuthContextValue {
   session: Session | null;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signUp: (email: string, password: string, username?: string) => Promise<AuthResult>;
+  /** Leaves the page for Google; only resolves (with an error) if it couldn't. */
   signInWithGoogle: () => Promise<AuthResult>;
+  googleStatus: GoogleStatus;
+  /** Why the last Google round-trip failed, until the sign-in screen shows it. */
+  oauthError: string | null;
+  clearOAuthError: () => void;
   signOut: () => Promise<void>;
   sendReset: (email: string) => Promise<AuthResult>;
   changePassword: (next: string) => Promise<AuthResult>;
@@ -43,11 +71,24 @@ interface AuthContextValue {
   updateMeta: (data: Record<string, unknown>) => Promise<boolean>;
 }
 
-/** The account's cloud profile picture URL, if one was set. */
+/**
+ * The account's profile picture URL, if there is one.
+ *
+ * A picture the person chose lives in `avatar_custom` (an empty string means
+ * they removed it on purpose). That key exists because Supabase rewrites
+ * `avatar_url` with the Google photo on every Google sign-in, which would
+ * otherwise wipe out an uploaded picture. Without a choice of their own, the
+ * Google photo is used.
+ */
 export function getAvatarUrl(user: User | null): string | null {
   if (!user) return null;
   const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
-  return typeof meta.avatar_url === 'string' && meta.avatar_url ? meta.avatar_url : null;
+  if (typeof meta.avatar_custom === 'string') return meta.avatar_custom || null;
+  for (const k of ['avatar_url', 'picture'] as const) {
+    const v = meta[k];
+    if (typeof v === 'string' && v) return v;
+  }
+  return null;
 }
 
 /** Up to two initials for the no-picture fallback. */
@@ -59,12 +100,15 @@ export function getInitials(name: string): string {
   return (first + second).toUpperCase();
 }
 
-/** The username the person chose, or a name derived from their email as a fallback. */
+/** The username the person chose, else the name on their Google account,
+ * else a name derived from their email. */
 export function getDisplayName(user: User | null): string {
   if (!user) return '';
   const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
-  const username = typeof meta.username === 'string' ? meta.username.trim() : '';
-  if (username) return username;
+  for (const k of ['username', 'full_name', 'name'] as const) {
+    const v = typeof meta[k] === 'string' ? (meta[k] as string).trim() : '';
+    if (v) return v;
+  }
   return user.email ? (user.email.split('@')[0] ?? user.email) : 'there';
 }
 
@@ -155,6 +199,11 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
     const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
       if (event === 'INITIAL_SESSION' && !next) return; // getSession() above decides
       setSession(next);
+      // Back from Google: put the person on the screen they started from.
+      if (event === 'SIGNED_IN' && next) {
+        const back = takeReturnRoute();
+        if (back && window.location.hash !== back) window.location.hash = back.slice(1);
+      }
     });
 
     return () => {
@@ -162,6 +211,23 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
       sub.subscription.unsubscribe();
     };
   }, [supabase]);
+
+  /* ── Google ──────────────────────────────────────────────────────── */
+  const [googleStatus, setGoogleStatus] = useState<GoogleStatus>(cloudConfigured ? 'checking' : 'off');
+  const [oauthError, setOAuthError] = useState<string | null>(initialOAuthError);
+  const clearOAuthError = useCallback(() => setOAuthError(null), []);
+
+  // Ask Supabase whether Google is switched on, so the button only appears
+  // once the provider is configured — no dead button, no raw error page.
+  useEffect(() => {
+    if (!cloudConfigured) return;
+    const ctl = new AbortController();
+    void fetchEnabledProviders(ctl.signal).then((providers) => {
+      if (ctl.signal.aborted) return;
+      setGoogleStatus(providers ? (providers.google ? 'on' : 'off') : 'unknown');
+    });
+    return () => ctl.abort();
+  }, []);
 
   const signIn = useCallback(
     async (email: string, password: string): Promise<AuthResult> => {
@@ -200,16 +266,34 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
     [supabase],
   );
 
-  /** Redirects to Google, then back here — requires the Google provider to be
-   * enabled in the Supabase project's Auth settings. */
+  /** Redirects to Google, then back here. Requires the Google provider to be
+   * switched on in the Supabase project's Auth settings, and this origin to
+   * be on its Redirect URLs allow list. */
   const signInWithGoogle = useCallback(async (): Promise<AuthResult> => {
     if (!supabase) return { ok: false, error: 'This build is not connected to a cloud project.' };
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      return { ok: false, error: 'You are offline. Connect to the internet to sign in with Google.' };
+    }
+    if (googleStatus === 'off') {
+      return { ok: false, error: 'Google sign-in is not switched on for this app yet. Use your email and password for now.' };
+    }
+    rememberReturnRoute(window.location.hash);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin },
+      options: {
+        // Trailing slash so it matches an allow-list entry like https://host/**.
+        redirectTo: `${window.location.origin}/`,
+        // Always show Google's account chooser, so someone with several
+        // Google accounts (or on a shared computer) picks the right one.
+        queryParams: { prompt: 'select_account' },
+      },
     });
-    return error ? { ok: false, error: friendly(error.message) } : { ok: true };
-  }, [supabase]);
+    if (error) {
+      takeReturnRoute();
+      return { ok: false, error: friendly(error.message) };
+    }
+    return { ok: true };
+  }, [supabase, googleStatus]);
 
   const signOut = useCallback(async () => {
     await supabase?.auth.signOut();
@@ -285,15 +369,17 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
           : { ok: false, error: 'This browser would not let us save the picture (storage is full or blocked).' };
       }
       try {
+        // Written to both keys: `avatar_custom` is the one Google sign-ins
+        // leave alone (see getAvatarUrl); '' records an explicit removal.
         if (!image) {
-          const { data, error } = await supabase.auth.updateUser({ data: { avatar_url: null } });
+          const { data, error } = await supabase.auth.updateUser({ data: { avatar_url: null, avatar_custom: '' } });
           if (error) return { ok: false, error: friendly(error.message) };
           if (data.user) setSession((s) => (s ? { ...s, user: data.user } : s));
           void pruneCloudAvatars(current.id, null);
           return { ok: true, message: 'Picture removed.' };
         }
         const url = await uploadCloudAvatar(current.id, image);
-        const { data, error } = await supabase.auth.updateUser({ data: { avatar_url: url } });
+        const { data, error } = await supabase.auth.updateUser({ data: { avatar_url: url, avatar_custom: url } });
         if (error) return { ok: false, error: friendly(error.message) };
         if (data.user) setSession((s) => (s ? { ...s, user: data.user } : s));
         return { ok: true, message: 'Profile picture updated.' };
@@ -328,6 +414,9 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
       signIn,
       signUp,
       signInWithGoogle,
+      googleStatus,
+      oauthError,
+      clearOAuthError,
       signOut,
       sendReset,
       changePassword,
@@ -336,7 +425,23 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
       setAvatar,
       updateMeta,
     }),
-    [ready, session, signIn, signUp, signInWithGoogle, signOut, sendReset, changePassword, updateUsername, avatarUrl, setAvatar, updateMeta],
+    [
+      ready,
+      session,
+      signIn,
+      signUp,
+      signInWithGoogle,
+      googleStatus,
+      oauthError,
+      clearOAuthError,
+      signOut,
+      sendReset,
+      changePassword,
+      updateUsername,
+      avatarUrl,
+      setAvatar,
+      updateMeta,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

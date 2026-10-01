@@ -27,6 +27,26 @@ export function getSupabase(): SupabaseClient | null {
   return client;
 }
 
+/**
+ * Which external sign-in providers the project has switched on, read from
+ * Supabase Auth's public settings endpoint. `null` when it can't be reached,
+ * so callers can tell "off" apart from "don't know".
+ */
+export async function fetchEnabledProviders(signal?: AbortSignal): Promise<Record<string, boolean> | null> {
+  if (!cloudConfigured) return null;
+  try {
+    const res = await fetch(`${url as string}/auth/v1/settings`, {
+      headers: { apikey: key as string },
+      signal,
+    });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { external?: Record<string, boolean> };
+    return body.external ?? null;
+  } catch {
+    return null;
+  }
+}
+
 // Kept as-is on purpose: this is the actual bucket id already created and
 // policed in the live Supabase project (see supabase/schema.sql). Renaming
 // it here without renaming/migrating the real bucket would break every
