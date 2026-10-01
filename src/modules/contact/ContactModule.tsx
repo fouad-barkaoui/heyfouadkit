@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 import { getDisplayName, useAuth } from '@/state/authStore';
 import { originOf, useTheme } from '@/state/themeStore';
 import { greetingFor } from './localTime';
-import { Hatch, KanzCover, Overview, Stack } from './ProfileExtras';
+import { BuiltWith, Experience, Hatch, KanzCover, Note, Overview, Stack } from './ProfileExtras';
 import { TOPICS } from './topics';
 
 /* ── Who I am ─────────────────────────────────────────────────────────── */
@@ -284,6 +284,7 @@ function ProfileCard(): JSX.Element {
       <Hatch />
 
       <section className="cp-section" aria-labelledby="cp-about">
+        <Note>say hi</Note>
         <h3 id="cp-about" className="cp-greeting">
           {greeting}
         </h3>
@@ -320,10 +321,15 @@ function ProfileCard(): JSX.Element {
       </section>
 
       <Rule />
-      <Stack />
+      <Experience />
       <Rule />
+      <Stack />
+      <Hatch />
+      <BuiltWith />
+      <Hatch />
 
       <section className="cp-section" aria-labelledby="cp-socials">
+        <Note>find me here</Note>
         <h3 id="cp-socials" className="cp-section-title">
           Socials
         </h3>
@@ -683,6 +689,7 @@ export function ContactModule(): JSX.Element {
             <Rule />
 
             <div className="cp-lower">
+              <Note>or write to me</Note>
               <section id="contact-form-card" aria-labelledby="form-title" className="surface-card contact-form-card">
                 <div className="contact-form-head">
                   <span className="contact-form-icon" aria-hidden>

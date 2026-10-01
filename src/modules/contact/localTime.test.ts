@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { describeGap, greetingFor, tzOffsetMinutes } from './localTime';
+import { describeGap, formatDuration, formatMonth, greetingFor, tzOffsetMinutes } from './localTime';
 
 describe('tzOffsetMinutes', () => {
   it('is zero for UTC', () => {
@@ -38,5 +38,22 @@ describe('greetingFor', () => {
     expect(greetingFor(14)).toBe('Good afternoon');
     expect(greetingFor(21)).toBe('Good evening');
     expect(greetingFor(2)).toBe('Good evening');
+  });
+});
+
+describe('formatDuration', () => {
+  it('never shows less than a month', () => {
+    expect(formatDuration('2026-09', new Date(2026, 8, 20))).toBe('1m');
+    expect(formatDuration('2026-09', new Date(2026, 9, 1))).toBe('1m');
+    expect(formatDuration('2026-09', new Date(2026, 10, 2))).toBe('2m');
+  });
+
+  it('rolls months into years', () => {
+    expect(formatDuration('2024-03', new Date(2026, 9, 1))).toBe('2y 7m');
+    expect(formatDuration('2025-10', new Date(2026, 9, 1))).toBe('1y');
+  });
+
+  it('formats the start month', () => {
+    expect(formatMonth('2026-09')).toBe('09.2026');
   });
 });

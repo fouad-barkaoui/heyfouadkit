@@ -35,3 +35,18 @@ export function greetingFor(hour: number): string {
   if (hour >= 12 && hour < 18) return 'Good afternoon';
   return 'Good evening';
 }
+
+/** "1m", "11m", "2y 7m" — calendar months from `start` (YYYY-MM) to `now`, at least 1. */
+export function formatDuration(start: string, now: Date): string {
+  const [y, m] = start.split('-').map(Number) as [number, number];
+  const months = Math.max(1, (now.getFullYear() - y) * 12 + (now.getMonth() + 1 - m));
+  const years = Math.floor(months / 12);
+  const rest = months % 12;
+  return [years ? `${years}y` : '', rest ? `${rest}m` : ''].filter(Boolean).join(' ');
+}
+
+/** "09.2026" from "2026-09". */
+export function formatMonth(start: string): string {
+  const [y, m] = start.split('-');
+  return `${m}.${y}`;
+}

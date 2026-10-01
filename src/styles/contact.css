@@ -794,6 +794,295 @@ ul.cp-bio > li::before {
   }
 }
 
+/* ── Margin notes, experience, built with ─────────────────────────────── */
+
+.cp-wrap {
+  container: cp / inline-size;
+}
+.cp-section,
+.cp-built,
+.cp-lower {
+  position: relative;
+}
+
+/* Handwritten aside in the left margin; only where the margin exists. */
+.cp-note {
+  position: absolute;
+  top: 20px;
+  right: calc(100% + 18px);
+  display: none;
+  width: 128px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  pointer-events: none;
+}
+.cp-note-text {
+  font-family: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--color-fog);
+  transform: rotate(-7deg);
+  transform-origin: right center;
+}
+.cp-note-arrow {
+  margin-inline-end: 6px;
+  fill: none;
+  stroke: var(--color-ash);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@container cp (min-width: 1040px) {
+  .cp-note {
+    display: flex;
+  }
+}
+
+/* Experience: a venture, then its roles hanging off a thin rail. */
+.cp-exp {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+.cp-venture-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-bottom: 10px;
+}
+.cp-venture-name {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-paper);
+  text-decoration: none;
+}
+a.cp-venture-name:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--color-acid);
+  text-underline-offset: 4px;
+}
+.cp-venture-where {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--color-ash);
+}
+.cp-venture-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-fog);
+}
+.cp-venture-status::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f5b524;
+  box-shadow: 0 0 0 3px rgb(245 181 36 / 0.18);
+}
+.cp-venture-status[data-status='live']::before {
+  background: #3ecf8e;
+  box-shadow: 0 0 0 3px rgb(62 207 142 / 0.18);
+}
+
+.cp-role-item {
+  position: relative;
+}
+.cp-role-head {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 4px 0;
+  text-align: start;
+  cursor: pointer;
+  color: inherit;
+}
+.cp-role-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  color: var(--color-fog);
+  background: rgb(var(--tint-rgb) / 0.05);
+  box-shadow: inset 0 0 0 1px var(--color-graphite);
+}
+.cp-role-main {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+.cp-role-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-paper);
+}
+.cp-role-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ash);
+}
+.cp-role-meta > span + span::before {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 12px;
+  margin: 0 10px;
+  vertical-align: -1px;
+  background: var(--color-smoke);
+}
+.cp-role-toggle {
+  flex-shrink: 0;
+  margin-top: 6px;
+  color: var(--color-ash);
+  transition: color 150ms var(--ease-snap);
+}
+.cp-role-head:hover .cp-role-toggle {
+  color: var(--color-paper);
+}
+.cp-role-head:focus-visible {
+  outline: 2px solid var(--color-acid);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+.cp-role-body {
+  position: relative;
+  padding: 10px 0 2px 40px;
+}
+/* The rail: from under the icon down the role's details. */
+.cp-role-body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 8px;
+  inset-inline-start: 13.5px;
+  width: 1px;
+  background: var(--color-graphite);
+}
+.cp-role-points {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+}
+.cp-role-points > li {
+  position: relative;
+  padding-inline-start: 16px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--color-mist);
+}
+.cp-role-points > li::before {
+  content: '';
+  position: absolute;
+  top: 0.66em;
+  inset-inline-start: 2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-smoke);
+}
+.cp-role-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.cp-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--color-fog);
+  background: rgb(var(--tint-rgb) / 0.05);
+  box-shadow: inset 0 0 0 1px var(--color-graphite);
+}
+
+/* Built with: a centred title over a row of dashed cells. */
+.cp-built-title {
+  margin: 0;
+  padding: 16px 0;
+  border-bottom: 1px dashed var(--color-smoke);
+  text-align: center;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-fog);
+}
+.cp-built-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cp-built-grid > li + li {
+  border-inline-start: 1px dashed var(--color-smoke);
+}
+.cp-built-name {
+  display: flex;
+  height: 92px;
+  align-items: center;
+  justify-content: center;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  color: var(--color-ash);
+  transition: color 180ms var(--ease-snap);
+}
+.cp-built-name:hover {
+  color: var(--color-paper);
+}
+.cp-built-name:focus-visible {
+  outline: 2px solid var(--color-acid);
+  outline-offset: -6px;
+  border-radius: 10px;
+}
+
+@media (max-width: 639px) {
+  .cp-built-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cp-built-grid > li:nth-child(3) {
+    border-inline-start: 0;
+  }
+  .cp-built-grid > li:nth-child(n + 3) {
+    border-top: 1px dashed var(--color-smoke);
+  }
+  .cp-built-name {
+    height: 72px;
+    font-size: 18px;
+  }
+  .cp-role-body {
+    padding-inline-start: 0;
+  }
+  .cp-role-body::before {
+    display: none;
+  }
+}
+
 /* Form card */
 .contact-form-card {
   padding: 20px;

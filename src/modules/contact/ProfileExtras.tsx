@@ -1,17 +1,21 @@
 import {
   Briefcase,
   Check,
+  ChevronsDownUp,
+  ChevronsUpDown,
+  Code2,
   Clock,
   Copy,
   Globe,
+  ShieldCheck,
   Sparkles,
   Languages,
   Mail,
   MapPin,
   type LucideIcon,
 } from 'lucide-react';
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { HOME_TZ, describeGap, tzOffsetMinutes } from './localTime';
+import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
+import { HOME_TZ, describeGap, formatDuration, formatMonth, tzOffsetMinutes } from './localTime';
 
 /* ── Cover: the Kanz star drawn as an isometric prism ─────────────────── */
 
@@ -159,6 +163,7 @@ function CopyEmail({ email }: { email: string }): JSX.Element {
 export function Overview({ email, flag }: { email: string; flag: ReactNode }): JSX.Element {
   return (
     <section className="cp-section" aria-labelledby="cp-overview">
+      <Note>the basics</Note>
       <h3 id="cp-overview" className="sr-only">
         Overview
       </h3>
@@ -198,6 +203,7 @@ const STACK: { group: string; items: string[] }[] = [
 export function Stack(): JSX.Element {
   return (
     <section className="cp-section" aria-labelledby="cp-stack">
+      <Note>my daily tools</Note>
       <h3 id="cp-stack" className="cp-section-title">
         Stack
       </h3>
@@ -215,6 +221,200 @@ export function Stack(): JSX.Element {
           </div>
         ))}
       </dl>
+    </section>
+  );
+}
+
+/* ── Handwritten margin note with a curved arrow ──────────────────────── */
+
+/** A scribbled aside in the left margin, pointing into its section. Wide screens only. */
+export function Note({ children }: { children: ReactNode }): JSX.Element {
+  return (
+    <span className="cp-note" aria-hidden>
+      <span className="cp-note-text">{children}</span>
+      <svg className="cp-note-arrow" viewBox="0 0 44 40" width="44" height="40">
+        <path d="M6 3c-2 12 2 24 14 29c5 2 11 2 17 0" />
+        <path d="M30 27l7 5l-7 5" />
+      </svg>
+    </span>
+  );
+}
+
+/* ── Experience ───────────────────────────────────────────────────────── */
+
+interface Role {
+  title: string;
+  icon: LucideIcon;
+  kind: string;
+  /** YYYY-MM */
+  start: string;
+  points: string[];
+  tags: string[];
+}
+
+interface Venture {
+  name: string;
+  where: string;
+  status: string;
+  url?: string;
+  roles: Role[];
+}
+
+const EXPERIENCE: Venture[] = [
+  {
+    name: 'ASSAS',
+    where: 'Morocco (Remote)',
+    status: 'In development',
+    roles: [
+      {
+        title: 'Founder & Security Developer',
+        icon: ShieldCheck,
+        kind: 'Own SaaS',
+        start: '2026-09',
+        points: [
+          'A SaaS that scans a full codebase for threats, bugs and violations of security rules.',
+          'Checks authentication, encryption, session handling, input validation, rate limiting and error handling.',
+          'Covers logging, backups, monitoring and dependency scanning, then reports every finding in one place.',
+          'Built as a multi-tenant cloud service, one workspace per team.',
+        ],
+        tags: ['Python', 'Static analysis', 'Dependency scanning', 'REST APIs', 'Docker', 'SaaS'],
+      },
+    ],
+  },
+  {
+    name: 'Kanz',
+    where: 'Morocco (Remote)',
+    status: 'Live',
+    url: 'https://kanz-workspace.vercel.app',
+    roles: [
+      {
+        title: 'Founder & Fullstack Developer',
+        icon: Code2,
+        kind: 'Own product',
+        start: '2026-09',
+        points: [
+          'A private workspace that keeps notes, tasks, articles, courses, docs and analytics on one spatial canvas.',
+          'Works offline first and syncs through Supabase, with row-level security on every table.',
+          'Google sign-in, team invites and roles, and a private contact inbox.',
+          'Designed the brand end to end: the KANZ wordmark, the star icon and this page.',
+        ],
+        tags: ['React', 'TypeScript', 'Vite', 'Tailwind CSS', 'Supabase', 'PostgreSQL', 'Vercel', 'Claude Code'],
+      },
+    ],
+  },
+];
+
+function RoleItem({ role }: { role: Role }): JSX.Element {
+  const [open, setOpen] = useState(true);
+  const id = useId();
+  const Icon = role.icon;
+  const now = useMemo(() => new Date(), []);
+  return (
+    <div className="cp-role-item" data-open={open || undefined}>
+      <button
+        type="button"
+        className="cp-role-head"
+        aria-expanded={open}
+        aria-controls={id}
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span className="cp-role-icon" aria-hidden>
+          <Icon size={15} strokeWidth={1.8} />
+        </span>
+        <span className="cp-role-main">
+          <span className="cp-role-title">{role.title}</span>
+          <span className="cp-role-meta">
+            <span>{role.kind}</span>
+            <span>
+              {formatMonth(role.start)} — <span aria-label="present">∞</span>
+            </span>
+            <span>{formatDuration(role.start, now)}</span>
+          </span>
+        </span>
+        {open ? (
+          <ChevronsDownUp className="cp-role-toggle" size={15} strokeWidth={1.8} aria-hidden />
+        ) : (
+          <ChevronsUpDown className="cp-role-toggle" size={15} strokeWidth={1.8} aria-hidden />
+        )}
+      </button>
+      <div id={id} className="cp-role-body" hidden={!open}>
+        <ul className="cp-role-points">
+          {role.points.map((p) => (
+            <li key={p}>{p}</li>
+          ))}
+        </ul>
+        <div className="cp-role-tags">
+          {role.tags.map((t) => (
+            <span key={t} className="cp-tag">
+              {t}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function Experience(): JSX.Element {
+  return (
+    <section className="cp-section" aria-labelledby="cp-experience">
+      <Note>what I'm building</Note>
+      <h3 id="cp-experience" className="cp-section-title">
+        Experience
+      </h3>
+      <div className="cp-exp">
+        {EXPERIENCE.map((v) => (
+          <article key={v.name} className="cp-venture">
+            <header className="cp-venture-head">
+              {v.url ? (
+                <a href={v.url} className="cp-venture-name" target="_blank" rel="noopener noreferrer">
+                  {v.name}
+                </a>
+              ) : (
+                <span className="cp-venture-name">{v.name}</span>
+              )}
+              <span className="cp-venture-where">
+                {v.where}
+                <span className="cp-venture-status" data-status={v.status === 'Live' ? 'live' : 'dev'}>
+                  {v.status}
+                </span>
+              </span>
+            </header>
+            {v.roles.map((r) => (
+              <RoleItem key={r.title} role={r} />
+            ))}
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ── Built with ───────────────────────────────────────────────────────── */
+
+const BUILT_WITH = [
+  { name: 'Supabase', url: 'https://supabase.com' },
+  { name: 'Claude', url: 'https://claude.ai' },
+  { name: 'Claude Code', url: 'https://claude.com/claude-code' },
+  { name: 'Vercel', url: 'https://vercel.com' },
+];
+
+export function BuiltWith(): JSX.Element {
+  return (
+    <section className="cp-built" aria-labelledby="cp-built">
+      <Note>big thanks</Note>
+      <h3 id="cp-built" className="cp-built-title">
+        Built with
+      </h3>
+      <ul className="cp-built-grid">
+        {BUILT_WITH.map((b) => (
+          <li key={b.name}>
+            <a href={b.url} target="_blank" rel="noopener noreferrer" className="cp-built-name">
+              {b.name}
+            </a>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
