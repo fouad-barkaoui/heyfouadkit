@@ -50,7 +50,7 @@ export const MODULES: ModuleMeta[] = [
   { id: 'reporting', label: 'Reporting', short: 'Reporting', icon: LayoutDashboard },
   { id: 'analytics', label: 'Analytics', short: 'Analytics', icon: BarChart3 },
   { id: 'trash', label: 'Trash', short: 'Trash', icon: Trash2 },
-  { id: 'portfolio', label: 'Profile', short: 'Profile', icon: IdCard },
+  { id: 'portfolio', label: 'Meet the Founder', short: 'Founder', icon: IdCard },
   { id: 'contact', label: 'Contact', short: 'Contact', icon: MessageSquareHeart },
   { id: 'inbox', label: 'Inbox', short: 'Inbox', icon: Inbox },
 ];
