@@ -32,9 +32,7 @@
 }
 .cp-frame {
   position: relative;
-  font-family: 'IBM Plex Mono', var(--font-mono);
-  font-feature-settings: 'zero' 0, 'calt' 0;
-  letter-spacing: 0;
+  font-family: var(--font-sans);
   max-width: 760px;
   margin: 0 auto;
   border-inline: 1px dashed var(--color-smoke);
@@ -108,10 +106,10 @@
   align-items: center;
   gap: 8px;
   margin: 0;
-  font-size: 20px;
-  font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
   color: var(--color-paper);
 }
 .cp-verified {
@@ -119,32 +117,117 @@
   color: #fff;
   fill: #1d9bf0;
 }
-.cp-role {
+
+/* Skills ticker: a pill that eases to each word's width; the hairline
+   along its bottom is the clock (its animationend advances the word). */
+.cp-skill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0 0;
+}
+.cp-skill-pill {
   position: relative;
-  height: 22px;
-  margin: 6px 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 12px 0 10px;
   overflow: hidden;
-  font-size: 13px;
-  line-height: 22px;
-  color: var(--color-fog);
+  border-radius: 999px;
+  background: rgb(var(--tint-rgb) / 0.045);
+  box-shadow: inset 0 0 0 1px var(--color-graphite);
 }
-.cp-role-word {
-  display: block;
+.cp-skill-dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-acid);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--color-acid) 55%, var(--color-paper)),
+    0 0 0 4px color-mix(in oklab, var(--color-acid) 20%, transparent);
+}
+.cp-skill-window {
+  position: relative;
+  display: grid;
+  height: 30px;
+  align-items: center;
+  overflow: hidden;
+  transition: width 520ms var(--ease-out-quint);
+}
+.cp-skill-word {
+  grid-area: 1 / 1;
   white-space: nowrap;
-  animation: cp-role-in 480ms var(--ease-out-quint) both;
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  color: var(--color-paper);
 }
-@keyframes cp-role-in {
+.cp-skill-word.is-in {
+  animation: cp-skill-in 520ms var(--ease-out-quint) both;
+}
+.cp-skill-word.is-out {
+  animation: cp-skill-out 320ms var(--ease-snap) both;
+}
+@keyframes cp-skill-in {
   from {
     opacity: 0;
-    transform: translateY(70%);
+    filter: blur(5px);
+    transform: translateY(38%);
   }
+}
+@keyframes cp-skill-out {
+  to {
+    opacity: 0;
+    filter: blur(5px);
+    transform: translateY(-38%);
+  }
+}
+.cp-skill-measure {
+  position: absolute;
+  visibility: hidden;
+  white-space: nowrap;
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  pointer-events: none;
+}
+.cp-skill-bar {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 2px;
+  transform-origin: left center;
+  background: color-mix(in oklab, var(--color-acid) 75%, transparent);
+  animation: cp-skill-clock 2800ms linear both;
+}
+.cp-skill[data-paused] .cp-skill-bar {
+  animation-play-state: paused;
+}
+@keyframes cp-skill-clock {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.cp-skill-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-fog);
+}
+.cp-skill-count > span {
+  color: var(--color-ash);
 }
 .cp-location {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin: 8px 0 0;
-  font-size: 11.5px;
+  margin: 10px 0 0;
+  font-size: 13.5px;
   color: var(--color-ash);
 }
 .cp-flag {
@@ -173,9 +256,10 @@
   padding: 26px 28px 30px;
 }
 .cp-bio {
+  max-width: 62ch;
   margin: 0;
-  font-size: 13px;
-  line-height: 1.75;
+  font-size: 16px;
+  line-height: 1.65;
   color: var(--color-fog);
 }
 .cp-bio strong {
@@ -186,32 +270,52 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 24px;
 }
 
-/* One quiet solid button. */
+/* Primary: the Kanz yellow-green. Secondary: an outlined twin. */
 .cp-cta {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 38px;
-  padding: 0 14px;
-  border-radius: 9px;
-  font-size: 12.5px;
-  font-weight: 500;
+  justify-content: center;
+  gap: 9px;
+  height: 44px;
+  padding: 0 20px 0 17px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
   text-decoration: none;
   cursor: pointer;
-  color: var(--color-void);
-  background: var(--color-paper);
+  color: #0b0c10;
+  background: var(--color-acid);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.45),
+    inset 0 -1px 0 rgb(0 0 0 / 0.18),
+    0 6px 18px -8px color-mix(in oklab, var(--color-acid) 70%, transparent);
   transition:
-    opacity 150ms var(--ease-snap),
-    transform 150ms var(--ease-snap);
+    transform 160ms var(--ease-snap),
+    box-shadow 160ms var(--ease-snap),
+    background-color 160ms var(--ease-snap);
 }
 .cp-cta:hover {
-  opacity: 0.88;
+  background: color-mix(in oklab, var(--color-acid) 88%, white);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    inset 0 -1px 0 rgb(0 0 0 / 0.18),
+    0 10px 24px -8px color-mix(in oklab, var(--color-acid) 80%, transparent);
 }
 .cp-cta:active {
-  transform: scale(0.98);
+  transform: translateY(1px) scale(0.985);
+}
+.cp-cta.is-quiet {
+  color: var(--color-paper);
+  background: rgb(var(--tint-rgb) / 0.04);
+  box-shadow: inset 0 0 0 1px var(--color-smoke);
+}
+.cp-cta.is-quiet:hover {
+  background: rgb(var(--tint-rgb) / 0.08);
+  box-shadow: inset 0 0 0 1px var(--color-ash);
 }
 .cp-cta:focus-visible,
 .cp-pill:focus-visible {
@@ -220,30 +324,26 @@
 }
 
 .cp-socials-title {
-  margin: 26px 0 12px;
-  font-size: 12px;
+  margin: 30px 0 12px;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--color-fog);
 }
-.cp-socials-title strong {
-  font-weight: 600;
-  color: var(--color-paper);
-}
 
-/* Social tiles: plain outlined cards, one neutral icon each. */
+/* Social tiles: outlined cards, a neutral icon, an arrow that leans in. */
 .cp-pills {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 10px;
 }
 .cp-pill {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 11px;
-  min-height: 54px;
-  padding: 9px 12px;
-  overflow: hidden;
-  border-radius: 10px;
+  gap: 12px;
+  min-height: 62px;
+  padding: 10px 14px 10px 10px;
+  border-radius: 12px;
   text-align: start;
   text-decoration: none;
   color: var(--color-mist);
@@ -251,11 +351,11 @@
   background: rgb(var(--tint-rgb) / 0.025);
   box-shadow: inset 0 0 0 1px var(--color-graphite);
   transition:
-    background-color 150ms var(--ease-snap),
-    box-shadow 150ms var(--ease-snap);
+    background-color 160ms var(--ease-snap),
+    box-shadow 160ms var(--ease-snap);
 }
 .cp-pill:hover {
-  background: rgb(var(--tint-rgb) / 0.05);
+  background: rgb(var(--tint-rgb) / 0.055);
   box-shadow: inset 0 0 0 1px var(--color-smoke);
 }
 .cp-pill-icon {
@@ -263,69 +363,76 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   color: var(--color-paper);
   background: rgb(var(--tint-rgb) / 0.06);
+  box-shadow: inset 0 0 0 1px rgb(var(--tint-rgb) / 0.05);
 }
 .cp-pill-text {
   display: flex;
   min-width: 0;
   flex: 1;
   flex-direction: column;
+  gap: 1px;
   line-height: 1.3;
 }
 .cp-pill-name {
-  font-size: 12.5px;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--color-paper);
 }
 .cp-pill-handle {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--color-ash);
 }
 .cp-pill-go {
   flex-shrink: 0;
   color: var(--color-ash);
+  transition:
+    transform 180ms var(--ease-snap),
+    color 180ms var(--ease-snap);
+}
+.cp-pill:hover .cp-pill-go {
+  color: var(--color-paper);
+  transform: translate(2px, -2px);
 }
 .cp-pill.is-locked {
   cursor: help;
 }
-.cp-pill.has-ribbon {
-  padding-inline-end: 44px;
+.cp-pill.is-locked .cp-pill-icon {
+  color: var(--color-fog);
 }
 
-/* Corner ribbon: one flat amber band across the top-right corner. */
-.cp-ribbon {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 66px;
-  height: 66px;
-  overflow: hidden;
-  pointer-events: none;
-}
-.cp-ribbon > span {
-  position: absolute;
-  top: 12px;
-  right: -26px;
-  display: block;
-  width: 96px;
-  padding: 2px 0;
-  text-align: center;
-  transform: rotate(45deg);
-  font-size: 7px;
-  font-weight: 700;
-  line-height: 1.5;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+/* Not-finished-yet badge, next to the name. */
+.cp-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 19px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   white-space: nowrap;
-  color: #2a1c00;
-  background: #f5b524;
+  color: color-mix(in oklab, #f5b524 55%, var(--color-paper));
+  background: rgb(245 181 36 / 0.12);
+  box-shadow: inset 0 0 0 1px rgb(245 181 36 / 0.3);
+}
+.cp-status::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 /* Tooltip for unfinished tiles. */
@@ -362,13 +469,6 @@
     transform: translate(-50%, 0);
   }
 }
-/* Tooltips need to escape the tile's clipped corner. */
-.cp-pill.has-ribbon {
-  overflow: visible;
-}
-.cp-pill.has-ribbon .cp-ribbon {
-  border-top-right-radius: 10px;
-}
 
 .cp-lower {
   display: flex;
@@ -402,51 +502,32 @@
     border-radius: 12px;
   }
   .cp-name {
-    font-size: 17px;
+    font-size: 21px;
     padding-inline-end: 30px;
   }
   .cp-verified {
     width: 19px;
     height: 19px;
   }
-  .cp-role {
-    height: 20px;
-    font-size: 12px;
-    line-height: 20px;
+  .cp-skill-count {
+    display: none;
   }
   .cp-location {
-    font-size: 11px;
+    font-size: 13px;
   }
   .cp-body {
     padding: 20px 16px 24px;
   }
   .cp-bio {
-    font-size: 12.5px;
+    font-size: 15.5px;
   }
   .cp-cta {
-    flex: 1 1 auto;
-    justify-content: center;
+    flex: 1 1 0;
+    padding: 0 14px;
   }
   .cp-pills {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-  .cp-pill {
-    gap: 10px;
-    padding: 9px 10px 9px 9px;
-  }
-  .cp-pill.has-ribbon {
-    padding-inline-end: 30px;
-  }
-  .cp-pill-icon {
-    width: 36px;
-    height: 36px;
-  }
-  .cp-pill-name {
-    font-size: 13.5px;
-  }
-  .cp-pill-handle {
-    font-size: 11px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
   }
   .cp-lower {
     padding: 18px 16px;
@@ -655,7 +736,7 @@
 .stamp-letter-meta dt {
   width: 34px;
   flex-shrink: 0;
-  font-family: 'IBM Plex Mono', var(--font-mono);
+  font-family: var(--font-mono);
   font-size: 10.5px;
   line-height: 19px;
   text-transform: uppercase;
@@ -685,14 +766,14 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 6;
   white-space: pre-wrap;
-  font-family: 'IBM Plex Mono', var(--font-mono);
+  font-family: var(--font-mono);
   font-size: 12.5px;
   line-height: 26px;
   color: #332b20;
 }
 .stamp-letter-sign {
   margin-top: 10px;
-  font-family: 'IBM Plex Mono', var(--font-mono);
+  font-family: var(--font-mono);
   font-size: 11px;
   color: #8a7a5e;
 }
@@ -961,13 +1042,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cp-role-word,
+  .cp-skill-word,
+  .cp-skill-window,
   .cp-cta,
-  .cp-cta::before,
-  .cp-cta::after,
   .cp-pill,
-  .cp-ribbon > span,
-  .cp-ribbon > span::after,
+  .cp-pill-go,
   .stamp-letter,
   .stamp-mark,
   .stamp-mark img,

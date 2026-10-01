@@ -9,13 +9,14 @@ import {
   Linkedin,
   Loader2,
   Mail,
+  MessageSquareText,
   MapPin,
   Moon,
   Send,
   Sun,
   type LucideIcon,
 } from 'lucide-react';
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { MenuButton } from '@/components/shell/MenuButton';
 import { Button } from '@/components/ui/Button';
 import { cloudConfigured } from '@/data/supabaseClient';
@@ -45,7 +46,6 @@ const ROLES = [
   'Cybersecurity Enthusiast',
   'Fast, Curious Learner',
 ];
-const ROLE_MS = 2600;
 
 interface Social {
   id: string;
@@ -55,8 +55,8 @@ interface Social {
   /** No url = not live yet (renders as a locked tile). */
   url?: string;
   icon: LucideIcon;
-  /** Diagonal corner ribbon, for things that aren't finished. */
-  ribbon?: string;
+  /** Small status badge, for things that aren't finished. */
+  status?: string;
   /** Longer explanation, shown as a tooltip and read to screen readers. */
   note?: string;
 }
@@ -67,7 +67,7 @@ const SOCIALS: Social[] = [
     name: 'Resume',
     handle: 'PDF · on its way',
     icon: FileText,
-    ribbon: 'Soon',
+    status: 'Soon',
     note: 'My resume is coming soon.',
   },
   {
@@ -76,7 +76,7 @@ const SOCIALS: Social[] = [
     handle: 'fouad-barkaoui',
     url: 'https://github.com/fouad-barkaoui',
     icon: Github,
-    ribbon: 'Building',
+    status: 'Building',
     note: 'Under construction — a brand-new account, repositories are on their way.',
   },
   {
@@ -85,7 +85,7 @@ const SOCIALS: Social[] = [
     handle: 'fouad-barkaoui',
     url: 'https://www.linkedin.com/in/fouad-barkaoui/',
     icon: Linkedin,
-    ribbon: 'WIP',
+    status: 'In progress',
     note: 'In development — the profile is still being put together.',
   },
   {
@@ -133,20 +133,62 @@ function MoroccoFlag(): JSX.Element {
   );
 }
 
-function RotatingRole(): JSX.Element {
+const prefersReducedMotion = (): boolean =>
+  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/**
+ * The skills line: one skill at a time in a pill that eases to the width of
+ * each word. A hairline along the bottom fills up to the next change and is
+ * also the clock, so pausing it (hover or focus) pauses the whole ticker.
+ */
+function SkillTicker(): JSX.Element {
   const [i, setI] = useState(0);
-  useEffect(() => {
-    const id = window.setInterval(() => setI((n) => (n + 1) % ROLES.length), ROLE_MS);
-    return () => window.clearInterval(id);
-  }, []);
+  const [prev, setPrev] = useState<number | null>(null);
+  const [paused, setPaused] = useState(false);
+  const [width, setWidth] = useState<number | undefined>(undefined);
+  const measure = useRef<HTMLSpanElement>(null);
+  const still = useMemo(prefersReducedMotion, []);
+
+  useLayoutEffect(() => {
+    if (measure.current) setWidth(Math.ceil(measure.current.getBoundingClientRect().width));
+  }, [i]);
+
+  const next = (): void => {
+    setPrev(i);
+    setI((n) => (n + 1) % ROLES.length);
+  };
+
   return (
-    <p className="cp-role">
+    <div
+      className="cp-skill"
+      data-paused={paused || undefined}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
       {/* Screen readers get the whole list once, not a chatty live region. */}
       <span className="sr-only">{ROLES.join(', ')}</span>
-      <span key={i} className="cp-role-word" aria-hidden>
-        {ROLES[i]}
+      <span className="cp-skill-pill" aria-hidden>
+        <span className="cp-skill-dot" />
+        <span className="cp-skill-window" style={{ width }}>
+          {prev !== null ? (
+            <span key={`out-${prev}-${i}`} className="cp-skill-word is-out">
+              {ROLES[prev]}
+            </span>
+          ) : null}
+          <span key={`in-${i}`} className="cp-skill-word is-in">
+            {ROLES[i]}
+          </span>
+        </span>
+        {still ? null : <span key={`bar-${i}`} className="cp-skill-bar" onAnimationEnd={next} />}
+        <span ref={measure} className="cp-skill-measure">
+          {ROLES[i]}
+        </span>
       </span>
-    </p>
+      <span className="cp-skill-count" aria-hidden>
+        {String(i + 1).padStart(2, '0')}
+        <span>/{String(ROLES.length).padStart(2, '0')}</span>
+      </span>
+    </div>
   );
 }
 
@@ -157,18 +199,16 @@ function SocialPill({ s }: { s: Social }): JSX.Element {
   const body = (
     <>
       <span className="cp-pill-icon" aria-hidden>
-        <Icon size={16} strokeWidth={1.7} />
+        <Icon size={17} strokeWidth={1.7} />
       </span>
       <span className="cp-pill-text">
-        <span className="cp-pill-name">{s.name}</span>
+        <span className="cp-pill-name">
+          {s.name}
+          {s.status ? <span className="cp-status">{s.status}</span> : null}
+        </span>
         <span className="cp-pill-handle">{s.handle}</span>
       </span>
-      {live && !s.ribbon ? <ArrowUpRight className="cp-pill-go" size={14} strokeWidth={1.8} aria-hidden /> : null}
-      {s.ribbon ? (
-        <span className="cp-ribbon" aria-hidden>
-          <span>{s.ribbon}</span>
-        </span>
-      ) : null}
+      {live && !s.status ? <ArrowUpRight className="cp-pill-go" size={15} strokeWidth={1.8} aria-hidden /> : null}
       {s.note ? (
         <span id={tipId} role="tooltip" className="cp-tip">
           {s.note}
@@ -177,7 +217,7 @@ function SocialPill({ s }: { s: Social }): JSX.Element {
     </>
   );
   const common = {
-    className: cn('cp-pill', s.ribbon && 'has-ribbon', !live && 'is-locked'),
+    className: cn('cp-pill', !live && 'is-locked'),
     'aria-describedby': tipId,
   };
   return live ? (
@@ -221,7 +261,7 @@ function ProfileCard(): JSX.Element {
             <span>Fouad Barkaoui</span>
             <BadgeCheck className="cp-verified" size={22} strokeWidth={1.6} aria-label="Verified" role="img" />
           </h2>
-          <RotatingRole />
+          <SkillTicker />
           <p className="cp-location">
             <MapPin size={13} strokeWidth={1.9} aria-hidden />
             <span>Morocco-based</span>
@@ -252,8 +292,21 @@ function ProfileCard(): JSX.Element {
 
         <div className="cp-cta-row">
           <a className="cp-cta" href={`mailto:${EMAIL}`}>
-            <Mail size={15} strokeWidth={1.8} aria-hidden />
-            Send an Email
+            <Mail size={16} strokeWidth={1.9} aria-hidden />
+            Email me
+          </a>
+          <a
+            className="cp-cta is-quiet"
+            href="#contact-form-card"
+            onClick={(e) => {
+              e.preventDefault();
+              const card = document.getElementById('contact-form-card');
+              card?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
+              card?.querySelector<HTMLElement>('input:not([type=radio]), textarea')?.focus({ preventScroll: true });
+            }}
+          >
+            <MessageSquareText size={16} strokeWidth={1.8} aria-hidden />
+            Write here
           </a>
         </div>
 
