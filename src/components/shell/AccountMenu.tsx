@@ -150,10 +150,12 @@ export function AccountMenu({
                   {look.label}
                 </div>
               ) : null}
-              <div className="am-status" data-live={user ? true : undefined}>
-                <span className="am-status-dot" aria-hidden />
-                {user ? 'Live · signed in' : configured ? 'Not signed in' : 'Local only'}
-              </div>
+              {user ? null : (
+                <div className="am-status">
+                  <span className="am-status-dot" aria-hidden />
+                  {configured ? 'Not signed in' : 'Local only'}
+                </div>
+              )}
               <div className="am-who">
                 <div className="min-w-0 flex-1">
                   <p className="am-name">{name}</p>
@@ -165,7 +167,7 @@ export function AccountMenu({
                   aria-label="Change profile picture"
                   onClick={go(() => setPictureOpen(true))}
                 >
-                  <Avatar src={avatarUrl} name={name} size={44} pro={isProUser(user)} />
+                  <Avatar src={avatarUrl} name={name} size={44} />
                   <span className="am-avatar-cam" aria-hidden>
                     <Camera size={11} strokeWidth={2.2} />
                   </span>
@@ -182,7 +184,7 @@ export function AccountMenu({
                     <span className="num">{formatBytes(MAX_TOTAL_CLOUD_BYTES)}</span>
                   </p>
                   <p className="am-usage-note">
-                    {tier === 'admin' ? 'Unlimited admin access' : tier === 'pro' ? 'Pro plan' : 'Beta · free while in beta'}
+                    {tier === 'admin' ? 'Admin account' : tier === 'pro' ? 'Pro plan' : 'Beta · free while in beta'}
                   </p>
                 </div>
               </div>

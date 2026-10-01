@@ -12,6 +12,7 @@ import { useLanguage } from '@/state/languageStore';
 import { useUI } from '@/state/uiStore';
 import { useWorkspace } from '@/state/workspaceStore';
 import { AccountMenu } from './AccountMenu';
+import { LiveStatus } from './LiveStatus';
 import { MenuButton } from './MenuButton';
 import { FLAG_TOOLTIP, FlagPill, NAV_KEY, SYNC_LOOK_KEY, TeamSwitcher, useRowFlag } from './navShared';
 
@@ -158,6 +159,7 @@ export function MobileMenu(): JSX.Element {
           </nav>
 
           <footer className="menu-foot relative px-4 pt-3 pb-[max(14px,env(safe-area-inset-bottom))]">
+            <LiveStatus />
             <div className="grid grid-cols-[auto_1fr] gap-2">
               <button
                 type="button"

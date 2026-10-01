@@ -25,6 +25,7 @@ import {
   type RowFlag,
 } from './navShared';
 import { AccountMenu } from './AccountMenu';
+import { LiveStatus } from './LiveStatus';
 import { NotificationBell } from './NotificationBell';
 import { useNotifications } from '@/state/notificationsStore';
 
@@ -534,6 +535,7 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
         </div>
 
         <div className="rail-foot">
+          <LiveStatus expanded={expanded} />
           <RailRow
             meta={MODULE_MAP.contact}
             label={labelFor('contact')}
