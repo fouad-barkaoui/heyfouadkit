@@ -3,16 +3,16 @@ import { friendlyOAuthError, parseOAuthRedirectError, rememberReturnRoute, takeR
 
 describe('parseOAuthRedirectError', () => {
   it('ignores a normal address', () => {
-    expect(parseOAuthRedirectError('https://heyfouadkit.vercel.app/#/saveit')).toBeNull();
+    expect(parseOAuthRedirectError('https://kanz-workspace.vercel.app/#/saveit')).toBeNull();
   });
 
   it('ignores a successful sign-in hash', () => {
-    expect(parseOAuthRedirectError('https://heyfouadkit.vercel.app/#access_token=a&refresh_token=b')).toBeNull();
+    expect(parseOAuthRedirectError('https://kanz-workspace.vercel.app/#access_token=a&refresh_token=b')).toBeNull();
   });
 
   it('reads a cancelled Google sign-in from the hash and cleans it out', () => {
     const r = parseOAuthRedirectError(
-      'https://heyfouadkit.vercel.app/#error=access_denied&error_code=access_denied&error_description=The+user+denied+access',
+      'https://kanz-workspace.vercel.app/#error=access_denied&error_code=access_denied&error_description=The+user+denied+access',
     );
     expect(r?.message).toMatch(/cancelled/);
     expect(r?.cleanedUrl).toBe('/');
@@ -20,7 +20,7 @@ describe('parseOAuthRedirectError', () => {
 
   it('reads an error from the query and keeps unrelated parameters', () => {
     const r = parseOAuthRedirectError(
-      'https://heyfouadkit.vercel.app/?ref=x&error=server_error&error_description=Database+error+saving+new+user',
+      'https://kanz-workspace.vercel.app/?ref=x&error=server_error&error_description=Database+error+saving+new+user',
     );
     expect(r?.message).toMatch(/could not be set up/);
     expect(r?.cleanedUrl).toBe('/?ref=x');

@@ -34,7 +34,7 @@ const ignorable = (text) =>
   );
 
 /* Fixtures for the attachment flow — a real 1x1 PNG and a text file. */
-const FIXTURES = join(tmpdir(), 'heyfouad-smoke');
+const FIXTURES = join(tmpdir(), 'kanz-smoke');
 mkdirSync(FIXTURES, { recursive: true });
 const PNG_PATH = join(FIXTURES, 'diagram.png');
 const TXT_PATH = join(FIXTURES, 'notes.txt');

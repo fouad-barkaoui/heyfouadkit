@@ -14,7 +14,7 @@ import type { Plugin } from 'vite';
  */
 function serviceWorker(): Plugin {
   return {
-    name: 'heyfouad-sw',
+    name: 'kanz-sw',
     apply: 'build',
     generateBundle(_opts, bundle) {
       const built = Object.keys(bundle)

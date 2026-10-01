@@ -1,5 +1,5 @@
 -- ============================================================================
--- heyfouad — Supabase schema (already applied to the live project)
+-- Kanz — Supabase schema (already applied to the live project)
 --
 -- Team collaboration: every content row belongs to a team, not directly to a
 -- user. Row-level security is enforced by team membership + role, not by

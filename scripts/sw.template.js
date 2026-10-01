@@ -1,4 +1,4 @@
-/* heyfouadkit service worker — generated at build time (see vite.config.ts).
+/* Kanz service worker — generated at build time (see vite.config.ts).
  *
  * - App shell + every hashed bundle are cached on install, so the app opens
  *   with no network at all.

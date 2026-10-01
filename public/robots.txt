@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://heyfouadkit.vercel.app/sitemap.xml
+Sitemap: https://kanz-workspace.vercel.app/sitemap.xml

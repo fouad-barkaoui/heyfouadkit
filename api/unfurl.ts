@@ -30,7 +30,7 @@ const MAX_BYTES = 1024 * 1024;
 const TIMEOUT_MS = 7000;
 const MAX_REDIRECTS = 4;
 const UA =
-  'Mozilla/5.0 (compatible; HeyfouadSaveIt/1.0; +https://heyfouadkit.vercel.app) AppleWebKit/537.36 (KHTML, like Gecko)';
+  'Mozilla/5.0 (compatible; KanzSaveIt/1.0; +https://kanz-workspace.vercel.app) AppleWebKit/537.36 (KHTML, like Gecko)';
 
 /* ── SSRF guards ───────────────────────────────────────────────────────── */
 
