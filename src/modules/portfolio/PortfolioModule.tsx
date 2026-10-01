@@ -312,9 +312,9 @@ export function PortfolioModule(): JSX.Element {
         <MenuButton className="md:hidden" />
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-[19px] font-medium leading-tight tracking-[-0.016em] text-paper md:text-[21px]">
-            Portfolio
+            Professional Profile
           </h1>
-          <p className="mt-1 truncate text-[12.5px] text-ash">Who I am, what I'm building, and where to find me.</p>
+          <p className="mt-1 truncate text-[12.5px] text-ash">Background, experience, stack and where to reach me.</p>
         </div>
       </header>
 

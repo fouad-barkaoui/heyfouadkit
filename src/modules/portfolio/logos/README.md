@@ -1,7 +1,7 @@
 # Built with — logo files
 
 Drop each company's **official** logo here (from its brand / press kit) and it
-shows up on the Portfolio page automatically. Until a file exists, the page shows
+shows up on the Profile page automatically. Until a file exists, the page shows
 the name as text.
 
 Name the files exactly like this (`.svg` preferred, `.png` also works):
