@@ -17,6 +17,22 @@ import { cn } from '@/lib/utils';
 import { originOf, useTheme } from '@/state/themeStore';
 import { useUI } from '@/state/uiStore';
 import { greetingFor } from './localTime';
+
+/**
+ * The name is set in PP Neue Machina Ultrabold when a licensed file sits in
+ * ./fonts (see fonts/README.md); otherwise CSS falls back to Unbounded.
+ */
+const NAME_FONT = Object.entries(
+  import.meta.glob<string>('./fonts/neue-machina-ultrabold.{woff2,woff,otf,ttf}', {
+    eager: true,
+    query: '?url',
+    import: 'default',
+  }),
+)[0]?.[1];
+if (NAME_FONT && typeof FontFace !== 'undefined') {
+  const face = new FontFace('PP Neue Machina', `url(${NAME_FONT})`, { weight: '800', display: 'swap' });
+  void face.load().then((f) => document.fonts.add(f), () => undefined);
+}
 import {
   BuiltWith,
   ExperienceSoon,

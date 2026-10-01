@@ -497,7 +497,7 @@ export function Motto(): JSX.Element {
         <blockquote>
           <p>&ldquo;Inspired by the fear of being average.&rdquo;</p>
         </blockquote>
-        <figcaption>— Fouad Barkaoui</figcaption>
+        <figcaption>— Unknown</figcaption>
       </figure>
     </div>
   );

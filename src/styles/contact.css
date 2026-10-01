@@ -1119,10 +1119,15 @@ a.cp-venture-name:hover {
 /* The name is the loudest thing on the page: heavy, tight, one line. */
 .cp-name {
   gap: 10px;
-  font-size: 36px;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.032em;
+  font-family: 'PP Neue Machina', 'Unbounded', var(--font-sans);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  font-size-adjust: none;
+}
+.cp-name > span {
+  color: color-mix(in oklab, var(--color-paper) 90%, transparent);
 }
 .cp-name .cp-verified {
   width: 26px;
@@ -1144,21 +1149,20 @@ a.cp-venture-name:hover {
 .cp-motto {
   position: relative;
   margin: 0;
-  padding: 30px 30px 22px;
+  padding: 40px 40px 30px;
   overflow: hidden;
   border-radius: 14px;
-  background: rgb(var(--tint-rgb) / 0.02);
-  box-shadow: inset 0 0 0 1px var(--color-graphite);
+  background: rgb(var(--tint-rgb) / 0.035);
 }
 .cp-motto-mark {
   position: absolute;
-  top: -26px;
-  left: 14px;
+  top: -58px;
+  left: 6px;
   font-family: Georgia, 'Times New Roman', serif;
-  font-size: 190px;
+  font-size: 300px;
   font-weight: 700;
   line-height: 1;
-  color: rgb(var(--tint-rgb) / 0.05);
+  color: rgb(var(--tint-rgb) / 0.07);
   pointer-events: none;
   user-select: none;
 }
@@ -1179,21 +1183,21 @@ a.cp-venture-name:hover {
 }
 .cp-motto blockquote p {
   margin: 0;
-  font-family: var(--font-mono);
-  font-size: 17px;
+  font-size: 26px;
   font-style: italic;
-  line-height: 1.5;
-  letter-spacing: -0.01em;
-  color: var(--color-mist);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+  color: var(--color-paper);
   text-wrap: balance;
 }
 .cp-motto figcaption {
   position: relative;
-  margin-top: 10px;
+  margin-top: 18px;
   text-align: right;
   font-family: var(--font-mono);
   font-size: 13px;
-  font-style: italic;
+  letter-spacing: 0.04em;
   color: var(--color-ash);
 }
 
@@ -1226,7 +1230,7 @@ a.cp-venture-name:hover {
 
 @media (max-width: 639px) {
   .cp-name {
-    font-size: 29px;
+    font-size: 24px;
   }
   .cp-name .cp-verified {
     width: 22px;
@@ -1242,13 +1246,14 @@ a.cp-venture-name:hover {
     padding: 20px 16px;
   }
   .cp-motto {
-    padding: 26px 20px 18px;
+    padding: 32px 22px 22px;
   }
   .cp-motto blockquote p {
-    font-size: 15.5px;
+    font-size: 21px;
   }
   .cp-motto-mark {
-    font-size: 150px;
+    top: -44px;
+    font-size: 220px;
   }
 }
 
