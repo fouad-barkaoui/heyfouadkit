@@ -1129,10 +1129,17 @@ a.cp-venture-name:hover {
   height: 26px;
   transform: translateY(1px);
 }
+/* Keep the name clear of the cover's bottom rule; the photo still overlaps it. */
+.cp-head {
+  padding-top: 24px;
+}
+.cp-head .cp-avatar {
+  margin-top: -88px;
+}
 
 /* Motto card: a giant faint quote mark behind italic mono, a star sticker. */
 .cp-motto-wrap {
-  padding: 4px 28px 28px;
+  padding: 28px;
 }
 .cp-motto {
   position: relative;
@@ -1225,8 +1232,14 @@ a.cp-venture-name:hover {
     width: 22px;
     height: 22px;
   }
+  .cp-head {
+    padding-top: 0;
+  }
+  .cp-head .cp-avatar {
+    margin-top: -52px;
+  }
   .cp-motto-wrap {
-    padding: 0 16px 22px;
+    padding: 20px 16px;
   }
   .cp-motto {
     padding: 26px 20px 18px;

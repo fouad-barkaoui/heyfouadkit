@@ -260,8 +260,6 @@ function ProfileCard(): JSX.Element {
         </div>
       </header>
 
-      <Motto />
-
       <Hatch />
       <Overview email={EMAIL} flag={<MoroccoFlag />} />
       <Hatch />
@@ -318,6 +316,8 @@ function ProfileCard(): JSX.Element {
 
       <Hatch />
       <RecognitionSoon />
+      <Hatch />
+      <Motto />
     </>
   );
 }
