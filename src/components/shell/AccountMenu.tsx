@@ -181,11 +181,9 @@ export function AccountMenu({
                     <span className="num">{used ? formatBytes(used) : '0 MB'}</span> used of{' '}
                     <span className="num">{formatBytes(MAX_TOTAL_CLOUD_BYTES)}</span>
                   </p>
-                  {tier === 'beta' ? (
-                    <p className="am-usage-cta">Try the Pro plan</p>
-                  ) : (
-                    <p className="am-usage-note">{tier === 'admin' ? 'Unlimited admin access' : 'Pro plan'}</p>
-                  )}
+                  <p className="am-usage-note">
+                    {tier === 'admin' ? 'Unlimited admin access' : tier === 'pro' ? 'Pro plan' : 'Beta · free while in beta'}
+                  </p>
                 </div>
               </div>
             ) : null}
