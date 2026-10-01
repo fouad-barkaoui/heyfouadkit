@@ -10,6 +10,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { IconButton } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 import { ScrollIndex } from '@/components/motion/ScrollIndex';
 
 interface TextMatch {
@@ -22,6 +23,7 @@ interface TextMatch {
  * full-text search that reports which pages a term lands on.
  */
 export function PdfViewer({ src, className }: { src: string; className?: string }): JSX.Element {
+  const { t, isArabic } = useLanguage();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const docRef = useRef<{ numPages: number; getPage: (n: number) => Promise<unknown> } | null>(null);
   const renderTask = useRef<{ cancel: () => void } | null>(null);
@@ -30,7 +32,8 @@ export function PdfViewer({ src, className }: { src: string; className?: string 
   const [page, setPage] = useState(1);
   const [scale, setScale] = useState(1.25);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  /** `true` = failed with no detail; a string is pdf.js's own (English) message. */
+  const [error, setError] = useState<string | true | null>(null);
   const [query, setQuery] = useState('');
   const [matches, setMatches] = useState<TextMatch[] | null>(null);
   const [searching, setSearching] = useState(false);
@@ -53,7 +56,7 @@ export function PdfViewer({ src, className }: { src: string; className?: string 
         docRef.current = doc as unknown as { numPages: number; getPage: (n: number) => Promise<unknown> };
         setPages(doc.numPages);
       } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'This PDF could not be opened.');
+        if (!cancelled) setError(e instanceof Error ? e.message : true);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -123,29 +126,29 @@ export function PdfViewer({ src, className }: { src: string; className?: string 
   return (
     <div className={cn('flex min-h-0 flex-col', className)}>
       <div className="no-print mb-3 flex flex-wrap items-center gap-2 rounded-[6px] bg-[rgb(var(--tint-rgb)/0.02)] px-2 py-1.5 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
-        <IconButton label="Previous page" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
-          <ChevronLeft size={15} strokeWidth={1.8} />
+        <IconButton label={t('art.pdf.prev')} disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+          <ChevronLeft size={15} strokeWidth={1.8} className="rtl:-scale-x-100" />
         </IconButton>
         <span className="mono num min-w-[68px] text-center text-[11.5px] text-mist">
           {pages ? `${page} / ${pages}` : '—'}
         </span>
         <IconButton
-          label="Next page"
+          label={t('art.pdf.next')}
           disabled={page >= pages}
           onClick={() => setPage((p) => Math.min(pages, p + 1))}
         >
-          <ChevronRight size={15} strokeWidth={1.8} />
+          <ChevronRight size={15} strokeWidth={1.8} className="rtl:-scale-x-100" />
         </IconButton>
 
         <span className="mx-1 h-4 w-px bg-graphite" aria-hidden />
 
-        <IconButton label="Zoom out" onClick={() => setScale((s) => Math.max(0.5, +(s - 0.25).toFixed(2)))}>
+        <IconButton label={t('art.pdf.zoomOut')} onClick={() => setScale((s) => Math.max(0.5, +(s - 0.25).toFixed(2)))}>
           <Minus size={14} strokeWidth={1.9} />
         </IconButton>
         <span className="mono num min-w-[42px] text-center text-[11.5px] text-mist">
           {Math.round(scale * 100)}%
         </span>
-        <IconButton label="Zoom in" onClick={() => setScale((s) => Math.min(3, +(s + 0.25).toFixed(2)))}>
+        <IconButton label={t('art.pdf.zoomIn')} onClick={() => setScale((s) => Math.min(3, +(s + 0.25).toFixed(2)))}>
           <Plus size={14} strokeWidth={1.9} />
         </IconButton>
 
@@ -155,7 +158,7 @@ export function PdfViewer({ src, className }: { src: string; className?: string 
           <Search
             size={13}
             strokeWidth={1.7}
-            className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-ash"
+            className="pointer-events-none absolute start-2 top-1/2 -translate-y-1/2 text-ash"
             aria-hidden
           />
           <input
@@ -164,19 +167,19 @@ export function PdfViewer({ src, className }: { src: string; className?: string 
             onKeyDown={(e) => {
               if (e.key === 'Enter') void runSearch();
             }}
-            placeholder="Find in document…"
-            aria-label="Find in document"
-            className="field py-[5px] pl-7 pr-7 text-[12.5px]"
+            placeholder={t('art.pdf.findPlaceholder')}
+            aria-label={t('art.pdf.find')}
+            className="field py-[5px] ps-7 pe-7 text-[12.5px]"
           />
           {query ? (
             <button
               type="button"
-              aria-label="Clear search"
+              aria-label={t('art.pdf.clear')}
               onClick={() => {
                 setQuery('');
                 setMatches(null);
               }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-ash hover:text-mist"
+              className="absolute end-2 top-1/2 -translate-y-1/2 text-ash hover:text-mist"
             >
               <X size={12} strokeWidth={2} />
             </button>
@@ -188,11 +191,11 @@ export function PdfViewer({ src, className }: { src: string; className?: string 
       {matches ? (
         <div className="no-print mb-3 rounded-[6px] bg-[rgb(var(--tint-rgb)/0.02)] p-2 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
           {matches.length === 0 ? (
-            <p className="px-1 py-1 text-[12px] text-ash">No match for “{query}”.</p>
+            <p className="px-1 py-1 text-[12px] text-ash">{t('art.pdf.noMatch', { query })}</p>
           ) : (
             <>
               <p className="px-1 pb-1.5 text-[11px] uppercase tracking-[0.07em] text-ash">
-                {matches.length} page{matches.length === 1 ? '' : 's'} matched
+                {matches.length === 1 ? t('art.pdf.matchedOne') : t('art.pdf.matchedMany', { count: matches.length })}
               </p>
               <div className="scroll-y max-h-[130px]">
                 {matches.map((m) => (
@@ -201,11 +204,11 @@ export function PdfViewer({ src, className }: { src: string; className?: string 
                     type="button"
                     onClick={() => setPage(m.page)}
                     className={cn(
-                      'flex w-full gap-2 rounded-[5px] px-2 py-1.5 text-left text-[12px] transition-colors',
+                      'flex w-full gap-2 rounded-[5px] px-2 py-1.5 text-start text-[12px] transition-colors',
                       m.page === page ? 'bg-obsidian text-mist' : 'text-ash hover:bg-[rgb(var(--tint-rgb)/0.03)]',
                     )}
                   >
-                    <span className="mono shrink-0 text-[11px] text-accent">p{m.page}</span>
+                    <span className="mono shrink-0 text-[11px] text-accent">{t('art.pdf.pageShort', { page: m.page })}</span>
                     <span className="truncate">{m.snippet}</span>
                   </button>
                 ))}
@@ -220,11 +223,11 @@ export function PdfViewer({ src, className }: { src: string; className?: string 
         {loading ? (
           <div className="flex h-[320px] items-center justify-center gap-2 text-[13px] text-ash">
             <Loader2 size={15} className="animate-spin" aria-hidden />
-            Opening document…
+            {t('art.pdf.opening')}
           </div>
         ) : error ? (
           <div className="flex h-[320px] items-center justify-center px-6 text-center text-[13px] text-coral">
-            {error}
+            {error === true || isArabic ? t('art.pdf.openFailed') : error}
           </div>
         ) : (
           <div className="flex justify-center">

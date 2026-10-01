@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { useUI } from '@/state/uiStore';
 import { ScrollIndex } from '@/components/motion/ScrollIndex';
+import { useI18n } from '@/components/ui/useI18n';
 import { MenuButton } from './MenuButton';
 
 /**
@@ -42,6 +43,7 @@ export function ModuleLayout({
   contentPadding?: boolean;
 }): JSX.Element {
   const { panelExpanded, togglePanel } = useUI();
+  const { t } = useI18n();
 
   return (
     <div className="flex h-full min-h-0 w-full min-w-0">
@@ -69,10 +71,10 @@ export function ModuleLayout({
           <button
             type="button"
             onClick={togglePanel}
-            aria-label="Collapse panel"
+            aria-label={t('sh.panel.collapse')}
             className="btn-icon hidden shrink-0 md:inline-flex"
           >
-            <PanelLeftClose size={14} strokeWidth={1.7} />
+            <PanelLeftClose size={14} strokeWidth={1.7} className="rtl:-scale-x-100" />
           </button>
         </div>
 
@@ -81,15 +83,15 @@ export function ModuleLayout({
             <Search
               size={13.5}
               strokeWidth={1.7}
-              className="pointer-events-none absolute left-[26px] top-1/2 -translate-y-1/2 text-ash"
+              className="pointer-events-none absolute start-[26px] top-1/2 -translate-y-1/2 text-ash"
               aria-hidden
             />
             <input
               value={panelSearch.value}
               onChange={(e) => panelSearch.onChange(e.target.value)}
-              placeholder={panelSearch.placeholder ?? 'Search…'}
-              aria-label={panelSearch.placeholder ?? 'Search'}
-              className="field py-[7px] pl-[30px] text-[13px]"
+              placeholder={panelSearch.placeholder ?? t('sh.searchEllipsis')}
+              aria-label={panelSearch.placeholder ?? t('shell.search')}
+              className="field py-[7px] ps-[30px] text-[13px]"
             />
           </div>
         ) : null}
@@ -108,8 +110,8 @@ export function ModuleLayout({
       >
         <header className="flex flex-wrap items-start gap-x-3 gap-y-2.5 border-b border-graphite px-4 py-3.5 md:flex-nowrap md:px-7 md:py-4">
           {onMobileBack ? (
-            <button type="button" className="btn-icon md:hidden" aria-label="Back to list" onClick={onMobileBack}>
-              <ChevronLeft size={17} strokeWidth={1.8} />
+            <button type="button" className="btn-icon md:hidden" aria-label={t('sh.panel.back')} onClick={onMobileBack}>
+              <ChevronLeft size={17} strokeWidth={1.8} className="rtl:-scale-x-100" />
             </button>
           ) : (
             <MenuButton className="md:hidden" />
@@ -118,10 +120,10 @@ export function ModuleLayout({
             <button
               type="button"
               className="btn-icon hidden shrink-0 md:inline-flex"
-              aria-label="Show panel"
+              aria-label={t('sh.panel.show')}
               onClick={togglePanel}
             >
-              <PanelLeftOpen size={16} strokeWidth={1.7} />
+              <PanelLeftOpen size={16} strokeWidth={1.7} className="rtl:-scale-x-100" />
             </button>
           ) : null}
           <div className="min-w-0 flex-1 basis-[190px]">

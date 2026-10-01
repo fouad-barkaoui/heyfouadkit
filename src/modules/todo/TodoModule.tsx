@@ -9,7 +9,9 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { ProgressRing } from '@/components/ui/ProgressRing';
 import { Timeline, type TimelineEntry } from '@/components/ui/Timeline';
 import type { TaskStatus, Todo } from '@/lib/types';
-import { cn, formatDateTime, groupByDay, nowISO } from '@/lib/utils';
+import { cn, nowISO } from '@/lib/utils';
+import { localDateTime, localGroupByDay } from '@/modules/articles/localDates';
+import { useLanguage } from '@/state/languageStore';
 import { useUI } from '@/state/uiStore';
 import { useRequireAuth } from '@/state/useRequireAuth';
 import { useWorkspace } from '@/state/workspaceStore';
@@ -21,21 +23,22 @@ import { dueInfo, PRIORITY_LABEL, PRIORITY_TONE, PRIORITY_WEIGHT, STATUS_LABEL, 
 
 type ViewMode = 'list' | 'board' | 'matrix' | 'timeline';
 
-const VIEWS: { id: ViewMode; label: string; icon: typeof Rows3 }[] = [
-  { id: 'list', label: 'List', icon: Rows3 },
-  { id: 'board', label: 'Board', icon: Columns3 },
-  { id: 'matrix', label: 'Matrix', icon: LayoutGrid },
-  { id: 'timeline', label: 'Timeline', icon: CalendarClock },
+const VIEWS: { id: ViewMode; labelKey: string; icon: typeof Rows3 }[] = [
+  { id: 'list', labelKey: 'task.view.list', icon: Rows3 },
+  { id: 'board', labelKey: 'task.view.board', icon: Columns3 },
+  { id: 'matrix', labelKey: 'task.view.matrix', icon: LayoutGrid },
+  { id: 'timeline', labelKey: 'task.view.timeline', icon: CalendarClock },
 ];
 
-const STATUS_FILTERS: { id: TaskStatus | 'all' | 'open'; label: string }[] = [
-  { id: 'open', label: 'Open' },
-  { id: 'all', label: 'All' },
-  { id: 'in_progress', label: 'Active' },
-  { id: 'completed', label: 'Done' },
+const STATUS_FILTERS: { id: TaskStatus | 'all' | 'open'; labelKey: string }[] = [
+  { id: 'open', labelKey: 'task.filter.open' },
+  { id: 'all', labelKey: 'task.filter.all' },
+  { id: 'in_progress', labelKey: 'task.filter.active' },
+  { id: 'completed', labelKey: 'task.filter.done' },
 ];
 
 export function TodoModule(): JSX.Element {
+  const { t } = useLanguage();
   const { workspace, createRecord, updateRecord, toggleInteresting } = useWorkspace();
   const { focusRequest, clearFocus } = useUI();
   const requireAuth = useRequireAuth();
@@ -111,7 +114,7 @@ export function TodoModule(): JSX.Element {
 
   const listView = (
     <div className="mx-auto max-w-[900px]">
-      {groupByDay(visible, (t) => t.dueDate ?? t.updatedAt).map(([bucket, items]) => (
+      {localGroupByDay(visible, (t) => t.dueDate ?? t.updatedAt).map(([bucket, items]) => (
         <div key={bucket} className="mb-6 last:mb-0">
           <div className="mb-2.5 flex items-center gap-2.5">
             <h3 className="text-[12px] font-medium uppercase tracking-[0.07em] text-ash">{bucket}</h3>
@@ -151,7 +154,7 @@ export function TodoModule(): JSX.Element {
     })
     .map((todo) => ({
       id: todo.id,
-      timestamp: todo.dueDate ? formatDateTime(todo.dueDate) : 'No date set',
+      timestamp: todo.dueDate ? localDateTime(todo.dueDate) : t('task.noDate'),
       title: todo.title,
       description: todo.description || undefined,
       state: todo.status === 'completed' ? 'done' : todo.status === 'in_progress' ? 'active' : 'pending',
@@ -164,10 +167,10 @@ export function TodoModule(): JSX.Element {
       actions: (
         <>
           <TaskCheckbox done={todo.status === 'completed'} onToggle={() => toggleDone(todo)} size={15} />
-          <IconButton label="Edit task" className="h-6 w-6" onClick={() => openEdit(todo)}>
+          <IconButton label={t('task.edit')} className="h-6 w-6" onClick={() => openEdit(todo)}>
             <Plus size={12.5} strokeWidth={1.9} className="rotate-45" />
           </IconButton>
-          <ConfirmDelete onConfirm={() => trashTodo(todo.id)} label="Delete task" size={12.5} />
+          <ConfirmDelete onConfirm={() => trashTodo(todo.id)} label={t('task.delete')} size={12.5} />
         </>
       ),
     }));
@@ -177,11 +180,11 @@ export function TodoModule(): JSX.Element {
     content = (
       <EmptyState
         icon={<ListChecks size={18} strokeWidth={1.6} />}
-        title={query || statusFilter !== 'open' ? 'Nothing matches this filter' : 'No open tasks'}
-        hint="Tasks carry a priority and an optional due date — both feed the matrix and timeline views."
+        title={query || statusFilter !== 'open' ? t('task.empty.filtered') : t('task.empty.none')}
+        hint={t('task.empty.hint')}
         action={
           <Button variant="primary" icon={<Plus size={14} strokeWidth={2} />} onClick={openNew}>
-            New task
+            {t('task.new')}
           </Button>
         }
       />
@@ -221,18 +224,18 @@ export function TodoModule(): JSX.Element {
     <div ref={panelRef}>
       <div className="mb-3 space-y-2 rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
         <div className="flex items-center gap-3">
-          <ProgressRing value={stats.rate} label={`${Math.round(stats.rate)}% complete`} />
+          <ProgressRing value={stats.rate} label={t('task.ringLabel', { percent: Math.round(stats.rate) })} />
           <div className="min-w-0">
             <p className="num text-[13px] text-paper">
               {stats.done}<span className="text-ash"> / {stats.total}</span>
             </p>
-            <p className="text-[11.5px] text-ash">tasks completed</p>
+            <p className="text-[11.5px] text-ash">{t('task.tasksCompleted')}</p>
           </div>
         </div>
         {stats.overdue > 0 ? (
           <div className="flex items-center gap-2 text-[11.5px] text-coral">
             <StatusDot tone="danger" />
-            <span className="num">{stats.overdue} overdue</span>
+            <span className="num">{t('task.overdueCount', { count: stats.overdue })}</span>
           </div>
         ) : null}
       </div>
@@ -281,14 +284,14 @@ export function TodoModule(): JSX.Element {
   return (
     <>
       <ModuleLayout
-        panelTitle="Tasks"
+        panelTitle={t('nav.todo')}
         panelCount={visible.length}
         panelActions={
-          <IconButton label="New task" onClick={openNew}>
+          <IconButton label={t('task.new')} onClick={openNew}>
             <Plus size={15} strokeWidth={1.9} />
           </IconButton>
         }
-        panelSearch={{ value: query, onChange: setQuery, placeholder: 'Search tasks…' }}
+        panelSearch={{ value: query, onChange: setQuery, placeholder: t('task.search') }}
         panelFilters={
           <div className="flex flex-wrap gap-1.5">
             {STATUS_FILTERS.map((f) => (
@@ -299,29 +302,29 @@ export function TodoModule(): JSX.Element {
                 data-active={statusFilter === f.id}
                 onClick={() => setStatusFilter(f.id)}
               >
-                {f.label}
+                {t(f.labelKey)}
               </button>
             ))}
           </div>
         }
         panel={panel}
-        title="Tasks"
+        title={t('nav.todo')}
         subtitle={
           <span className="flex flex-wrap items-center gap-2">
-            <span className="num">{visible.length} shown</span>
+            <span className="num">{t('task.shownCount', { count: visible.length })}</span>
             <span aria-hidden>·</span>
-            <span className="num">{stats.done} completed</span>
+            <span className="num">{t('task.completedCount', { count: stats.done })}</span>
             {stats.overdue > 0 ? (
               <>
                 <span aria-hidden>·</span>
-                <span className="text-coral num">{stats.overdue} overdue</span>
+                <span className="text-coral num">{t('task.overdueCount', { count: stats.overdue })}</span>
               </>
             ) : null}
           </span>
         }
         actions={
           <Button variant="primary" icon={<Plus size={14} strokeWidth={2} />} onClick={openNew}>
-            New task
+            {t('task.new')}
           </Button>
         }
         toolbar={
@@ -338,7 +341,7 @@ export function TodoModule(): JSX.Element {
                 )}
               >
                 <v.icon size={13} strokeWidth={1.75} aria-hidden />
-                {v.label}
+                {t(v.labelKey)}
               </button>
             ))}
           </div>

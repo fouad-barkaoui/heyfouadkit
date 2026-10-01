@@ -13,6 +13,7 @@ import {
 } from '@/data/avatar';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/state/authStore';
+import { translate, useLanguage } from '@/state/languageStore';
 
 const FRAME = 232;
 const MIN_ZOOM = 1;
@@ -28,6 +29,7 @@ type Feedback = { tone: 'ok' | 'bad'; text: string } | null;
  */
 export function AvatarEditor({ name, pro = false }: { name: string; pro?: boolean }): JSX.Element {
   const { avatarUrl, setAvatar, user } = useAuth();
+  const { t } = useLanguage();
   const inputRef = useRef<HTMLInputElement>(null);
   const [source, setSource] = useState<{ url: string; img: HTMLImageElement } | null>(null);
   const [crop, setCrop] = useState<CropState>({ zoom: 1, x: 0, y: 0 });
@@ -45,11 +47,11 @@ export function AvatarEditor({ name, pro = false }: { name: string; pro?: boolea
     if (!file) return;
     setFeedback(null);
     if (!file.type.startsWith('image/')) {
-      setFeedback({ tone: 'bad', text: 'Pick an image file — PNG, JPG or WebP.' });
+      setFeedback({ tone: 'bad', text: translate('prof.err.notImage') });
       return;
     }
     if (file.size > MAX_AVATAR_SOURCE_BYTES) {
-      setFeedback({ tone: 'bad', text: 'That image is over 12 MB — pick a smaller one.' });
+      setFeedback({ tone: 'bad', text: translate('prof.err.tooBig') });
       return;
     }
     const url = URL.createObjectURL(file);
@@ -59,7 +61,7 @@ export function AvatarEditor({ name, pro = false }: { name: string; pro?: boolea
       setCrop({ zoom: 1, x: 0, y: 0 });
     } catch (err) {
       URL.revokeObjectURL(url);
-      setFeedback({ tone: 'bad', text: err instanceof Error ? err.message : 'That image could not be opened.' });
+      setFeedback({ tone: 'bad', text: err instanceof Error ? err.message : translate('prof.err.cantOpen') });
     }
   }, []);
 
@@ -152,12 +154,12 @@ export function AvatarEditor({ name, pro = false }: { name: string; pro?: boolea
         setSource(null);
         setJustSaved(true);
         window.setTimeout(() => setJustSaved(false), 1400);
-        setFeedback({ tone: 'ok', text: result.message ?? 'Profile picture updated.' });
+        setFeedback({ tone: 'ok', text: result.message ?? t('prof.updated') });
       } else {
         setFeedback({ tone: 'bad', text: result.error });
       }
     } catch (err) {
-      setFeedback({ tone: 'bad', text: err instanceof Error ? err.message : 'The picture could not be saved.' });
+      setFeedback({ tone: 'bad', text: err instanceof Error ? err.message : t('prof.err.cantSave') });
     } finally {
       setBusy(false);
     }
@@ -168,7 +170,7 @@ export function AvatarEditor({ name, pro = false }: { name: string; pro?: boolea
     setFeedback(null);
     const result = await setAvatar(null);
     setBusy(false);
-    setFeedback(result.ok ? { tone: 'ok', text: result.message ?? 'Picture removed.' } : { tone: 'bad', text: result.error });
+    setFeedback(result.ok ? { tone: 'ok', text: result.message ?? t('prof.removed') } : { tone: 'bad', text: result.error });
   };
 
   const hiddenInput = (
@@ -199,7 +201,7 @@ export function AvatarEditor({ name, pro = false }: { name: string; pro?: boolea
           ref={frameRef}
           role="application"
           tabIndex={0}
-          aria-label="Position your picture. Drag or use the arrow keys to move, scroll or plus and minus to zoom."
+          aria-label={t('prof.cropLabel')}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
@@ -225,7 +227,7 @@ export function AvatarEditor({ name, pro = false }: { name: string; pro?: boolea
         </div>
 
         <div className="mt-4 flex w-full max-w-[260px] items-center gap-2.5">
-          <button type="button" className="btn-icon" aria-label="Zoom out" onClick={() => update({ ...crop, zoom: crop.zoom / 1.15 })}>
+          <button type="button" className="btn-icon" aria-label={t('prof.zoomOut')} onClick={() => update({ ...crop, zoom: crop.zoom / 1.15 })}>
             <Minus size={14} strokeWidth={2} />
           </button>
           <input
@@ -234,20 +236,20 @@ export function AvatarEditor({ name, pro = false }: { name: string; pro?: boolea
             max={MAX_ZOOM}
             step={0.01}
             value={crop.zoom}
-            aria-label="Zoom"
+            aria-label={t('prof.zoom')}
             onChange={(e) => update({ ...crop, zoom: Number(e.target.value) })}
             className="avatar-zoom flex-1"
             style={{ ['--pct' as string]: `${pct}%` }}
           />
-          <button type="button" className="btn-icon" aria-label="Zoom in" onClick={() => update({ ...crop, zoom: crop.zoom * 1.15 })}>
+          <button type="button" className="btn-icon" aria-label={t('prof.zoomIn')} onClick={() => update({ ...crop, zoom: crop.zoom * 1.15 })}>
             <Plus size={14} strokeWidth={2} />
           </button>
         </div>
-        <p className="mt-2 text-[11.5px] text-ash">Drag to reposition · scroll or pinch to zoom</p>
+        <p className="mt-2 text-[11.5px] text-ash">{t('prof.cropHint')}</p>
 
         <div className="mt-4 flex w-full flex-wrap justify-center gap-2">
           <Button variant="quiet" disabled={busy} onClick={() => setSource(null)} icon={<X size={13} strokeWidth={2} />}>
-            Cancel
+            {t('prof.cancel')}
           </Button>
           <Button
             variant="quiet"
@@ -255,11 +257,11 @@ export function AvatarEditor({ name, pro = false }: { name: string; pro?: boolea
             onClick={() => setCrop({ zoom: 1, x: 0, y: 0 })}
             icon={<RotateCcw size={13} strokeWidth={2} />}
           >
-            Reset
+            {t('prof.reset')}
           </Button>
           <Button variant="primary" disabled={busy} onClick={() => void save()}>
             {busy ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} strokeWidth={2.2} />}
-            {busy ? 'Saving…' : 'Save picture'}
+            {busy ? t('prof.saving') : t('prof.savePicture')}
           </Button>
         </div>
         {feedback ? (
@@ -291,7 +293,7 @@ export function AvatarEditor({ name, pro = false }: { name: string; pro?: boolea
         type="button"
         onClick={() => inputRef.current?.click()}
         className={cn('avatar-trigger group relative shrink-0 rounded-full', justSaved && 'is-saved')}
-        aria-label={avatarUrl ? 'Change profile picture' : 'Add a profile picture'}
+        aria-label={avatarUrl ? t('prof.changePicture') : t('prof.addPicture')}
       >
         <Avatar src={avatarUrl} name={name} size={76} pro={pro} />
         <span className="avatar-trigger-veil absolute inset-0 flex items-center justify-center rounded-full">
@@ -299,17 +301,17 @@ export function AvatarEditor({ name, pro = false }: { name: string; pro?: boolea
         </span>
       </button>
       <div className="min-w-0 flex-1">
-        <p className="text-[13px] text-paper">Profile picture</p>
+        <p className="text-[13px] text-paper">{t('prof.picture')}</p>
         <p className="mt-0.5 text-[11.5px] leading-[1.5] text-ash">
           {dragOver
-            ? 'Drop it here'
+            ? t('prof.dropHere')
             : user
-              ? 'Shown across the app and to your team. Drag an image here or choose one.'
-              : 'Kept on this device. Sign in to carry it to every device.'}
+              ? t('prof.hintSignedIn')
+              : t('prof.hintLocal')}
         </p>
         <div className="mt-2.5 flex flex-wrap gap-2">
           <Button onClick={() => inputRef.current?.click()} disabled={busy} icon={<ImagePlus size={13} strokeWidth={1.9} />}>
-            {avatarUrl ? 'Change' : 'Upload'}
+            {avatarUrl ? t('prof.change') : t('prof.upload')}
           </Button>
           {avatarUrl ? (
             <Button
@@ -318,7 +320,7 @@ export function AvatarEditor({ name, pro = false }: { name: string; pro?: boolea
               onClick={() => void remove()}
               icon={busy ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} strokeWidth={1.9} />}
             >
-              Remove
+              {t('prof.remove')}
             </Button>
           ) : null}
         </div>

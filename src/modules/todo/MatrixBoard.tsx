@@ -1,5 +1,6 @@
 import { StatusDot } from '@/components/ui/BadgeChip';
 import type { Todo } from '@/lib/types';
+import { useLanguage } from '@/state/languageStore';
 import { TaskCard } from './TaskCard';
 import { matrixQuadrant, QUADRANTS } from './taskMeta';
 
@@ -17,6 +18,7 @@ export function MatrixBoard({
   onDelete: (id: string) => void;
   onToggleStar: (id: string) => void;
 }): JSX.Element {
+  const { t } = useLanguage();
   const open = todos.filter((t) => t.status !== 'completed' && t.status !== 'archived');
 
   return (
@@ -30,8 +32,8 @@ export function MatrixBoard({
           >
             <header className="mb-3 flex items-baseline gap-2">
               <StatusDot tone={quadrant.tone} className="translate-y-[-2px]" />
-              <h3 className="text-[13px] font-medium tracking-[-0.012em] text-paper">{quadrant.title}</h3>
-              <span className="text-[11.5px] text-ash">{quadrant.hint}</span>
+              <h3 className="text-[13px] font-medium tracking-[-0.012em] text-paper">{t(quadrant.titleKey)}</h3>
+              <span className="text-[11.5px] text-ash">{t(quadrant.hintKey)}</span>
               <span className="mono num ml-auto text-[11px] text-ash">{items.length}</span>
             </header>
             <div className="flex flex-col gap-2">
@@ -47,7 +49,7 @@ export function MatrixBoard({
                 />
               ))}
               {items.length === 0 ? (
-                <p className="py-5 text-center text-[11.5px] text-ash/70">Nothing here — good.</p>
+                <p className="py-5 text-center text-[11.5px] text-ash/70">{t('task.matrix.empty')}</p>
               ) : null}
             </div>
           </section>

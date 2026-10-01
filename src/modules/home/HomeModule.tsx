@@ -17,7 +17,6 @@ import { Avatar } from '@/components/ui/Avatar';
 import { isProUser } from '@/lib/access';
 import { Timeline, type TimelineEntry } from '@/components/ui/Timeline';
 import type { ModuleId, Workspace } from '@/lib/types';
-import { formatDateTime } from '@/lib/utils';
 import { getDisplayName, useAuth } from '@/state/authStore';
 import { useLanguage } from '@/state/languageStore';
 import { useTeam } from '@/state/teamStore';
@@ -27,16 +26,32 @@ import { dueInfo } from '@/modules/todo/taskMeta';
 import { MenuButton } from '@/components/shell/MenuButton';
 import { ScrollIndex } from '@/components/motion/ScrollIndex';
 
-function collectTimestamps(ws: Workspace): { id: string; title: string; when: string; kind: string; module: ModuleId }[] {
+/** `kind` is a stable id (also used in row keys); its label is `home2.kind.<kind>`. */
+function collectTimestamps(
+  ws: Workspace,
+  t: (key: string) => string,
+): { id: string; title: string; when: string; kind: string; module: ModuleId }[] {
   return [
-    ...ws.notes.map((n) => ({ id: n.id, title: n.title || 'Untitled note', when: n.updatedAt, kind: 'Note', module: 'notebook' as ModuleId })),
-    ...ws.todos.map((t) => ({ id: t.id, title: t.title, when: t.updatedAt, kind: 'Task', module: 'todo' as ModuleId })),
-    ...ws.articles.map((a) => ({ id: a.id, title: a.title || 'Untitled article', when: a.updatedAt, kind: 'Article', module: 'articles' as ModuleId })),
-    ...ws.docs.map((d) => ({ id: d.id, title: d.title || 'Untitled document', when: d.updatedAt, kind: 'Document', module: 'docs' as ModuleId })),
-    ...ws.courses.map((c) => ({ id: c.id, title: c.title || 'Untitled course', when: c.updatedAt, kind: 'Course', module: 'courses' as ModuleId })),
-    ...ws.news.map((n) => ({ id: n.id, title: n.title || 'Untitled story', when: n.updatedAt, kind: 'News', module: 'news' as ModuleId })),
-    ...ws.medicines.map((m) => ({ id: m.id, title: m.name || 'Untitled medicine', when: m.updatedAt, kind: 'Medicine', module: 'medications' as ModuleId })),
+    ...ws.notes.map((n) => ({ id: n.id, title: n.title || t('home2.untitled.note'), when: n.updatedAt, kind: 'Note', module: 'notebook' as ModuleId })),
+    ...ws.todos.map((x) => ({ id: x.id, title: x.title, when: x.updatedAt, kind: 'Task', module: 'todo' as ModuleId })),
+    ...ws.articles.map((a) => ({ id: a.id, title: a.title || t('home2.untitled.article'), when: a.updatedAt, kind: 'Article', module: 'articles' as ModuleId })),
+    ...ws.docs.map((d) => ({ id: d.id, title: d.title || t('home2.untitled.document'), when: d.updatedAt, kind: 'Document', module: 'docs' as ModuleId })),
+    ...ws.courses.map((c) => ({ id: c.id, title: c.title || t('home2.untitled.course'), when: c.updatedAt, kind: 'Course', module: 'courses' as ModuleId })),
+    ...ws.news.map((n) => ({ id: n.id, title: n.title || t('home2.untitled.story'), when: n.updatedAt, kind: 'News', module: 'news' as ModuleId })),
+    ...ws.medicines.map((m) => ({ id: m.id, title: m.name || t('home2.untitled.medicine'), when: m.updatedAt, kind: 'Medicine', module: 'medications' as ModuleId })),
   ];
+}
+
+function daysUntil(iso: string | null | undefined): number {
+  if (!iso) return Infinity;
+  const startOf = (d: Date): number => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  return Math.round((startOf(new Date(iso)) - startOf(new Date())) / 86_400_000);
+}
+
+function formatWhen(iso: string, locale: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleString(locale, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
 
 function greetingKey(): string {
@@ -53,7 +68,7 @@ export function HomeModule(): JSX.Element {
   const pro = isProUser(user);
   const { activeTeam, members } = useTeam();
   const { setModule } = useUI();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
 
   const QUICK_LINKS: { id: ModuleId; labelKey: string; hintKey: string; icon: typeof ListChecks }[] = [
     { id: 'saveit', labelKey: 'home.link.saveit.label', hintKey: 'home.link.saveit.hint', icon: BookmarkPlus },
@@ -69,7 +84,8 @@ export function HomeModule(): JSX.Element {
     const openTasks = workspace.todos.filter((t) => t.status !== 'completed' && t.status !== 'archived');
     const dueSoon = openTasks.filter((t) => {
       const info = dueInfo(t);
-      return info ? info.overdue || /today|tomorrow/.test(info.label) : false;
+      // Overdue, or due today / tomorrow — from the date itself, not the (translatable) label.
+      return info ? info.overdue || (t.status !== 'completed' && daysUntil(t.dueDate) <= 1) : false;
     });
     const overdue = openTasks.filter((t) => dueInfo(t)?.overdue);
     return {
@@ -81,18 +97,18 @@ export function HomeModule(): JSX.Element {
   }, [workspace]);
 
   const recent = useMemo<TimelineEntry[]>(() => {
-    return collectTimestamps(workspace)
+    return collectTimestamps(workspace, t)
       .sort((a, b) => new Date(b.when).getTime() - new Date(a.when).getTime())
       .slice(0, 7)
       .map((row, i) => ({
         id: `${row.kind}-${row.id}`,
-        timestamp: formatDateTime(row.when),
+        timestamp: row.when ? formatWhen(row.when, locale) : '—',
         title: row.title,
-        description: row.kind,
+        description: t(`home2.kind.${row.kind.toLowerCase()}`),
         state: i === 0 ? 'active' : 'done',
         onClick: () => setModule(row.module),
       }));
-  }, [workspace, setModule]);
+  }, [workspace, setModule, t, locale]);
 
   const gridRef = useStagger([workspace, activeTeam?.id]);
   const name = getDisplayName(user).split(' ')[0] || getDisplayName(user);
@@ -104,7 +120,7 @@ export function HomeModule(): JSX.Element {
       <header className="flex items-center gap-3 border-b border-graphite px-4 py-3.5 md:px-7 md:py-4">
         <MenuButton className="md:hidden" />
         <span className="home-hello-avatar hidden shrink-0 rounded-full sm:block">
-          <Avatar src={avatarUrl} name={getDisplayName(user) || 'You'} size={42} pro={pro} />
+          <Avatar src={avatarUrl} name={getDisplayName(user) || t('home2.you')} size={42} pro={pro} />
         </span>
         <div className="min-w-0 flex-1">
           <h1 className="flex min-w-0 items-center gap-2 truncate text-[19px] font-medium leading-tight tracking-[-0.016em] text-paper md:text-[21px]">
@@ -115,7 +131,7 @@ export function HomeModule(): JSX.Element {
           </h1>
           <p className="mt-1 text-[12.5px] text-ash">
             {live
-              ? `${t('home.liveIn')} ${activeTeam?.name ?? 'your team'} · ${memberCount} ${memberWord}`
+              ? `${t('home.liveIn')} ${activeTeam?.name ?? t('home2.yourTeam')} · ${memberCount} ${memberWord}`
               : t('home.workingLocalOnly')}
           </p>
         </div>
@@ -175,7 +191,7 @@ export function HomeModule(): JSX.Element {
                     key={link.id}
                     type="button"
                     onClick={() => setModule(link.id)}
-                    className="group flex w-full items-center gap-3 rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 text-left shadow-[inset_0_0_0_1px_var(--color-graphite)] transition-[background-color,box-shadow] duration-150 hover:bg-[rgb(var(--tint-rgb)/0.04)] hover:shadow-[inset_0_0_0_1px_var(--color-smoke)]"
+                    className="group flex w-full items-center gap-3 rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 text-start shadow-[inset_0_0_0_1px_var(--color-graphite)] transition-[background-color,box-shadow] duration-150 hover:bg-[rgb(var(--tint-rgb)/0.04)] hover:shadow-[inset_0_0_0_1px_var(--color-smoke)]"
                   >
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] bg-[rgb(var(--tint-rgb)/0.05)] text-fog">
                       <Icon size={14} strokeWidth={1.7} aria-hidden />
@@ -187,7 +203,7 @@ export function HomeModule(): JSX.Element {
                     <ArrowRight
                       size={14}
                       strokeWidth={1.8}
-                      className="shrink-0 text-ash transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-mist"
+                      className="shrink-0 text-ash rtl:-scale-x-100 transition-transform duration-150 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 group-hover:text-mist"
                       aria-hidden
                     />
                   </button>

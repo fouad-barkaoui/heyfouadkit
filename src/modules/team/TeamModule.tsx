@@ -20,22 +20,42 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { FieldRow, Label, Select, TextInput } from '@/components/ui/Field';
 import { Modal } from '@/components/ui/Modal';
 import type { TeamRole } from '@/lib/types';
-import { cn, formatDate, relativeTime } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { useAuth } from '@/state/authStore';
+import { useLanguage, type TranslateVars } from '@/state/languageStore';
 import { useTeam } from '@/state/teamStore';
 import { MenuButton } from '@/components/shell/MenuButton';
 import { ScrollIndex } from '@/components/motion/ScrollIndex';
 
-const ROLE_LABEL: Record<TeamRole, string> = { owner: 'Owner', admin: 'Admin', editor: 'Editor', viewer: 'Viewer' };
+type T = (key: string, vars?: TranslateVars) => string;
 
-const ROLE_HINT: Record<TeamRole, string> = {
-  owner: 'Full control, including deleting the team',
-  admin: 'Manage members, roles and invites',
-  editor: 'Create and edit everything',
-  viewer: 'Read-only access',
-};
+const roleLabel = (t: T, role: TeamRole): string => t(`team2.role.${role}`);
+
+/** "Sep 30, 2026" / "30 شتنبر 2026". */
+function formatDay(iso: string | null | undefined, locale: string): string {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+/** "just now" / "5m ago" / "3h ago" / "2d ago", then a date. */
+function relTime(iso: string | null | undefined, t: T, locale: string): string {
+  if (!iso) return '—';
+  const ms = new Date(iso).getTime();
+  if (Number.isNaN(ms)) return '—';
+  const mins = Math.round((Date.now() - ms) / 60_000);
+  if (mins < 1) return t('team2.justNow');
+  if (mins < 60) return t('team2.minsAgo', { count: mins });
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return t('team2.hoursAgo', { count: hours });
+  const days = Math.round(hours / 24);
+  if (days < 30) return t('team2.daysAgo', { count: days });
+  return formatDay(iso, locale);
+}
 
 function RoleBadge({ role }: { role: TeamRole }): JSX.Element {
+  const { t } = useLanguage();
   return (
     <span
       className={cn(
@@ -44,7 +64,7 @@ function RoleBadge({ role }: { role: TeamRole }): JSX.Element {
       )}
     >
       {role === 'owner' ? <Crown size={10} strokeWidth={2} /> : null}
-      {ROLE_LABEL[role]}
+      {roleLabel(t, role)}
     </span>
   );
 }
@@ -57,6 +77,7 @@ function CreateTeamModal({
   onOpenChange: (open: boolean) => void;
 }): JSX.Element {
   const { createTeam } = useTeam();
+  const { t } = useLanguage();
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,7 +85,7 @@ function CreateTeamModal({
 
   const submit = async (): Promise<void> => {
     if (name.trim().length < 2) {
-      setError('Give the team a name of at least 2 characters.');
+      setError(t('team2.nameTooShort'));
       return;
     }
     setBusy(true);
@@ -92,15 +113,15 @@ function CreateTeamModal({
       onOpenChange={(next) => {
         if (!next) handleClose();
       }}
-      title={step === 'name' ? 'Create a team' : 'Invite members'}
+      title={step === 'name' ? t('team2.createTitle') : t('team2.inviteMembers')}
       description={
         step === 'name'
-          ? "You'll be the owner. Invite people once it's created."
-          : 'Share the invite link with your team members.'
+          ? t('team2.createDesc')
+          : t('team2.shareDesc')
       }
       footer={
         <>
-          <Button onClick={() => handleClose()}>{step === 'invites' ? 'Done' : 'Cancel'}</Button>
+          <Button onClick={() => handleClose()}>{step === 'invites' ? t('team2.done') : t('team2.cancel')}</Button>
           {step === 'name' ? (
             <Button
               variant="primary"
@@ -111,7 +132,7 @@ function CreateTeamModal({
                 void submit();
               }}
             >
-              {busy ? 'Creating...' : 'Create team'}
+              {busy ? t('team2.creating') : t('team.create')}
             </Button>
           ) : null}
         </>
@@ -119,13 +140,13 @@ function CreateTeamModal({
     >
       {step === 'name' ? (
         <FieldRow>
-          <Label htmlFor="team-name">Team name</Label>
+          <Label htmlFor="team-name">{t('team2.teamName')}</Label>
           <TextInput
             id="team-name"
             autoFocus
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Acme Product Team"
+            placeholder={t('team2.namePlaceholder')}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !busy) {
                 e.preventDefault();
@@ -137,9 +158,11 @@ function CreateTeamModal({
         </FieldRow>
       ) : (
         <div className="space-y-2 text-[12px] text-ash">
-          <p className="text-mist">Team “{name}” is ready, and it's now your active team.</p>
+          <p className="text-mist">{t('team2.ready', { name })}</p>
           <p>
-            Use <span className="text-paper">Invite</span> at the top of the team page to add people.
+            {t('team2.useInviteBefore')}
+            <span className="text-paper">{t('team.invite')}</span>
+            {t('team2.useInviteAfter')}
           </p>
         </div>
       )}
@@ -149,6 +172,7 @@ function CreateTeamModal({
 
 function InviteModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }): JSX.Element {
   const { createInvite } = useTeam();
+  const { t } = useLanguage();
   const [role, setRole] = useState<TeamRole>('editor');
   const [link, setLink] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -191,14 +215,14 @@ function InviteModal({ open, onOpenChange }: { open: boolean; onOpenChange: (ope
           setError(null);
         }
       }}
-      title="Invite to the team"
-      description="Anyone with this link can join with the role you pick — good for 7 days."
+      title={t('team2.inviteTitle')}
+      description={t('team2.inviteDesc')}
       footer={
         link ? (
-          <Button onClick={() => onOpenChange(false)}>Done</Button>
+          <Button onClick={() => onOpenChange(false)}>{t('team2.done')}</Button>
         ) : (
           <>
-            <Button onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button onClick={() => onOpenChange(false)}>{t('team2.cancel')}</Button>
             <Button
               variant="primary"
               disabled={busy}
@@ -208,7 +232,7 @@ function InviteModal({ open, onOpenChange }: { open: boolean; onOpenChange: (ope
                 void generate();
               }}
             >
-              {busy ? 'Generating...' : 'Generate link'}
+              {busy ? t('team2.generating') : t('team2.generateLink')}
             </Button>
           </>
         )
@@ -216,11 +240,11 @@ function InviteModal({ open, onOpenChange }: { open: boolean; onOpenChange: (ope
     >
       {!link ? (
         <FieldRow>
-          <Label htmlFor="invite-role">Role for people who join</Label>
+          <Label htmlFor="invite-role">{t('team2.joinRole')}</Label>
           <Select id="invite-role" value={role} onChange={(e) => setRole(e.target.value as TeamRole)}>
             {(['viewer', 'editor', 'admin'] as TeamRole[]).map((r) => (
               <option key={r} value={r}>
-                {ROLE_LABEL[r]} — {ROLE_HINT[r]}
+                {roleLabel(t, r)} — {t(`team2.roleHint.${r}`)}
               </option>
             ))}
           </Select>
@@ -228,11 +252,11 @@ function InviteModal({ open, onOpenChange }: { open: boolean; onOpenChange: (ope
         </FieldRow>
       ) : (
         <FieldRow>
-          <Label htmlFor="invite-link">Invite link</Label>
+          <Label htmlFor="invite-link">{t('team2.inviteLink')}</Label>
           <div className="flex items-center gap-2">
             <TextInput id="invite-link" readOnly value={link} onFocus={(e) => e.currentTarget.select()} />
             <IconButton
-              label="Copy invite link"
+              label={t('team2.copyLink')}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -246,7 +270,7 @@ function InviteModal({ open, onOpenChange }: { open: boolean; onOpenChange: (ope
               )}
             </IconButton>
           </div>
-          <p className="mt-1.5 text-[12px] text-ash">Joins as {ROLE_LABEL[role]}. Share it however you like.</p>
+          <p className="mt-1.5 text-[12px] text-ash">{t('team2.joinsAsShare', { role: roleLabel(t, role) })}</p>
         </FieldRow>
       )}
     </Modal>
@@ -264,6 +288,7 @@ function RenameTeamModal({
   onOpenChange: (open: boolean) => void;
   onSave: (name: string) => Promise<string | null>;
 }): JSX.Element {
+  const { t } = useLanguage();
   const [name, setName] = useState(current);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -278,7 +303,7 @@ function RenameTeamModal({
   const submit = async (): Promise<void> => {
     const trimmed = name.trim();
     if (trimmed.length < 2) {
-      setError('Give the team a name of at least 2 characters.');
+      setError(t('team2.nameTooShort'));
       return;
     }
     if (trimmed === current) {
@@ -296,19 +321,19 @@ function RenameTeamModal({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Rename team"
+      title={t('team2.renameTitle')}
       width="sm"
       footer={
         <>
-          <Button onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={() => onOpenChange(false)}>{t('team2.cancel')}</Button>
           <Button variant="primary" disabled={busy} onClick={() => void submit()}>
-            {busy ? 'Saving…' : 'Save'}
+            {busy ? t('team2.saving') : t('team2.save')}
           </Button>
         </>
       }
     >
       <FieldRow>
-        <Label htmlFor="team-rename">Team name</Label>
+        <Label htmlFor="team-rename">{t('team2.teamName')}</Label>
         <TextInput
           id="team-rename"
           autoFocus
@@ -339,6 +364,7 @@ function DeleteTeamModal({
   onOpenChange: (open: boolean) => void;
   onDelete: () => Promise<string | null>;
 }): JSX.Element {
+  const { t } = useLanguage();
   const [typed, setTyped] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -365,26 +391,28 @@ function DeleteTeamModal({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Delete team"
-      description="This permanently deletes the team and everything in it — notes, tasks, docs, links, habits and files — for every member."
+      title={t('team2.deleteTitle')}
+      description={t('team2.deleteDesc')}
       width="sm"
       footer={
         <>
-          <Button onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={() => onOpenChange(false)}>{t('team2.cancel')}</Button>
           <Button
             variant="primary"
             className="!bg-coral !text-white disabled:opacity-40"
             disabled={!matches || busy}
             onClick={() => void submit()}
           >
-            {busy ? 'Deleting…' : 'Delete forever'}
+            {busy ? t('team2.deleting') : t('team2.deleteForever')}
           </Button>
         </>
       }
     >
       <FieldRow>
         <Label htmlFor="team-delete-confirm">
-          Type <span className="text-paper">{teamName}</span> to confirm
+          {t('team2.typeBefore')}
+          <span className="text-paper">{teamName}</span>
+          {t('team2.typeAfter')}
         </Label>
         <TextInput
           id="team-delete-confirm"
@@ -410,6 +438,7 @@ type Notice = { tone: 'ok' | 'error'; text: string } | null;
 
 export function TeamModule(): JSX.Element {
   const { user } = useAuth();
+  const { t, locale } = useLanguage();
   const {
     ready,
     teams,
@@ -443,8 +472,8 @@ export function TeamModule(): JSX.Element {
 
   useEffect(() => {
     if (!notice) return;
-    const t = window.setTimeout(() => setNotice(null), notice.tone === 'ok' ? 2600 : 6000);
-    return () => window.clearTimeout(t);
+    const timer = window.setTimeout(() => setNotice(null), notice.tone === 'ok' ? 2600 : 6000);
+    return () => window.clearTimeout(timer);
   }, [notice]);
 
   const run = async (
@@ -456,10 +485,10 @@ export function TeamModule(): JSX.Element {
     const res = await action();
     setBusyId(null);
     if (res.ok) {
-      if (okText ?? res.message) setNotice({ tone: 'ok', text: okText ?? res.message ?? 'Done.' });
+      if (okText ?? res.message) setNotice({ tone: 'ok', text: okText ?? res.message ?? t('team2.genericDone') });
       return true;
     }
-    setNotice({ tone: 'error', text: res.error ?? 'Something went wrong.' });
+    setNotice({ tone: 'error', text: res.error ?? t('team2.genericError') });
     return false;
   };
 
@@ -489,13 +518,13 @@ export function TeamModule(): JSX.Element {
       <div className="flex h-full flex-col">
         <header className="flex items-center gap-3 border-b border-graphite px-4 py-3.5 md:hidden">
           <MenuButton />
-          <h1 className="text-[17px] font-medium text-paper">Team</h1>
+          <h1 className="text-[17px] font-medium text-paper">{t('nav.team')}</h1>
         </header>
         <div className="flex min-h-0 flex-1 items-center justify-center p-6">
           <EmptyState
             icon={<Users size={18} strokeWidth={1.6} />}
-            title="Sign in to use teams"
-            hint="Team collaboration is shared across signed-in members — sign in first."
+            title={t('team2.signInTitle')}
+            hint={t('team2.signInHint')}
           />
         </div>
       </div>
@@ -513,46 +542,46 @@ export function TeamModule(): JSX.Element {
         >
           <div className="flex items-center gap-2 px-4 pb-2.5 pt-3.5">
             <MenuButton className="md:hidden" />
-            <h2 className="flex-1 truncate text-[13px] font-medium tracking-[-0.011em] text-paper">Your teams</h2>
+            <h2 className="flex-1 truncate text-[13px] font-medium tracking-[-0.011em] text-paper">{t('team2.yourTeams')}</h2>
             <Button
               variant="primary"
               icon={<Plus size={14} strokeWidth={2} />}
               onClick={() => setCreateOpen(true)}
-              aria-label="Create team"
+              aria-label={t('team.create')}
             >
-              New
+              {t('team2.new')}
             </Button>
           </div>
 
           <div className="scroll-y min-h-0 flex-1 px-3 pb-4">
             {!ready ? (
-              <p className="px-2 py-4 text-[12.5px] text-ash">Loading teams…</p>
+              <p className="px-2 py-4 text-[12.5px] text-ash">{t('team2.loadingTeams')}</p>
             ) : teams.length === 0 ? (
-              <p className="px-2 py-4 text-[12.5px] text-ash">No teams yet — create one.</p>
+              <p className="px-2 py-4 text-[12.5px] text-ash">{t('team2.noTeams')}</p>
             ) : (
-              teams.map((t) => (
+              teams.map((team) => (
                 <button
-                  key={t.id}
+                  key={team.id}
                   type="button"
-                  data-team-row={t.id}
+                  data-team-row={team.id}
                   onClick={() => {
-                    switchTeam(t.id);
+                    switchTeam(team.id);
                     setMobilePane('detail');
                   }}
                   className={cn(
-                    'mb-[3px] flex w-full items-center gap-2.5 rounded-[6px] px-2.5 py-2 text-left transition-colors duration-120',
-                    t.id === activeTeamId ? 'bg-[rgb(var(--tint-rgb)/0.05)]' : 'hover:bg-[rgb(var(--tint-rgb)/0.03)]',
+                    'mb-[3px] flex w-full items-center gap-2.5 rounded-[6px] px-2.5 py-2 text-start transition-colors duration-120',
+                    team.id === activeTeamId ? 'bg-[rgb(var(--tint-rgb)/0.05)]' : 'hover:bg-[rgb(var(--tint-rgb)/0.03)]',
                   )}
                 >
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] bg-gradient-to-br from-[#e4f222] to-[#9db300] text-[11px] font-semibold text-[#08090a]">
-                    {t.name.trim()[0]?.toUpperCase() ?? '?'}
+                    {team.name.trim()[0]?.toUpperCase() ?? '?'}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13px] text-paper">{t.name}</span>
-                    <span className="block truncate text-[11px] capitalize text-ash">{t.role}</span>
+                    <span className="block truncate text-[13px] text-paper">{team.name}</span>
+                    <span className="block truncate text-[11px] text-ash">{roleLabel(t, team.role)}</span>
                   </span>
-                  {t.id === activeTeamId ? (
-                    <Check size={14} strokeWidth={2.2} className="shrink-0 text-accent" aria-label="Active" />
+                  {team.id === activeTeamId ? (
+                    <Check size={14} strokeWidth={2.2} className="shrink-0 text-accent" aria-label={t('team2.active')} />
                   ) : null}
                 </button>
               ))
@@ -574,22 +603,24 @@ export function TeamModule(): JSX.Element {
                 className="mb-0.5 inline-flex items-center gap-1 text-[11.5px] text-ash hover:text-paper md:hidden"
                 onClick={() => setMobilePane('list')}
               >
-                <ArrowLeft size={12} strokeWidth={2} /> All teams ({teams.length})
+                <ArrowLeft size={12} strokeWidth={2} className="rtl:-scale-x-100" /> {t('team2.allTeams', { count: teams.length })}
               </button>
               <h1 className="flex items-center gap-1.5 truncate text-[17px] font-medium leading-tight tracking-[-0.016em] text-paper md:text-[19px]">
-                <span className="truncate">{activeTeam?.name ?? 'No team selected'}</span>
+                <span className="truncate">{activeTeam?.name ?? t('team2.noTeamSelected')}</span>
                 {activeTeam && canManage ? (
-                  <IconButton label="Rename team" className="shrink-0" onClick={() => setRenameOpen(true)}>
+                  <IconButton label={t('team2.renameTitle')} className="shrink-0" onClick={() => setRenameOpen(true)}>
                     <Pencil size={13} strokeWidth={1.9} />
                   </IconButton>
                 ) : null}
               </h1>
               <p className="mt-1 text-[12.5px] text-ash">
-                {members.length} member{members.length === 1 ? '' : 's'}
+                {t(members.length === 1 ? 'team2.members.one' : 'team2.members', { count: members.length })}
                 {activeInvites.length > 0
-                  ? ` · ${activeInvites.length} open invite${activeInvites.length === 1 ? '' : 's'}`
+                  ? t(activeInvites.length === 1 ? 'team2.openInvites.one' : 'team2.openInvites', {
+                      count: activeInvites.length,
+                    })
                   : ''}
-                {myRole ? ` · you're ${ROLE_LABEL[myRole].toLowerCase()}` : ''}
+                {myRole ? t('team2.youAre', { role: t(`team2.roleLower.${myRole}`) }) : ''}
               </p>
             </div>
             {activeTeam ? (
@@ -600,7 +631,7 @@ export function TeamModule(): JSX.Element {
                     icon={<UserPlus size={14} strokeWidth={2} />}
                     onClick={() => setInviteOpen(true)}
                   >
-                    Invite
+                    {t('team.invite')}
                   </Button>
                 ) : null}
                 {!isOwner ? (
@@ -610,16 +641,16 @@ export function TeamModule(): JSX.Element {
                     onClick={() => {
                       if (!activeTeamId) return;
                       if (
-                        !window.confirm(`Leave “${activeTeam.name}”? You'll lose access to its notes, tasks and files.`)
+                        !window.confirm(t('team2.leaveConfirm', { name: activeTeam.name }))
                       )
                         return;
-                      void run('leave', () => leaveTeam(activeTeamId), `You left ${activeTeam.name}.`);
+                      void run('leave', () => leaveTeam(activeTeamId), t('team2.left', { name: activeTeam.name }));
                     }}
                   >
-                    Leave
+                    {t('team2.leave')}
                   </Button>
                 ) : (
-                  <IconButton label="Delete team" danger onClick={() => setDeleteOpen(true)}>
+                  <IconButton label={t('team2.deleteTitle')} danger onClick={() => setDeleteOpen(true)}>
                     <Trash2 size={14} strokeWidth={1.75} />
                   </IconButton>
                 )}
@@ -647,23 +678,22 @@ export function TeamModule(): JSX.Element {
               <div className="flex items-start gap-2.5 rounded-[8px] bg-[rgb(var(--tint-rgb)/0.03)] px-3 py-2.5 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
                 <Clock size={14} strokeWidth={1.8} className="mt-[1px] shrink-0 text-accent" aria-hidden />
                 <p className="text-[12px] leading-[1.5] text-fog">
-                  <span className="font-medium text-mist">Still growing</span> — create, rename and delete teams, invite
-                  people, change roles, remove members and cancel invites all work. Shared editing extras are on the
-                  way.
+                  <span className="font-medium text-mist">{t('team2.stillGrowing')}</span>
+                  {t('team2.stillGrowingBody')}
                 </p>
               </div>
 
               <div>
-                <p className="mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">Members</p>
+                <p className="mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('team2.membersHeading')}</p>
                 {membersLoading ? (
-                  <p className="py-4 text-[12.5px] text-ash">Loading members…</p>
+                  <p className="py-4 text-[12.5px] text-ash">{t('team2.loadingMembers')}</p>
                 ) : sortedMembers.length === 0 ? (
-                  <p className="py-4 text-[12.5px] text-ash">No members yet.</p>
+                  <p className="py-4 text-[12.5px] text-ash">{t('team2.noMembers')}</p>
                 ) : (
                   <div className="space-y-1.5">
                     {sortedMembers.map((m) => {
                       const isSelf = m.userId === user.id;
-                      const displayName = m.username || m.email || 'Member';
+                      const displayName = m.username || m.email || t('team2.member');
                       // Admins manage editors and viewers; owners manage everyone.
                       const canTouch = canManage && !isSelf && (isOwner || (m.role !== 'owner' && m.role !== 'admin'));
                       const roleChoices: TeamRole[] = isOwner
@@ -683,16 +713,16 @@ export function TeamModule(): JSX.Element {
                           </span>
                           <div className="min-w-0 flex-1 basis-[140px]">
                             <p className="truncate text-[13px] text-paper">
-                              {displayName} {isSelf ? <span className="text-ash">(you)</span> : null}
+                              {displayName} {isSelf ? <span className="text-ash">{t('team2.you')}</span> : null}
                             </p>
                             <p className="truncate text-[11.5px] text-ash">
-                              {m.email || '—'} · joined {relativeTime(m.joinedAt)}
+                              {m.email || '—'} · {t('team2.joined', { when: relTime(m.joinedAt, t, locale) })}
                             </p>
                           </div>
                           {canTouch ? (
                             <div className="ml-auto flex items-center gap-1.5">
                               <Select
-                                aria-label={`Role for ${displayName}`}
+                                aria-label={t('team2.roleFor', { name: displayName })}
                                 value={m.role}
                                 disabled={busyId === m.userId}
                                 onChange={(e) => {
@@ -700,22 +730,22 @@ export function TeamModule(): JSX.Element {
                                   void run(
                                     m.userId,
                                     () => setMemberRole(m.userId, role),
-                                    `${displayName} is now ${ROLE_LABEL[role].toLowerCase()}.`,
+                                    t('team2.nowRole', { name: displayName, role: t(`team2.roleLower.${role}`) }),
                                   );
                                 }}
                                 className="w-auto py-1 text-[12px]"
                               >
                                 {(roleChoices.includes(m.role) ? roleChoices : [m.role, ...roleChoices]).map((r) => (
                                   <option key={r} value={r}>
-                                    {ROLE_LABEL[r]}
+                                    {roleLabel(t, r)}
                                   </option>
                                 ))}
                               </Select>
                               <ConfirmDelete
                                 onConfirm={() =>
-                                  void run(m.userId, () => removeMember(m.userId), `${displayName} was removed.`)
+                                  void run(m.userId, () => removeMember(m.userId), t('team2.removed', { name: displayName }))
                                 }
-                                label={`Remove ${displayName}`}
+                                label={t('team2.remove', { name: displayName })}
                                 size={13}
                               />
                             </div>
@@ -733,9 +763,9 @@ export function TeamModule(): JSX.Element {
 
               {canManage ? (
                 <div>
-                  <p className="mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">Open invites</p>
+                  <p className="mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('team2.openInvitesHeading')}</p>
                   {activeInvites.length === 0 ? (
-                    <p className="py-2 text-[12.5px] text-ash">No open invites. Use Invite to create a link.</p>
+                    <p className="py-2 text-[12.5px] text-ash">{t('team2.noOpenInvites')}</p>
                   ) : (
                     <div className="space-y-1.5">
                       {activeInvites.map((inv) => (
@@ -752,16 +782,17 @@ export function TeamModule(): JSX.Element {
                           </span>
                           <div className="min-w-0 flex-1 basis-[140px]">
                             <p className="text-[13px] text-paper">
-                              Joins as <span className="capitalize">{ROLE_LABEL[inv.role]}</span>
+                              {t('team2.joinsAs')}
+                              <span>{roleLabel(t, inv.role)}</span>
                             </p>
                             <p className="text-[11.5px] text-ash">
-                              {inv.useCount} used · created {formatDate(inv.createdAt)}
-                              {inv.expiresAt ? ` · expires ${formatDate(inv.expiresAt)}` : ''}
+                              {t('team2.inviteMeta', { used: inv.useCount, date: formatDay(inv.createdAt, locale) })}
+                              {inv.expiresAt ? t('team2.expires', { date: formatDay(inv.expiresAt, locale) }) : ''}
                             </p>
                           </div>
                           <div className="ml-auto flex items-center gap-1">
                             <IconButton
-                              label="Copy invite link"
+                              label={t('team2.copyLink')}
                               onClick={() => {
                                 void navigator.clipboard
                                   ?.writeText(inviteLink(inv.id))
@@ -779,13 +810,13 @@ export function TeamModule(): JSX.Element {
                               )}
                             </IconButton>
                             <ConfirmDelete
-                              label="Cancel invite"
+                              label={t('team2.cancelInvite')}
                               size={13}
                               onConfirm={() =>
                                 void run(
                                   inv.id,
                                   () => revokeInvite(inv.id),
-                                  'Invite cancelled — the link no longer works.',
+                                  t('team2.inviteCancelled'),
                                 )
                               }
                             />
@@ -814,11 +845,11 @@ export function TeamModule(): JSX.Element {
         teamName={activeTeam?.name ?? ''}
         onOpenChange={setDeleteOpen}
         onDelete={async () => {
-          if (!activeTeamId || !activeTeam) return 'No team selected.';
+          if (!activeTeamId || !activeTeam) return t('team2.noTeamSelectedErr');
           const name = activeTeam.name;
           const res = await deleteTeam(activeTeamId);
           if (res.ok) {
-            setNotice({ tone: 'ok', text: `“${name}” was deleted.` });
+            setNotice({ tone: 'ok', text: t('team2.deleted', { name }) });
             return null;
           }
           return res.error;
@@ -829,10 +860,10 @@ export function TeamModule(): JSX.Element {
         current={activeTeam?.name ?? ''}
         onOpenChange={setRenameOpen}
         onSave={async (name) => {
-          if (!activeTeamId) return 'No team selected.';
+          if (!activeTeamId) return t('team2.noTeamSelectedErr');
           const res = await renameTeam(activeTeamId, name);
           if (res.ok) {
-            setNotice({ tone: 'ok', text: 'Team renamed.' });
+            setNotice({ tone: 'ok', text: t('team2.renamed') });
             return null;
           }
           return res.error;

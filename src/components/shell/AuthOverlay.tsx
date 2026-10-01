@@ -1,6 +1,7 @@
 import { ArrowLeft, Check, Eye, EyeOff, Loader2, Lock, Mail, type LucideIcon, User, X } from 'lucide-react';
 import { MARK_SRC } from '@/components/ui/BrandMark';
 import { KanzWordmark } from '@/components/ui/KanzWordmark';
+import { useI18n } from '@/components/ui/useI18n';
 import { useEffect, useState, type InputHTMLAttributes, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
@@ -11,13 +12,8 @@ type Mode = 'signin' | 'signup' | 'reset';
 
 const INSTAGRAM_URL = 'https://www.instagram.com/heyfouad/';
 
-/** What the left panel promises: the app's real modules, in its own words. */
-const FEATURES = [
-  'Notebook, articles and CVE write-ups',
-  'Task board and habit streaks',
-  'Course tracker and document vault',
-  'Shared team workspaces',
-] as const;
+/** What the left panel promises: the app's real modules, in its own words (translation keys). */
+const FEATURES = ['sh.auth.feature1', 'sh.auth.feature2', 'sh.auth.feature3', 'sh.auth.feature4'] as const;
 
 function GoogleMark(): JSX.Element {
   return (
@@ -81,6 +77,7 @@ export function AuthOverlay({
   onOpenChange: (open: boolean) => void;
 }): JSX.Element | null {
   const { signIn, signUp, sendReset, signInWithGoogle, googleStatus, oauthError, clearOAuthError } = useAuth();
+  const { t } = useI18n();
 
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
@@ -159,7 +156,7 @@ export function AuthOverlay({
           /* private mode — the welcome popup just won't appear this once */
         }
       }
-      setFeedback({ tone: 'ok', text: result.message ?? 'Signed in.' });
+      setFeedback({ tone: 'ok', text: result.message ?? t('sh.auth.signedIn') });
       setPassword('');
       if (loggedIn) window.setTimeout(() => onOpenChange(false), 700);
     } else {
@@ -179,13 +176,10 @@ export function AuthOverlay({
     }
   };
 
-  const heading = mode === 'signup' ? 'Create your workspace' : mode === 'reset' ? 'Reset your password' : 'Welcome back';
+  const heading =
+    mode === 'signup' ? t('sh.auth.signupTitle') : mode === 'reset' ? t('sh.auth.resetTitle') : t('sh.auth.signinTitle');
   const subtitle =
-    mode === 'signup'
-      ? 'Free, private, and ready in a minute.'
-      : mode === 'reset'
-        ? "Enter your email and we'll send you a reset link."
-        : 'Sign in to pick up where you left off.';
+    mode === 'signup' ? t('sh.auth.signupHint') : mode === 'reset' ? t('sh.auth.resetHint') : t('sh.auth.signinHint');
 
   const showGoogle = mode !== 'reset' && (googleStatus === 'on' || googleStatus === 'unknown');
   const disabled = busy || googleBusy || !email || (mode === 'signup' && (fullName.trim().length < 2 || !agreed));
@@ -203,7 +197,7 @@ export function AuthOverlay({
       <button
         type="button"
         onClick={() => onOpenChange(false)}
-        aria-label="Close and keep browsing"
+        aria-label={t('sh.auth.closeKeepBrowsing')}
         className="fixed right-4 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-[#12151d] text-[#9aa1b2] transition-colors hover:text-white"
         style={{ top: 'calc(env(safe-area-inset-top, 0px) + 16px)' }}
       >
@@ -226,17 +220,17 @@ export function AuthOverlay({
             <img src={MARK_SRC} alt="" width={36} height={36} className="h-full w-full object-cover" aria-hidden />
           </span>
           <KanzWordmark height={20} gem="#e4f222" className="text-white" />
-          <span lang="ar" dir="rtl" className="text-[17px] leading-none text-[#4f5566]" title="Kanz means treasure in Arabic">
+          <span lang="ar" dir="rtl" className="text-[17px] leading-none text-[#4f5566]" title={t('sh.auth.kanzMeaning')}>
             كنز
           </span>
         </div>
 
         <div className="relative flex max-w-[460px] flex-col gap-7">
           <p className="text-[40px] font-bold leading-[1.15] tracking-[-0.02em] text-white [text-wrap:balance]">
-            One workspace for the work that doesn't sleep.
+            {t('sh.auth.tagline')}
           </p>
           <p className="max-w-[38ch] text-[15px] leading-[1.65] text-[#9aa1b2]">
-            Notes, tasks, habits, courses and a vault, kept in one private place and synced across every device.
+            {t('sh.auth.pitch')}
           </p>
           <ul className="flex flex-col gap-3.5">
             {FEATURES.map((f) => (
@@ -244,16 +238,16 @@ export function AuthOverlay({
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#e4f222]/50 text-[#e4f222]">
                   <Check size={12} strokeWidth={2.6} aria-hidden />
                 </span>
-                {f}
+                {t(f)}
               </li>
             ))}
           </ul>
         </div>
 
         <p className="relative flex flex-wrap gap-x-5 gap-y-1 font-mono text-[11px] tracking-[0.02em] text-[#4f5566]">
-          <span>Row-level security on</span>
-          <span>Encrypted at rest</span>
-          <span>Works offline</span>
+          <span>{t('sh.auth.rls')}</span>
+          <span>{t('sh.auth.encrypted')}</span>
+          <span>{t('sh.auth.offline')}</span>
         </p>
       </aside>
 
@@ -280,7 +274,7 @@ export function AuthOverlay({
                     mode === m ? 'bg-[#1a1e29] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]' : 'text-[#6c7385] hover:text-[#b7bdcb]',
                   )}
                 >
-                  {m === 'signin' ? 'Sign in' : 'Create account'}
+                  {m === 'signin' ? t('shell.signIn') : t('sh.auth.createAccount')}
                 </button>
               ))}
             </div>
@@ -290,8 +284,8 @@ export function AuthOverlay({
               onClick={() => switchMode('signin')}
               className="mb-7 inline-flex items-center gap-1.5 text-[12.5px] font-medium text-[#9aa1b2] transition-colors hover:text-white"
             >
-              <ArrowLeft size={14} strokeWidth={2} aria-hidden />
-              Back to sign in
+              <ArrowLeft size={14} strokeWidth={2} aria-hidden className="rtl:-scale-x-100" />
+              {t('sh.auth.backToSignIn')}
             </button>
           )}
 
@@ -309,12 +303,12 @@ export function AuthOverlay({
                 className="mt-7 flex h-[46px] w-full items-center justify-center gap-2.5 rounded-[10px] bg-white text-[14px] font-semibold text-[#1f1f1f] shadow-[0_1px_0_rgba(255,255,255,0.4)_inset,0_8px_22px_-10px_rgba(0,0,0,0.6)] transition-[background-color,opacity] duration-150 hover:bg-[#f1f2f4] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {googleBusy ? <Loader2 size={17} className="animate-spin text-[#5f6368]" aria-hidden /> : <GoogleMark />}
-                {googleBusy ? 'Opening Google…' : 'Continue with Google'}
+                {googleBusy ? t('sh.auth.openingGoogle') : t('sh.auth.continueGoogle')}
               </button>
 
               <div className="my-6 flex items-center gap-3">
                 <div className="h-px flex-1 bg-white/[0.08]" />
-                <span className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-[#4f5566]">or with email</span>
+                <span className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-[#4f5566]">{t('sh.auth.orEmail')}</span>
                 <div className="h-px flex-1 bg-white/[0.08]" />
               </div>
             </>
@@ -326,19 +320,19 @@ export function AuthOverlay({
             {mode === 'signup' ? (
               <DarkField
                 id="auth-fullname"
-                label="Full name"
+                label={t('sh.auth.fullName')}
                 icon={User}
                 autoComplete="name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="What should we call you?"
+                placeholder={t('sh.auth.fullNamePlaceholder')}
                 onKeyDown={onEnter}
               />
             ) : null}
 
             <DarkField
               id="auth-email"
-              label="Email"
+              label={t('sh.auth.email')}
               icon={Mail}
               type="email"
               autoComplete="email"
@@ -351,13 +345,13 @@ export function AuthOverlay({
             {mode !== 'reset' ? (
               <DarkField
                 id="auth-password"
-                label="Password"
+                label={t('sh.auth.password')}
                 icon={Lock}
                 type={showPassword ? 'text' : 'password'}
                 autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={mode === 'signup' ? 'At least 6 characters' : 'Your password'}
+                placeholder={mode === 'signup' ? t('sh.auth.pwMin') : t('sh.auth.pwYours')}
                 onKeyDown={onEnter}
                 aside={
                   mode === 'signin' ? (
@@ -366,7 +360,7 @@ export function AuthOverlay({
                       onClick={() => switchMode('reset')}
                       className="text-[12px] font-medium text-[#e4f222] transition-opacity hover:opacity-80"
                     >
-                      Forgot?
+                      {t('sh.auth.forgot')}
                     </button>
                   ) : null
                 }
@@ -374,7 +368,7 @@ export function AuthOverlay({
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-label={showPassword ? t('sh.auth.hidePassword') : t('sh.auth.showPassword')}
                     className="shrink-0 text-[#6c7385] transition-colors hover:text-white"
                   >
                     {showPassword ? <EyeOff size={15} strokeWidth={1.8} /> : <Eye size={15} strokeWidth={1.8} />}
@@ -392,7 +386,7 @@ export function AuthOverlay({
                 onChange={(e) => setAgreed(e.target.checked)}
                 className="mt-[2px] h-[15px] w-[15px] accent-[#e4f222]"
               />
-              <span className="text-[12px] leading-[1.55] text-[#b7bdcb]">I agree to the terms of service and privacy policy.</span>
+              <span className="text-[12px] leading-[1.55] text-[#b7bdcb]">{t('sh.auth.agree')}</span>
             </label>
           ) : null}
 
@@ -415,18 +409,18 @@ export function AuthOverlay({
             className="mt-6 flex h-[46px] w-full items-center justify-center gap-2 rounded-[10px] bg-gradient-to-r from-[#e4f222] to-[#c4d600] text-[14px] font-bold text-[#0a0a0a] shadow-[0_8px_22px_-10px_rgba(228,242,34,0.55)] transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
           >
             {busy ? <Loader2 size={15} className="animate-spin" aria-hidden /> : null}
-            {mode === 'reset' ? 'Send reset link' : mode === 'signup' ? 'Create account' : 'Sign in'}
+            {mode === 'reset' ? t('sh.auth.sendReset') : mode === 'signup' ? t('sh.auth.createAccount') : t('shell.signIn')}
           </button>
 
           {mode !== 'reset' ? (
             <p className="mt-5 text-center text-[13px] text-[#9aa1b2]">
-              {mode === 'signup' ? 'Already have an account?' : "Don't have an account?"}{' '}
+              {mode === 'signup' ? t('sh.auth.haveAccount') : t('sh.auth.noAccount')}{' '}
               <button
                 type="button"
                 onClick={() => switchMode(mode === 'signup' ? 'signin' : 'signup')}
                 className="font-semibold text-white underline decoration-white/30 underline-offset-[3px] hover:decoration-white"
               >
-                {mode === 'signup' ? 'Sign in' : 'Create one'}
+                {mode === 'signup' ? t('shell.signIn') : t('sh.auth.createOne')}
               </button>
             </p>
           ) : null}
@@ -437,14 +431,14 @@ export function AuthOverlay({
               onClick={() => onOpenChange(false)}
               className="text-[12px] text-[#6c7385] underline decoration-[#6c7385]/40 underline-offset-2 transition-colors hover:text-[#b7bdcb]"
             >
-              Keep browsing without an account
+              {t('sh.auth.keepBrowsing')}
             </button>
           </p>
 
           <p className="mt-8 border-t border-white/[0.07] pt-5 text-center text-[11.5px] leading-[1.5] text-[#4f5566]">
-            Questions?{' '}
+            {t('sh.auth.questions')}{' '}
             <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="text-[#e4f222] underline underline-offset-2">
-              Message @heyfouad
+              {t('sh.auth.message', { handle: '@heyfouad' })}
             </a>
           </p>
         </div>

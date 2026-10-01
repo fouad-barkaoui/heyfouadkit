@@ -46,7 +46,7 @@ export function Timeline({ entries, className }: { entries: TimelineEntry[]; cla
       );
       gsap.fromTo(
         '[data-tl-body]',
-        { x: -8, opacity: 0 },
+        { x: el.closest('[dir="rtl"]') ? 8 : -8, opacity: 0 },
         { x: 0, opacity: 1, duration: 0.5, ease: 'power3.out', stagger: 0.075, delay: 0.14 },
       );
     }, el);
@@ -64,7 +64,7 @@ export function Timeline({ entries, className }: { entries: TimelineEntry[]; cla
               <span
                 data-tl-rail
                 aria-hidden
-                className="absolute left-[13px] top-[26px] bottom-[-2px] w-px"
+                className="absolute start-[13px] top-[26px] bottom-[-2px] w-px"
                 style={{
                   background:
                     entry.state === 'pending'

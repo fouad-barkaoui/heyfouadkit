@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { Team, TeamInvite, TeamMember, TeamRole } from '@/lib/types';
 import { getSupabase } from '@/data/supabaseClient';
 import { useAuth } from './authStore';
+import { translate } from './languageStore';
 
 const ACTIVE_TEAM_KEY = 'kanz.activeTeam.v1';
 
@@ -65,9 +66,9 @@ function friendlyRpcError(e: unknown): string {
       : e && typeof e === 'object' && 'message' in e && typeof (e as { message: unknown }).message === 'string'
         ? (e as { message: string }).message
         : '';
-  if (!raw) return 'Something went wrong.';
-  if (/failed to fetch|network/i.test(raw)) return 'No connection — try again when you are back online.';
-  if (/could not find the function/i.test(raw)) return 'This action is not available on the server yet.';
+  if (!raw) return translate('core.team.somethingWrong');
+  if (/failed to fetch|network/i.test(raw)) return translate('core.team.noConnection');
+  if (/could not find the function/i.test(raw)) return translate('core.team.notAvailable');
   return raw.replace(/^(error|exception):\s*/i, '');
 }
 
@@ -174,7 +175,7 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
   /* ── Redeem a `?join=` link once signed in ──────────────────────────── */
   const redeemInvite = useCallback(
     async (token: string): Promise<RpcResult> => {
-      if (!supabase || !user) return { ok: false, error: 'Sign in first, then use the invite link again.' };
+      if (!supabase || !user) return { ok: false, error: translate('core.team.signInFirst') };
       try {
         const { data, error } = await supabase.rpc('redeem_invite', { p_token: token });
         if (error) throw error;
@@ -188,7 +189,7 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
         } catch {
           /* ignore */
         }
-        return { ok: true, message: 'You joined the team.' };
+        return { ok: true, message: translate('core.team.joined') };
       } catch (e) {
         return { ok: false, error: friendlyRpcError(e) };
       }
@@ -280,13 +281,13 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
   /* ── RPC-backed mutations ────────────────────────────────────────────── */
   const createTeam = useCallback(
     async (name: string): Promise<RpcResult> => {
-      if (!supabase) return { ok: false, error: 'This build is not connected to a cloud project.' };
+      if (!supabase) return { ok: false, error: translate('core.notConfigured') };
       try {
         const { data, error } = await supabase.rpc('create_team', { team_name: name });
         if (error) throw error;
         await refreshTeams();
         if (typeof data === 'string') switchTeam(data);
-        return { ok: true, message: 'Team created.' };
+        return { ok: true, message: translate('core.team.created') };
       } catch (e) {
         return { ok: false, error: friendlyRpcError(e) };
       }
@@ -296,7 +297,7 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
 
   const renameTeam = useCallback(
     async (id: string, name: string): Promise<RpcResult> => {
-      if (!supabase) return { ok: false, error: 'This build is not connected to a cloud project.' };
+      if (!supabase) return { ok: false, error: translate('core.notConfigured') };
       try {
         const { error } = await supabase.rpc('rename_team', { p_team_id: id, p_name: name });
         if (error) throw error;
@@ -311,7 +312,7 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
 
   const createInvite = useCallback(
     async (role: TeamRole): Promise<{ ok: true; token: string } | { ok: false; error: string }> => {
-      if (!supabase || !activeTeamId) return { ok: false, error: 'This build is not connected to a cloud project.' };
+      if (!supabase || !activeTeamId) return { ok: false, error: translate('core.notConfigured') };
       try {
         const { data, error } = await supabase.rpc('create_invite', {
           p_team_id: activeTeamId,
@@ -331,7 +332,7 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
 
   const setMemberRole = useCallback(
     async (userId: string, role: TeamRole): Promise<RpcResult> => {
-      if (!supabase || !activeTeamId) return { ok: false, error: 'This build is not connected to a cloud project.' };
+      if (!supabase || !activeTeamId) return { ok: false, error: translate('core.notConfigured') };
       try {
         const { error } = await supabase.rpc('set_member_role', {
           p_team_id: activeTeamId,
@@ -350,7 +351,7 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
 
   const removeMember = useCallback(
     async (userId: string): Promise<RpcResult> => {
-      if (!supabase || !activeTeamId) return { ok: false, error: 'This build is not connected to a cloud project.' };
+      if (!supabase || !activeTeamId) return { ok: false, error: translate('core.notConfigured') };
       try {
         const { error } = await supabase.rpc('remove_member', { p_team_id: activeTeamId, p_user_id: userId });
         if (error) throw error;
@@ -365,7 +366,7 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
 
   const leaveTeam = useCallback(
     async (id: string): Promise<RpcResult> => {
-      if (!supabase || !user) return { ok: false, error: 'This build is not connected to a cloud project.' };
+      if (!supabase || !user) return { ok: false, error: translate('core.notConfigured') };
       try {
         const { error } = await supabase.rpc('remove_member', { p_team_id: id, p_user_id: user.id });
         if (error) throw error;
@@ -383,7 +384,7 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
 
   const deleteTeam = useCallback(
     async (id: string): Promise<RpcResult> => {
-      if (!supabase || !user) return { ok: false, error: 'This build is not connected to a cloud project.' };
+      if (!supabase || !user) return { ok: false, error: translate('core.notConfigured') };
       try {
         const { error } = await supabase.rpc('delete_team', { p_team_id: id });
         if (error) throw error;
@@ -391,7 +392,7 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
         const next = list.find((t) => t.id !== id) ?? null;
         if (next) switchTeam(next.id);
         else writeStoredTeam(null);
-        return { ok: true, message: 'Team deleted.' };
+        return { ok: true, message: translate('core.team.deleted') };
       } catch (e) {
         return { ok: false, error: friendlyRpcError(e) };
       }
@@ -401,12 +402,12 @@ export function TeamProvider({ children }: { children: ReactNode }): JSX.Element
 
   const revokeInvite = useCallback(
     async (inviteId: string): Promise<RpcResult> => {
-      if (!supabase) return { ok: false, error: 'This build is not connected to a cloud project.' };
+      if (!supabase) return { ok: false, error: translate('core.notConfigured') };
       try {
         const { error } = await supabase.rpc('revoke_invite', { p_invite_id: inviteId });
         if (error) throw error;
         refreshInvites();
-        return { ok: true, message: 'Invite cancelled.' };
+        return { ok: true, message: translate('core.team.inviteCancelled') };
       } catch (e) {
         return { ok: false, error: friendlyRpcError(e) };
       }

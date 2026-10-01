@@ -22,6 +22,7 @@ import type { Attachment, CollectionKey, Workspace } from '@/lib/types';
 import { nowISO } from '@/lib/utils';
 import { useAuth } from './authStore';
 import { useTeam } from './teamStore';
+import { translate } from './languageStore';
 
 type Item<K extends CollectionKey> = Workspace[K][number];
 
@@ -41,7 +42,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promi
       },
       (err: unknown) => {
         window.clearTimeout(timer);
-        reject(err instanceof Error ? err : new Error('Request failed'));
+        reject(err instanceof Error ? err : new Error(translate('core.ws.requestFailed')));
       },
     );
   });
@@ -139,7 +140,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
         if (!cancelled) setWorkspace(data);
       })
       .catch((e: unknown) => {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load workspace');
+        if (!cancelled) setError(e instanceof Error ? e.message : translate('core.ws.loadFailed'));
       })
       .finally(() => {
         if (!cancelled) setReady(true);
@@ -168,7 +169,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
       const res = await flushOutbox(supabase, userId);
       if (res.dropped.length) {
         setSyncState('error');
-        setSyncMessage(`A change could not be saved to the cloud — ${friendlyCloudError(res.dropped[0]!.message)}`);
+        setSyncMessage(translate('core.ws.changeNotSaved', { error: friendlyCloudError(res.dropped[0]!.message) }));
       } else if (res.remaining > 0 && res.blocked) {
         setSyncState('queued');
         setSyncMessage(null);
@@ -210,7 +211,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
         if (cancelled) return;
         setReady(true);
         setSyncState(pendingCount(activeTeamId) ? 'queued' : painted ? 'queued' : 'error');
-        if (!painted) setSyncMessage('You are offline and this team has not been opened on this device yet.');
+        if (!painted) setSyncMessage(translate('core.ws.offlineUnopened'));
         return;
       }
 
@@ -230,7 +231,16 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
         if (failed.length) {
           setSyncState('error');
           setSyncMessage(
-            `Synced, except ${failed.map((f) => f.table.replace('_', ' ')).join(', ')} — ${friendlyCloudError(failed[0]!.message)}`,
+            translate('core.ws.syncedExcept', {
+              tables: failed
+                .map((f) => {
+                  const key = `core.table.${f.table}`;
+                  const label = translate(key);
+                  return label === key ? f.table.replace('_', ' ') : label;
+                })
+                .join(translate('core.listSeparator')),
+              error: friendlyCloudError(failed[0]!.message),
+            }),
           );
         } else {
           setSyncState(pending.some((o) => o.teamId === activeTeamId) ? 'queued' : 'synced');

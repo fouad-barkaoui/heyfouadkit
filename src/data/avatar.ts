@@ -1,5 +1,6 @@
 import { friendlyCloudError, retryTransient } from './cloudErrors';
 import { getSupabase } from './supabaseClient';
+import { translate } from '@/state/languageStore';
 
 /** Public bucket created in supabase/schema.sql — writes are limited to the owner's uid folder. */
 export const AVATAR_BUCKET = 'avatars';
@@ -25,7 +26,7 @@ export function loadImage(src: string): Promise<HTMLImageElement> {
     const img = new Image();
     img.decoding = 'async';
     img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error('That image could not be opened. Try a PNG, JPG or WebP.'));
+    img.onerror = () => reject(new Error(translate('core.avatar.openFailed')));
     img.src = src;
   });
 }
@@ -54,7 +55,7 @@ export async function renderCrop(img: HTMLImageElement, crop: CropState): Promis
   canvas.width = edge;
   canvas.height = edge;
   const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Your browser could not prepare the image.');
+  if (!ctx) throw new Error(translate('core.avatar.prepareFailed'));
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   const s = coverScale(img, edge) * crop.zoom;
@@ -69,7 +70,7 @@ export async function renderCrop(img: HTMLImageElement, crop: CropState): Promis
   const webp = await toBlob('image/webp', 0.9);
   if (webp && webp.type === 'image/webp') return webp;
   const png = await toBlob('image/png');
-  if (!png) throw new Error('Your browser could not export the image.');
+  if (!png) throw new Error(translate('core.avatar.exportFailed'));
   return png;
 }
 
@@ -77,7 +78,7 @@ export function blobToDataUrl(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error('The image could not be read.'));
+    reader.onerror = () => reject(new Error(translate('core.avatar.readFailed')));
     reader.readAsDataURL(blob);
   });
 }
@@ -112,7 +113,7 @@ export function writeLocalAvatar(dataUrl: string | null): boolean {
  */
 export async function uploadCloudAvatar(userId: string, blob: Blob): Promise<string> {
   const client = getSupabase();
-  if (!client) throw new Error('This build is not connected to a cloud project.');
+  if (!client) throw new Error(translate('core.notConfigured'));
   const ext = blob.type === 'image/webp' ? 'webp' : 'png';
   const name = `avatar-${Date.now()}.${ext}`;
   const path = `${userId}/${name}`;
@@ -124,7 +125,7 @@ export async function uploadCloudAvatar(userId: string, blob: Blob): Promise<str
       if (error) throw new Error(error.message);
     });
   } catch (err) {
-    throw new Error(`The picture could not be uploaded — ${friendlyCloudError(err)}`);
+    throw new Error(translate('core.avatar.uploadFailed', { error: friendlyCloudError(err) }));
   }
   void pruneCloudAvatars(userId, name);
   return client.storage.from(AVATAR_BUCKET).getPublicUrl(path).data.publicUrl;

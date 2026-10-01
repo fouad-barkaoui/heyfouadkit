@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { LinkKind, SavedLink } from '@/lib/types';
 import { KIND_META, KIND_ORDER } from '@/modules/saveit/linkIntel';
+import { useLanguage } from '@/state/languageStore';
 
 /**
  * SaveIt's "Constellation": every saved link is a star. Links cluster into
@@ -386,6 +387,7 @@ function Scene({
 }
 
 export function Constellation({ links, onOpen }: { links: SavedLink[]; onOpen: (link: SavedLink) => void }): JSX.Element {
+  const { t } = useLanguage();
   const [hover, setHover] = useState<{ i: number; x: number; y: number } | null>(null);
   const labelRefs = useRef<(HTMLDivElement | null)[]>([]);
   const reduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -435,13 +437,13 @@ export function Constellation({ links, onOpen }: { links: SavedLink[]; onOpen: (
           ) : null}
           <div className="p-2.5">
             <p className="line-clamp-2 text-[12.5px] font-medium leading-[1.35] text-paper">{hovered.title}</p>
-            <p className="mt-1 truncate text-[11px] text-ash">{hovered.domain} · click to open</p>
+            <p className="mt-1 truncate text-[11px] text-ash">{hovered.domain} · {t('core.space.clickToOpen')}</p>
           </div>
         </div>
       ) : null}
 
       <div className="save-space-hint pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1.5 text-[11.5px]">
-        Drag to orbit · scroll to zoom · click a star to open it
+        {t('core.space.hint')}
       </div>
     </div>
   );

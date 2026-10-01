@@ -2,7 +2,8 @@ import { Cloud, FileArchive, FileText, HardDrive, Image as ImageIcon, Loader2, P
 import { useCallback, useRef, useState } from 'react';
 import { ACCEPTED_TYPES, attachmentKind, totalCloudBytes, uploadAttachment } from '@/data/attachments';
 import type { Attachment, ItemType } from '@/lib/types';
-import { cn, formatBytes } from '@/lib/utils';
+import { fmtBytes, useI18n } from '@/components/ui/useI18n';
+import { cn } from '@/lib/utils';
 import { useAuth } from '@/state/authStore';
 import { useTeam } from '@/state/teamStore';
 import { useRequireAuth } from '@/state/useRequireAuth';
@@ -14,6 +15,7 @@ function Thumb({ attachment, onOpen }: { attachment: Attachment; onOpen: () => v
   const kind = attachmentKind(attachment);
   const { url } = useAttachmentUrl(kind === 'image' ? attachment : null);
   const { removeAttachment } = useWorkspace();
+  const { t } = useI18n();
 
   const Icon = kind === 'pdf' ? FileText : kind === 'text' ? FileText : kind === 'image' ? ImageIcon : FileArchive;
 
@@ -25,8 +27,8 @@ function Thumb({ attachment, onOpen }: { attachment: Attachment; onOpen: () => v
       <button
         type="button"
         onClick={onOpen}
-        className="block w-full text-left"
-        aria-label={`Preview ${attachment.name}`}
+        className="block w-full text-start"
+        aria-label={t('sh.files.preview', { name: attachment.name })}
       >
         <span className="flex h-[92px] items-center justify-center overflow-hidden bg-obsidian">
           {kind === 'image' && url ? (
@@ -43,16 +45,16 @@ function Thumb({ attachment, onOpen }: { attachment: Attachment; onOpen: () => v
             ) : (
               <HardDrive size={10} strokeWidth={1.9} aria-hidden />
             )}
-            <span className="num">{formatBytes(attachment.size)}</span>
+            <span className="num">{fmtBytes(attachment.size, t)}</span>
           </span>
         </span>
       </button>
 
       <button
         type="button"
-        aria-label={`Remove ${attachment.name}`}
+        aria-label={t('sh.files.remove', { name: attachment.name })}
         onClick={() => removeAttachment(attachment.id)}
-        className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-[5px] bg-void/80 text-ash opacity-0 backdrop-blur transition-opacity duration-150 hover:text-coral group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
+        className="absolute end-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-[5px] bg-void/80 text-ash opacity-0 backdrop-blur transition-opacity duration-150 hover:text-coral group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
       >
         <X size={12.5} strokeWidth={2} aria-hidden />
       </button>
@@ -88,6 +90,7 @@ export function AttachmentPanel({
   const [busy, setBusy] = useState(0);
   const [errors, setErrors] = useState<string[]>([]);
   const [previewing, setPreviewing] = useState<Attachment | null>(null);
+  const { t } = useI18n();
 
   const files = attachmentsFor(ownerId);
 
@@ -101,7 +104,7 @@ export function AttachmentPanel({
       // file is never attached to a record that does not exist.
       const target = ensureOwnerId ? ensureOwnerId() : ownerId;
       if (!target || target.startsWith('__')) {
-        setErrors(['Give this record a title first, then attach files to it.']);
+        setErrors([t('sh.files.needTitle')]);
         return;
       }
 
@@ -116,7 +119,7 @@ export function AttachmentPanel({
         setBusy((n) => n - 1);
       }
     },
-    [ownerId, ownerType, ensureOwnerId, activeTeamId, addAttachment, workspace.attachments, requireAuth],
+    [ownerId, ownerType, ensureOwnerId, activeTeamId, addAttachment, workspace.attachments, requireAuth, t],
   );
 
   const triggerFilePicker = (): void => {
@@ -145,7 +148,7 @@ export function AttachmentPanel({
     >
       <header className="mb-2.5 flex items-center gap-2">
         <Paperclip size={12.5} strokeWidth={1.8} className="text-ash" aria-hidden />
-        <h3 className="text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">Files</h3>
+        <h3 className="text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('sh.files.title')}</h3>
         {files.length > 0 ? (
           <span className="mono num rounded-[4px] bg-[rgb(var(--tint-rgb)/0.05)] px-1.5 py-[1px] text-[10.5px] text-ash">
             {files.length}
@@ -155,10 +158,10 @@ export function AttachmentPanel({
         <button
           type="button"
           onClick={triggerFilePicker}
-          className="ml-auto flex items-center gap-1.5 rounded-[5px] px-2 py-[5px] text-[11.5px] text-ash transition-colors duration-150 hover:bg-[rgb(var(--tint-rgb)/0.06)] hover:text-mist"
+          className="ms-auto flex items-center gap-1.5 rounded-[5px] px-2 py-[5px] text-[11.5px] text-ash transition-colors duration-150 hover:bg-[rgb(var(--tint-rgb)/0.06)] hover:text-mist"
         >
           <Upload size={12} strokeWidth={1.9} aria-hidden />
-          Add files
+          {t('sh.files.add')}
         </button>
       </header>
 
@@ -180,11 +183,9 @@ export function AttachmentPanel({
           onClick={triggerFilePicker}
           className="flex w-full flex-col items-center justify-center gap-1.5 rounded-[6px] border border-dashed border-graphite px-3 py-5 text-center transition-colors duration-150 hover:border-smoke"
         >
-          <span className="text-[12.5px] text-mist">Drop files here, or browse</span>
+          <span className="text-[12.5px] text-mist">{t('sh.files.drop')}</span>
           <span className="text-[11px] leading-[1.5] text-ash">
-            {user
-              ? 'Images, PDFs and documents up to 50 MB — stored in your cloud bucket'
-              : 'Sign in to attach files — up to 50 MB each, backed up to your account'}
+            {user ? t('sh.files.dropHintUser') : t('sh.files.dropHintGuest')}
           </span>
         </button>
       ) : (

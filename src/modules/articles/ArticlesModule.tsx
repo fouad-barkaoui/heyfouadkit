@@ -13,19 +13,18 @@ import type { Article, ArticleKind } from '@/lib/types';
 import {
   cn,
   formatBytes,
-  formatDate,
-  groupByDay,
   isWideViewport,
   nowISO,
   refCode,
-  relativeTime,
   stripHtml,
   uid,
   wordCount,
 } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 import { useUI } from '@/state/uiStore';
 import { useRequireAuth } from '@/state/useRequireAuth';
 import { useWorkspace } from '@/state/workspaceStore';
+import { localDate, localGroupByDay, localRelativeTime } from './localDates';
 import { PdfViewer } from './PdfViewer';
 import { PrintSheet } from './PrintSheet';
 
@@ -35,11 +34,11 @@ const MAX_INLINE_BYTES = 3 * 1024 * 1024;
 
 const KIND_ICON = { written: PenLine, pdf: FileType2, image: FileImage } as const;
 
-const KIND_FILTERS: { id: ArticleKind | 'all'; label: string }[] = [
-  { id: 'all', label: 'All' },
-  { id: 'written', label: 'Written' },
-  { id: 'pdf', label: 'PDF' },
-  { id: 'image', label: 'Images' },
+const KIND_FILTERS: { id: ArticleKind | 'all'; labelKey: string }[] = [
+  { id: 'all', labelKey: 'art.filter.all' },
+  { id: 'written', labelKey: 'art.filter.written' },
+  { id: 'pdf', labelKey: 'art.filter.pdf' },
+  { id: 'image', labelKey: 'art.filter.image' },
 ];
 
 const emptyDraft = (): Article => ({
@@ -61,6 +60,7 @@ const isMeaningful = (a: Article): boolean =>
   a.title.trim().length > 0 || stripHtml(a.content).length > 0 || a.tags.length > 0;
 
 export function ArticlesModule(): JSX.Element {
+  const { t } = useLanguage();
   const { workspace, createRecord, updateRecord, toggleInteresting } = useWorkspace();
   const { focusRequest, clearFocus } = useUI();
   const requireAuth = useRequireAuth();
@@ -73,7 +73,8 @@ export function ArticlesModule(): JSX.Element {
   );
   const [draft, setDraft] = useState<Article | null>(null);
   const [printOpen, setPrintOpen] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
+  /** Kept as a phrase key + values so the message follows a language switch. */
+  const [uploadError, setUploadError] = useState<{ key: string; vars: Record<string, string> } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -141,7 +142,7 @@ export function ArticlesModule(): JSX.Element {
     createRecord('articles', {
       ...active,
       id,
-      title: active.title.trim() || 'Untitled article',
+      title: active.title.trim() || t('art.untitledArticle'),
       createdAt: nowISO(),
       updatedAt: nowISO(),
     });
@@ -156,9 +157,10 @@ export function ArticlesModule(): JSX.Element {
     setUploadError(null);
 
     if (file.size > MAX_INLINE_BYTES) {
-      setUploadError(
-        `${file.name} is ${formatBytes(file.size)} — the local demo store caps files at ${formatBytes(MAX_INLINE_BYTES)}. Connect Supabase Storage for full-size uploads.`,
-      );
+      setUploadError({
+        key: 'art.tooBig',
+        vars: { name: file.name, size: formatBytes(file.size), max: formatBytes(MAX_INLINE_BYTES) },
+      });
       return;
     }
 
@@ -183,7 +185,7 @@ export function ArticlesModule(): JSX.Element {
       setDraft(null);
       setSelectedId(id);
     };
-    reader.onerror = () => setUploadError(`${file.name} could not be read.`);
+    reader.onerror = () => setUploadError({ key: 'art.readFailed', vars: { name: file.name } });
     reader.readAsDataURL(file);
   };
 
@@ -191,10 +193,10 @@ export function ArticlesModule(): JSX.Element {
     <div ref={panelRef}>
       {filtered.length === 0 ? (
         <p className="px-2.5 py-6 text-[12.5px] text-ash">
-          {query || kindFilter !== 'all' ? 'Nothing matches this filter.' : 'No articles or files yet.'}
+          {query || kindFilter !== 'all' ? t('art.empty.filtered') : t('art.empty.none')}
         </p>
       ) : (
-        groupByDay(filtered, (a) => a.updatedAt).map(([bucket, items]) => (
+        localGroupByDay(filtered, (a) => a.updatedAt).map(([bucket, items]) => (
           <div key={bucket} className="mb-3">
             <p className="px-2.5 pb-1.5 pt-1 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash/70">
               {bucket}
@@ -205,7 +207,7 @@ export function ArticlesModule(): JSX.Element {
                 <PanelItem
                   key={article.id}
                   active={article.id === selectedId}
-                  title={article.title || 'Untitled'}
+                  title={article.title || t('art.untitled')}
                   starred={article.isInteresting}
                   onToggleStar={() => toggleInteresting('articles', article.id)}
                   onSelect={() => {
@@ -215,9 +217,9 @@ export function ArticlesModule(): JSX.Element {
                   meta={
                     <>
                       <Icon size={11} strokeWidth={1.8} className="text-ash" aria-hidden />
-                      <span className="capitalize">{article.kind}</span>
+                      <span className="capitalize">{t(`art.kind.${article.kind}`)}</span>
                       <span aria-hidden>·</span>
-                      <span>{relativeTime(article.updatedAt)}</span>
+                      <span>{localRelativeTime(article.updatedAt)}</span>
                     </>
                   }
                 />
@@ -232,36 +234,36 @@ export function ArticlesModule(): JSX.Element {
   const meta = active ? (
     <aside className="w-full shrink-0 lg:w-[224px]">
       <div className="rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
-        <p className="mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">Record</p>
+        <p className="mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('art.meta.record')}</p>
         <dl className="space-y-2 text-[12px]">
           <div className="flex justify-between gap-3">
-            <dt className="text-ash">Type</dt>
-            <dd className="capitalize text-mist">{active.kind}</dd>
+            <dt className="text-ash">{t('art.meta.type')}</dt>
+            <dd className="capitalize text-mist">{t(`art.kind.${active.kind}`)}</dd>
           </div>
           <div className="flex justify-between gap-3">
-            <dt className="text-ash">Ref</dt>
+            <dt className="text-ash">{t('art.meta.ref')}</dt>
             <dd className="mono text-[11px] text-mist">{refCode('ART', active.id)}</dd>
           </div>
           <div className="flex justify-between gap-3">
-            <dt className="text-ash">Created</dt>
-            <dd className="text-mist">{formatDate(active.createdAt)}</dd>
+            <dt className="text-ash">{t('art.meta.created')}</dt>
+            <dd className="text-mist">{localDate(active.createdAt)}</dd>
           </div>
           {active.fileName ? (
             <>
               <div className="flex justify-between gap-3">
-                <dt className="shrink-0 text-ash">File</dt>
+                <dt className="shrink-0 text-ash">{t('art.meta.file')}</dt>
                 <dd className="truncate text-mist" title={active.fileName}>
                   {active.fileName}
                 </dd>
               </div>
               <div className="flex justify-between gap-3">
-                <dt className="text-ash">Size</dt>
+                <dt className="text-ash">{t('art.meta.size')}</dt>
                 <dd className="num text-mist">{formatBytes(active.fileSize)}</dd>
               </div>
             </>
           ) : (
             <div className="flex justify-between gap-3">
-              <dt className="text-ash">Words</dt>
+              <dt className="text-ash">{t('art.meta.words')}</dt>
               <dd className="num text-mist">{wordCount(active.content)}</dd>
             </div>
           )}
@@ -273,19 +275,19 @@ export function ArticlesModule(): JSX.Element {
   return (
     <>
       <ModuleLayout
-        panelTitle="Articles & Media"
+        panelTitle={t('nav.articles')}
         panelCount={articles.length}
         panelActions={
           <>
-            <IconButton label="Upload a file" onClick={triggerUpload}>
+            <IconButton label={t('art.uploadFile')} onClick={triggerUpload}>
               <Upload size={14.5} strokeWidth={1.8} />
             </IconButton>
-            <IconButton label="Write a new article" onClick={startDraft}>
+            <IconButton label={t('art.writeNew')} onClick={startDraft}>
               <PenLine size={14.5} strokeWidth={1.8} />
             </IconButton>
           </>
         }
-        panelSearch={{ value: query, onChange: setQuery, placeholder: 'Search articles…' }}
+        panelSearch={{ value: query, onChange: setQuery, placeholder: t('art.search') }}
         panelFilters={
           <div className="flex flex-wrap gap-1.5">
             {KIND_FILTERS.map((f) => (
@@ -296,22 +298,22 @@ export function ArticlesModule(): JSX.Element {
                 data-active={kindFilter === f.id}
                 onClick={() => setKindFilter(f.id)}
               >
-                {f.label}
+                {t(f.labelKey)}
               </button>
             ))}
           </div>
         }
         panel={panel}
-        title={active ? active.title || 'Untitled' : 'Articles & Media'}
+        title={active ? active.title || t('art.untitled') : t('nav.articles')}
         subtitle={
           active ? (
             <span className="flex flex-wrap items-center gap-2">
               <span className="mono text-[11px]">{refCode('ART', active.id)}</span>
               <span aria-hidden>·</span>
-              <span>Edited {relativeTime(active.updatedAt)}</span>
+              <span>{t('art.edited', { time: localRelativeTime(active.updatedAt) })}</span>
               {active.id === DRAFT_ID ? (
                 <span className="rounded-[4px] bg-[rgb(var(--tint-rgb)/0.06)] px-1.5 py-[1px] text-[11px] text-ash">
-                  Draft · saves as you type
+                  {t('art.draftBadge')}
                 </span>
               ) : null}
             </span>
@@ -328,17 +330,17 @@ export function ArticlesModule(): JSX.Element {
                   setDraft(null);
                 }}
               >
-                Save
+                {t('art.save')}
               </Button>
               <Button
                 icon={<Printer size={13.5} strokeWidth={1.85} />}
                 onClick={() => setPrintOpen(true)}
                 className="max-sm:hidden"
               >
-                Print
+                {t('art.print')}
               </Button>
               <IconButton
-                label={active.isInteresting ? 'Remove from vault' : 'Add to vault'}
+                label={active.isInteresting ? t('art.vault.remove') : t('art.vault.add')}
                 className={cn(active.isInteresting && 'text-accent')}
                 onClick={() => {
                   if (active.id !== DRAFT_ID) toggleInteresting('articles', active.id);
@@ -358,10 +360,10 @@ export function ArticlesModule(): JSX.Element {
           ) : (
             <>
               <Button icon={<Upload size={13.5} strokeWidth={1.85} />} onClick={triggerUpload}>
-                Upload
+                {t('art.upload')}
               </Button>
               <Button variant="primary" icon={<PenLine size={13.5} strokeWidth={1.9} />} onClick={startDraft}>
-                Write
+                {t('art.write')}
               </Button>
             </>
           )
@@ -385,22 +387,22 @@ export function ArticlesModule(): JSX.Element {
 
         {uploadError ? (
           <div className="mb-4 rounded-[6px] bg-coral/[0.09] px-3 py-2.5 text-[12.5px] text-coral shadow-[inset_0_0_0_1px_rgba(235,87,87,0.25)]">
-            {uploadError}
+            {t(uploadError.key, uploadError.vars)}
           </div>
         ) : null}
 
         {!active ? (
           <EmptyState
             icon={<FileText size={18} strokeWidth={1.6} />}
-            title="Nothing selected"
-            hint="Write an article in place, or upload a PDF or image — both land in the same library with a print-ready A4 view."
+            title={t('art.empty.title')}
+            hint={t('art.empty.hint')}
             action={
               <div className="flex gap-2">
                 <Button icon={<Upload size={13.5} strokeWidth={1.85} />} onClick={triggerUpload}>
-                  Upload a file
+                  {t('art.uploadFile')}
                 </Button>
                 <Button variant="primary" icon={<PenLine size={13.5} strokeWidth={1.9} />} onClick={startDraft}>
-                  Write an article
+                  {t('art.writeArticle')}
                 </Button>
               </div>
             }
@@ -411,8 +413,8 @@ export function ArticlesModule(): JSX.Element {
               <input
                 value={active.title}
                 onChange={(e) => patch({ title: e.target.value })}
-                placeholder="Untitled"
-                aria-label="Article title"
+                placeholder={t('art.untitled')}
+                aria-label={t('art.titleLabel')}
                 className="mb-3 w-full bg-transparent text-[24px] font-medium leading-[1.18] tracking-[-0.022em] text-paper outline-none placeholder:text-ash/50"
               />
               <TagInput tags={active.tags} onChange={(tags) => patch({ tags })} className="mb-4" />
@@ -432,19 +434,19 @@ export function ArticlesModule(): JSX.Element {
                   key={active.id}
                   value={active.content}
                   onChange={(content) => patch({ content })}
-                  placeholder="Write the piece…"
+                  placeholder={t('art.bodyPlaceholder')}
                   minHeight={340}
                 />
               )}
 
               {active.kind !== 'written' ? (
                 <div className="mt-5">
-                  <p className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">Notes</p>
+                  <p className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('art.notes')}</p>
                   <RichEditor
                     key={`${active.id}-notes`}
                     value={active.content}
                     onChange={(content) => patch({ content })}
-                    placeholder="What matters in this document…"
+                    placeholder={t('art.notesPlaceholder')}
                     minHeight={140}
                     toolbar={false}
                   />

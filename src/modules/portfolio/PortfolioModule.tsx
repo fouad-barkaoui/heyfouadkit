@@ -11,9 +11,10 @@ import {
   Sun,
   type LucideIcon,
 } from 'lucide-react';
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { MenuButton } from '@/components/shell/MenuButton';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 import { originOf, useTheme } from '@/state/themeStore';
 import { useUI } from '@/state/uiStore';
 import { greetingFor } from './localTime';
@@ -51,19 +52,27 @@ import {
 
 const EMAIL = 'fouadbr2001@gmail.com';
 
-/** The line under the name cycles through these. */
+/** The line under the name cycles through these (translation keys). */
 const ROLES = [
-  'Beginner SOC Analyst',
-  'Fullstack Web Developer',
-  'Programmer',
-  'Vibe Coder',
-  'Prompt Engineer',
-  'Problem Solver',
-  'Analytical Thinker',
-  'Cybersecurity Enthusiast',
-  'Fast, Curious Learner',
+  'pf.role.soc',
+  'pf.role.fullstack',
+  'pf.role.programmer',
+  'pf.role.vibe',
+  'pf.role.prompt',
+  'pf.role.solver',
+  'pf.role.analytical',
+  'pf.role.cyber',
+  'pf.role.learner',
 ];
 
+/** Renders a translated phrase, making its <b>…</b> parts <strong>. */
+function rich(text: string): ReactNode {
+  return text.split(/<b>(.*?)<\/b>/).map((part, k) =>
+    k % 2 ? <strong key={k}>{part}</strong> : <Fragment key={k}>{part}</Fragment>,
+  );
+}
+
+/** name, handle, status and note are translation keys. */
 interface Social {
   id: string;
   name: string;
@@ -81,41 +90,41 @@ interface Social {
 const SOCIALS: Social[] = [
   {
     id: 'resume',
-    name: 'Resume',
-    handle: 'PDF · on its way',
+    name: 'pf.social.resume.name',
+    handle: 'pf.social.resume.handle',
     icon: FileText,
-    status: 'Soon',
-    note: 'My resume is coming soon.',
+    status: 'pf.status.soon',
+    note: 'pf.social.resume.note',
   },
   {
     id: 'github',
-    name: 'GitHub',
-    handle: 'fouad-barkaoui',
+    name: 'pf.social.github.name',
+    handle: 'pf.social.github.handle',
     url: 'https://github.com/fouad-barkaoui',
     icon: Github,
-    status: 'Building',
-    note: 'Under construction — a brand-new account, repositories are on their way.',
+    status: 'pf.status.building',
+    note: 'pf.social.github.note',
   },
   {
     id: 'linkedin',
-    name: 'LinkedIn',
-    handle: 'fouad-barkaoui',
+    name: 'pf.social.linkedin.name',
+    handle: 'pf.social.linkedin.handle',
     url: 'https://www.linkedin.com/in/fouad-barkaoui/',
     icon: Linkedin,
-    status: 'In progress',
-    note: 'In development — the profile is still being put together.',
+    status: 'pf.status.inProgress',
+    note: 'pf.social.linkedin.note',
   },
   {
     id: 'instagram',
-    name: 'Instagram',
-    handle: '@heyfouad',
+    name: 'pf.social.instagram.name',
+    handle: 'pf.social.instagram.handle',
     url: 'https://www.instagram.com/heyfouad/',
     icon: Instagram,
   },
   {
     id: 'facebook',
-    name: 'Facebook',
-    handle: 'Fouad Barkaoui',
+    name: 'pf.social.facebook.name',
+    handle: 'pf.social.facebook.handle',
     url: 'https://www.facebook.com/share/16E8VLshmwD/',
     icon: Facebook,
   },
@@ -148,6 +157,8 @@ const prefersReducedMotion = (): boolean =>
  * also the clock, so pausing it (hover or focus) pauses the whole ticker.
  */
 function SkillTicker(): JSX.Element {
+  const { t } = useLanguage();
+  const roles = useMemo(() => ROLES.map((k) => t(k)), [t]);
   const [i, setI] = useState(0);
   const [prev, setPrev] = useState<number | null>(null);
   const [paused, setPaused] = useState(false);
@@ -157,7 +168,7 @@ function SkillTicker(): JSX.Element {
 
   useLayoutEffect(() => {
     if (measure.current) setWidth(Math.ceil(measure.current.getBoundingClientRect().width));
-  }, [i]);
+  }, [i, roles]);
 
   const next = (): void => {
     setPrev(i);
@@ -172,22 +183,22 @@ function SkillTicker(): JSX.Element {
       onMouseLeave={() => setPaused(false)}
     >
       {/* Screen readers get the whole list once, not a chatty live region. */}
-      <span className="sr-only">{ROLES.join(', ')}</span>
+      <span className="sr-only">{roles.join(t('pf.listSep'))}</span>
       <span className="cp-skill-pill" aria-hidden>
         <span className="cp-skill-dot" />
         <span className="cp-skill-window" style={{ width }}>
           {prev !== null ? (
             <span key={`out-${prev}-${i}`} className="cp-skill-word is-out">
-              {ROLES[prev]}
+              {roles[prev]}
             </span>
           ) : null}
           <span key={`in-${i}`} className="cp-skill-word is-in">
-            {ROLES[i]}
+            {roles[i]}
           </span>
         </span>
         {still ? null : <span key={`bar-${i}`} className="cp-skill-bar" onAnimationEnd={next} />}
         <span ref={measure} className="cp-skill-measure">
-          {ROLES[i]}
+          {roles[i]}
         </span>
       </span>
       <span className="cp-skill-count" aria-hidden>
@@ -199,6 +210,7 @@ function SkillTicker(): JSX.Element {
 }
 
 function SocialPill({ s }: { s: Social }): JSX.Element {
+  const { t } = useLanguage();
   const Icon = s.icon;
   const live = Boolean(s.url);
   const tipId = s.note ? `cp-tip-${s.id}` : undefined;
@@ -209,15 +221,19 @@ function SocialPill({ s }: { s: Social }): JSX.Element {
       </span>
       <span className="cp-pill-text">
         <span className="cp-pill-name">
-          {s.name}
-          {s.status ? <span className="cp-status">{s.status}</span> : null}
+          {t(s.name)}
+          {s.status ? <span className="cp-status">{t(s.status)}</span> : null}
         </span>
-        <span className="cp-pill-handle">{s.handle}</span>
+        <span className="cp-pill-handle">{t(s.handle)}</span>
       </span>
-      {live && !s.status ? <ArrowUpRight className="cp-pill-go" size={15} strokeWidth={1.8} aria-hidden /> : null}
+      {live && !s.status ? (
+        <span className="inline-flex shrink-0 rtl:-scale-x-100" aria-hidden>
+          <ArrowUpRight className="cp-pill-go" size={15} strokeWidth={1.8} />
+        </span>
+      ) : null}
       {s.note ? (
         <span id={tipId} role="tooltip" className="cp-tip">
-          {s.note}
+          {t(s.note)}
         </span>
       ) : null}
     </>
@@ -240,8 +256,11 @@ function SocialPill({ s }: { s: Social }): JSX.Element {
 function ProfileCard(): JSX.Element {
   const { resolved, toggle } = useTheme();
   const ThemeIcon = resolved === 'light' ? Sun : Moon;
-  const greeting = useMemo(() => greetingFor(new Date().getHours()), []);
+  const { t, language } = useLanguage();
+  // Re-read on a language switch (greetingFor translates).
+  const greeting = useMemo(() => greetingFor(new Date().getHours()), [language]);
   const { setModule } = useUI();
+  const dark = resolved === 'light';
 
   return (
     <>
@@ -250,8 +269,8 @@ function ProfileCard(): JSX.Element {
           type="button"
           className="cp-theme"
           onClick={(e) => toggle(originOf(e.currentTarget))}
-          aria-label={`Switch the whole app to ${resolved === 'light' ? 'dark' : 'light'} theme`}
-          title={`Switch the whole app to ${resolved === 'light' ? 'dark' : 'light'}`}
+          aria-label={t(dark ? 'pf.theme.toDark.aria' : 'pf.theme.toLight.aria')}
+          title={t(dark ? 'pf.theme.toDark.title' : 'pf.theme.toLight.title')}
         >
           <ThemeIcon size={16} strokeWidth={1.7} aria-hidden />
         </button>
@@ -261,7 +280,7 @@ function ProfileCard(): JSX.Element {
         <div className="cp-avatar">
           <img
             src="/fouad-portrait-512.jpg"
-            alt="Portrait of Fouad Barkaoui"
+            alt={t('pf.portraitAlt')}
             width={120}
             height={120}
             decoding="async"
@@ -270,7 +289,7 @@ function ProfileCard(): JSX.Element {
         <div className="cp-head-text">
           <h2 className="cp-name">
             <span>Fouad Barkaoui</span>
-            <BadgeCheck className="cp-verified" size={26} strokeWidth={1.6} aria-label="Verified" role="img" />
+            <BadgeCheck className="cp-verified" size={26} strokeWidth={1.6} aria-label={t('pf.verified')} role="img" />
           </h2>
           <SkillTicker />
         </div>
@@ -281,29 +300,20 @@ function ProfileCard(): JSX.Element {
       <Hatch />
 
       <section className="cp-section" aria-labelledby="cp-about">
-        <Note>say hi</Note>
+        <Note>{t('pf.note.sayHi')}</Note>
         <h3 id="cp-about" className="cp-greeting">
           {greeting}
         </h3>
         <ul className="cp-bio">
-          <li>
-            I'm <strong>Fouad Barkaoui</strong> — a <strong>beginner SOC analyst</strong> and{' '}
-            <strong>fullstack web developer</strong> from Morocco.
-          </li>
-          <li>
-            A <strong>programmer</strong>, <strong>vibe coder</strong> and <strong>prompt engineer</strong> who turns
-            ideas into working products — fast, clean and <strong>secure by default</strong>.
-          </li>
-          <li>
-            My edge is <strong>problem solving</strong>: I break big, messy problems into small steps, stay curious, and
-            keep learning how systems get built — and how they get attacked.
-          </li>
+          <li>{rich(t('pf.bio.1'))}</li>
+          <li>{rich(t('pf.bio.2'))}</li>
+          <li>{rich(t('pf.bio.3'))}</li>
         </ul>
 
         <div className="cp-cta-row">
           <button type="button" className="cp-cta" onClick={() => setModule('contact')}>
             <MessageSquareText size={16} strokeWidth={1.8} aria-hidden />
-            Write to me
+            {t('pf.writeToMe')}
           </button>
         </div>
       </section>
@@ -319,9 +329,9 @@ function ProfileCard(): JSX.Element {
       <Hatch />
 
       <section className="cp-section" aria-labelledby="cp-socials">
-        <Note>find me here</Note>
+        <Note>{t('pf.note.findMe')}</Note>
         <h3 id="cp-socials" className="cp-section-title">
-          Socials
+          {t('pf.section.socials')}
         </h3>
         <div className="cp-pills">
           {SOCIALS.map((s) => (
@@ -341,15 +351,16 @@ function ProfileCard(): JSX.Element {
 /* ── Page ─────────────────────────────────────────────────────────────── */
 
 export function PortfolioModule(): JSX.Element {
+  const { t } = useLanguage();
   return (
     <div className="flex h-full min-h-0 w-full min-w-0 flex-col bg-void/78 backdrop-blur-2xl">
       <header className="flex items-center gap-3 border-b border-graphite px-4 py-3.5 md:px-7 md:py-4">
         <MenuButton className="md:hidden" />
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-[19px] font-medium leading-tight tracking-[-0.016em] text-paper md:text-[21px]">
-            About the Founder
+            {t('pf.title')}
           </h1>
-          <p className="mt-1 truncate text-[12.5px] text-ash">The person behind Kanz — background, experience and stack.</p>
+          <p className="mt-1 truncate text-[12.5px] text-ash">{t('pf.subtitle')}</p>
         </div>
       </header>
 

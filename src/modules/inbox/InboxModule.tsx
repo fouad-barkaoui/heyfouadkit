@@ -11,11 +11,26 @@ import {
   type ContactTopic,
 } from '@/data/contact';
 import { isAdminUser } from '@/lib/access';
-import { cn, relativeTime } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { useAuth } from '@/state/authStore';
+import { translate, useLanguage } from '@/state/languageStore';
 import { TOPICS, TOPIC_LABEL } from '@/modules/contact/topics';
 
 type TopicFilter = 'all' | ContactTopic;
+
+/** Same buckets as lib/utils relativeTime, in the current language. */
+function agoLabel(iso: string, t: (key: string, vars?: Record<string, number>) => string, locale: string): string {
+  const time = new Date(iso).getTime();
+  if (Number.isNaN(time)) return '—';
+  const mins = Math.round((Date.now() - time) / 60_000);
+  if (mins < 1) return t('trash.ago.now');
+  if (mins < 60) return t('trash.ago.minutes', { count: mins });
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return t('trash.ago.hours', { count: hours });
+  const days = Math.round(hours / 24);
+  if (days < 30) return t('trash.ago.days', { count: days });
+  return new Date(iso).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' });
+}
 
 /**
  * Admin-only page: every message people send from the Contact page lands
@@ -25,6 +40,7 @@ type TopicFilter = 'all' | ContactTopic;
 export function InboxModule(): JSX.Element {
   const { user } = useAuth();
   const admin = isAdminUser(user);
+  const { t, locale } = useLanguage();
 
   const [items, setItems] = useState<ContactMessage[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +56,7 @@ export function InboxModule(): JSX.Element {
       setItems(await listContactMessages());
       announceContactChange();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not load messages');
+      setError(e instanceof Error ? e.message : translate('inbox.loadFailed'));
       setItems((prev) => prev ?? []);
     } finally {
       setBusy(false);
@@ -62,7 +78,7 @@ export function InboxModule(): JSX.Element {
       announceContactChange();
     } catch (e) {
       rollback();
-      setError(e instanceof Error ? e.message : 'That change did not save');
+      setError(e instanceof Error ? e.message : t('inbox.saveFailed'));
     }
   };
 
@@ -84,16 +100,16 @@ export function InboxModule(): JSX.Element {
         <MenuButton className="md:hidden" />
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-[19px] font-medium leading-tight tracking-[-0.016em] text-paper md:text-[21px]">
-            Inbox
-            {unread ? <span className="contact-count mono">{unread} new</span> : null}
+            {t('inbox.title')}
+            {unread ? <span className="contact-count mono">{t('inbox.newCount', { count: unread })}</span> : null}
           </h1>
-          <p className="mt-1 truncate text-[12.5px] text-ash">Messages people send from the Contact page.</p>
+          <p className="mt-1 truncate text-[12.5px] text-ash">{t('inbox.subtitle')}</p>
         </div>
         {admin ? (
           <button
             type="button"
             className="btn-icon"
-            aria-label="Refresh inbox"
+            aria-label={t('inbox.refresh')}
             onClick={() => void refresh()}
             disabled={busy}
           >
@@ -108,13 +124,13 @@ export function InboxModule(): JSX.Element {
             <span className="inbox-locked-icon" aria-hidden>
               <Lock size={18} strokeWidth={1.8} />
             </span>
-            <h2>Admin only</h2>
-            <p>This inbox belongs to the app owner. Sign in with the admin account to read messages.</p>
+            <h2>{t('inbox.adminOnly')}</h2>
+            <p>{t('inbox.adminOnlyHint')}</p>
           </div>
         ) : (
           <div className="inbox-page">
             <div className="inbox-toolbar">
-              <div className="contact-seg" role="tablist" aria-label="Inbox filter">
+              <div className="contact-seg" role="tablist" aria-label={t('inbox.filter')}>
                 {(['open', 'archived'] as const).map((f) => (
                   <button
                     key={f}
@@ -124,12 +140,12 @@ export function InboxModule(): JSX.Element {
                     data-active={status === f}
                     onClick={() => setStatus(f)}
                   >
-                    {f === 'open' ? 'Open' : 'Archived'}
+                    {f === 'open' ? t('inbox.open') : t('inbox.archived')}
                   </button>
                 ))}
               </div>
-              <div className="inbox-topics" role="group" aria-label="Filter by type">
-                {(['all', ...TOPICS.map((t) => t.id)] as TopicFilter[]).map((id) => (
+              <div className="inbox-topics" role="group" aria-label={t('inbox.filterByType')}>
+                {(['all', ...TOPICS.map((tp) => tp.id)] as TopicFilter[]).map((id) => (
                   <button
                     key={id}
                     type="button"
@@ -138,7 +154,7 @@ export function InboxModule(): JSX.Element {
                     aria-pressed={topic === id}
                     onClick={() => setTopic(id)}
                   >
-                    {id === 'all' ? 'All' : TOPIC_LABEL[id]}
+                    {id === 'all' ? t('inbox.all') : TOPIC_LABEL[id]}
                     <span className="inbox-count mono">{counts[id] ?? 0}</span>
                   </button>
                 ))}
@@ -150,7 +166,7 @@ export function InboxModule(): JSX.Element {
             <section className="surface-card contact-inbox">
               {items === null ? (
                 <div className="flex items-center gap-2 px-4 py-5 text-[12.5px] text-ash">
-                  <Loader2 size={14} className="animate-spin" /> Loading messages…
+                  <Loader2 size={14} className="animate-spin" /> {t('inbox.loading')}
                 </div>
               ) : shown.length === 0 ? (
                 <div className="inbox-empty">
@@ -159,10 +175,10 @@ export function InboxModule(): JSX.Element {
                   </span>
                   <p>
                     {status === 'archived'
-                      ? 'Nothing archived.'
+                      ? t('inbox.emptyArchived')
                       : topic === 'all'
-                        ? 'No messages yet — they will land here.'
-                        : `No ${TOPIC_LABEL[topic].toLowerCase()} messages.`}
+                        ? t('inbox.emptyAll')
+                        : t('inbox.emptyTopic', { topic: TOPIC_LABEL[topic].toLowerCase() })}
                   </p>
                 </div>
               ) : (
@@ -194,7 +210,7 @@ export function InboxModule(): JSX.Element {
                             </span>
                           </span>
                           <span className="contact-msg-topic">{TOPIC_LABEL[m.topic]}</span>
-                          <span className="mono text-[10.5px] text-ash">{relativeTime(m.createdAt)}</span>
+                          <span className="mono text-[10.5px] text-ash">{m.createdAt ? agoLabel(m.createdAt, t, locale) : '—'}</span>
                         </button>
                         {open ? (
                           <div className="contact-msg-body">
@@ -204,7 +220,7 @@ export function InboxModule(): JSX.Element {
                                 className="btn btn-primary"
                                 href={`mailto:${encodeURIComponent(m.email)}?subject=${encodeURIComponent(`Re: ${m.subject}`)}`}
                               >
-                                <Mail size={14} strokeWidth={2} aria-hidden /> Reply by email
+                                <Mail size={14} strokeWidth={2} aria-hidden /> {t('inbox.reply')}
                               </a>
                               <Button
                                 onClick={() => {
@@ -218,7 +234,7 @@ export function InboxModule(): JSX.Element {
                                 }}
                               >
                                 <Archive size={14} strokeWidth={1.8} aria-hidden />
-                                {m.status === 'archived' ? 'Move to open' : 'Archive'}
+                                {m.status === 'archived' ? t('inbox.moveToOpen') : t('inbox.archive')}
                               </Button>
                               <Button
                                 className="contact-delete"
@@ -231,7 +247,7 @@ export function InboxModule(): JSX.Element {
                                   );
                                 }}
                               >
-                                <Trash2 size={14} strokeWidth={1.8} aria-hidden /> Delete
+                                <Trash2 size={14} strokeWidth={1.8} aria-hidden /> {t('inbox.delete')}
                               </Button>
                             </div>
                           </div>

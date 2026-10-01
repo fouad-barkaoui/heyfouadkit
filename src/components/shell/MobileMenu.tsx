@@ -7,7 +7,7 @@ import type { ModuleId } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { HOME_ID, MODULE_MAP, NAV_GROUPS } from '@/modules/registry';
 import { getDisplayName, useAuth } from '@/state/authStore';
-import { useLanguage } from '@/state/languageStore';
+import { useI18n } from '@/components/ui/useI18n';
 import { useUI } from '@/state/uiStore';
 import { useWorkspace } from '@/state/workspaceStore';
 import { AccountMenu } from './AccountMenu';
@@ -42,7 +42,7 @@ export function MobileMenu(): JSX.Element {
   const { live, syncState } = useWorkspace();
   const { user, configured, avatarUrl } = useAuth();
   const pro = isProUser(user);
-  const { t } = useLanguage();
+  const { t } = useI18n();
   const flagFor = useRowFlag();
 
   useEffect(listenForTaps, []);
@@ -96,7 +96,7 @@ export function MobileMenu(): JSX.Element {
           onClick={() => setModule(id)}
           data-active={active}
           aria-current={active ? 'page' : undefined}
-          aria-label={flag ? `${label} — ${FLAG_TOOLTIP[flag]}` : label}
+          aria-label={flag ? `${label} — ${t(FLAG_TOOLTIP[flag])}` : label}
           className="menu-tile"
           style={{ ['--i' as string]: i }}
         >
@@ -113,18 +113,18 @@ export function MobileMenu(): JSX.Element {
     <Dialog.Root open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
       <Dialog.Portal>
         <Dialog.Content
-          aria-label="Navigation"
+          aria-label={t('sh.nav.title')}
           aria-describedby={undefined}
           onOpenAutoFocus={(e) => e.preventDefault()}
           className="mobile-menu fixed inset-0 z-50 flex flex-col md:hidden"
           style={origin}
         >
-          <Dialog.Title className="sr-only">Navigation</Dialog.Title>
+          <Dialog.Title className="sr-only">{t('sh.nav.title')}</Dialog.Title>
           <div className="mobile-menu-glow" aria-hidden />
 
           <header className="relative flex items-center gap-3 px-4 pb-3 pt-[max(14px,env(safe-area-inset-top))]">
-            <MenuButton open={morph} onClick={close} label="Close navigation" />
-            <span className="min-w-0 flex-1 text-[15px] font-medium tracking-[-0.014em] text-paper">Menu</span>
+            <MenuButton open={morph} onClick={close} label={t('sh.nav.close')} />
+            <span className="min-w-0 flex-1 text-[15px] font-medium tracking-[-0.014em] text-paper">{t('sh.nav.menu')}</span>
           </header>
 
           <div className="relative px-4 pb-3">
@@ -147,7 +147,7 @@ export function MobileMenu(): JSX.Element {
             </div>
           ) : null}
 
-          <nav aria-label="Modules" className="scroll-y relative min-h-0 flex-1 px-4 pb-4">
+          <nav aria-label={t('sh.nav.modules')} className="scroll-y relative min-h-0 flex-1 px-4 pb-4">
             <div className="menu-grid mt-1">{tiles([HOME_ID, 'portfolio'])}</div>
             {NAV_GROUPS.map((g) => (
               <div key={g.id}>
@@ -172,7 +172,7 @@ export function MobileMenu(): JSX.Element {
               <AccountMenu side="top" align="end">
               <button type="button" aria-label={`${t('shell.account')} — ${accountName}`} className="menu-foot-btn">
                 <span className="relative shrink-0">
-                  <Avatar src={avatarUrl} name={user ? accountName : 'Guest'} size={30} pro={pro} />
+                  <Avatar src={avatarUrl} name={user ? accountName : t('sh.guest')} size={30} pro={pro} />
                   <span className="absolute -bottom-0.5 -end-0.5 flex h-[14px] w-[14px] items-center justify-center rounded-full bg-void" aria-hidden>
                     <SyncIcon
                       size={9.5}

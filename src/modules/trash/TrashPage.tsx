@@ -18,7 +18,7 @@ import { Button, IconButton } from '@/components/ui/Button';
 import { ConfirmDelete } from '@/components/ui/ConfirmDelete';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { CollectionKey } from '@/lib/types';
-import { relativeTime, stripHtml } from '@/lib/utils';
+import { stripHtml } from '@/lib/utils';
 import { useLanguage } from '@/state/languageStore';
 import { useWorkspace } from '@/state/workspaceStore';
 import { ScrollIndex } from '@/components/motion/ScrollIndex';
@@ -49,8 +49,22 @@ const KIND_ICON: Record<TrashKind, JSX.Element> = {
   plan: <HeartPulse size={15} strokeWidth={1.7} />,
 };
 
+/** Same buckets as lib/utils relativeTime, in the current language. */
+function agoLabel(iso: string, t: (key: string, vars?: Record<string, number>) => string, locale: string): string {
+  const time = new Date(iso).getTime();
+  if (Number.isNaN(time)) return '—';
+  const mins = Math.round((Date.now() - time) / 60_000);
+  if (mins < 1) return t('trash.ago.now');
+  if (mins < 60) return t('trash.ago.minutes', { count: mins });
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return t('trash.ago.hours', { count: hours });
+  const days = Math.round(hours / 24);
+  if (days < 30) return t('trash.ago.days', { count: days });
+  return new Date(iso).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 export function TrashPage(): JSX.Element {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const { workspace, updateRecord, removeRecord } = useWorkspace();
 
   /** Every soft-deleted record across the collections that support Trash,
@@ -63,7 +77,7 @@ export function TrashPage(): JSX.Element {
         .map((n) => ({
           id: n.id,
           key: 'notes' as CollectionKey,
-          title: n.title || 'Untitled note',
+          title: n.title || t('trash.untitled.note'),
           type: 'note' as TrashKind,
           deletedAt: n.deletedAt || n.updatedAt,
           preview: stripHtml(n.content).slice(0, 100),
@@ -73,7 +87,7 @@ export function TrashPage(): JSX.Element {
         .map((task) => ({
           id: task.id,
           key: 'todos' as CollectionKey,
-          title: task.title || 'Untitled task',
+          title: task.title || t('trash.untitled.task'),
           type: 'task' as TrashKind,
           deletedAt: task.deletedAt || task.updatedAt,
           preview: task.description?.slice(0, 100),
@@ -83,7 +97,7 @@ export function TrashPage(): JSX.Element {
         .map((a) => ({
           id: a.id,
           key: 'articles' as CollectionKey,
-          title: a.title || 'Untitled article',
+          title: a.title || t('trash.untitled.article'),
           type: 'article' as TrashKind,
           deletedAt: a.deletedAt || a.updatedAt,
           preview: stripHtml(a.content).slice(0, 100),
@@ -93,7 +107,7 @@ export function TrashPage(): JSX.Element {
         .map((d) => ({
           id: d.id,
           key: 'docs' as CollectionKey,
-          title: d.title || 'Untitled document',
+          title: d.title || t('trash.untitled.document'),
           type: 'doc' as TrashKind,
           deletedAt: d.deletedAt || d.updatedAt,
           preview: stripHtml(d.content).slice(0, 100),
@@ -103,7 +117,7 @@ export function TrashPage(): JSX.Element {
         .map((c) => ({
           id: c.id,
           key: 'courses' as CollectionKey,
-          title: c.title || 'Untitled course',
+          title: c.title || t('trash.untitled.course'),
           type: 'course' as TrashKind,
           deletedAt: c.deletedAt || c.updatedAt,
           preview: c.description?.slice(0, 100),
@@ -113,7 +127,7 @@ export function TrashPage(): JSX.Element {
         .map((n) => ({
           id: n.id,
           key: 'news' as CollectionKey,
-          title: n.title || 'Untitled story',
+          title: n.title || t('trash.untitled.story'),
           type: 'news' as TrashKind,
           deletedAt: n.deletedAt || n.updatedAt,
           preview: stripHtml(n.content).slice(0, 100),
@@ -123,7 +137,7 @@ export function TrashPage(): JSX.Element {
         .map((m) => ({
           id: m.id,
           key: 'medicines' as CollectionKey,
-          title: m.name || 'Untitled medicine',
+          title: m.name || t('trash.untitled.medicine'),
           type: 'medicine' as TrashKind,
           deletedAt: m.deletedAt || m.updatedAt,
           preview: `${m.dosage} ${m.unit}`,
@@ -133,7 +147,7 @@ export function TrashPage(): JSX.Element {
         .map((p) => ({
           id: p.id,
           key: 'treatmentPlans' as CollectionKey,
-          title: p.condition || 'Untitled plan',
+          title: p.condition || t('trash.untitled.plan'),
           type: 'plan' as TrashKind,
           deletedAt: p.deletedAt || p.updatedAt,
           preview: p.prescriber,
@@ -156,7 +170,7 @@ export function TrashPage(): JSX.Element {
           title: `${h.emoji} ${h.name}`,
           type: 'habit' as TrashKind,
           deletedAt: h.deletedAt || h.updatedAt,
-          preview: `${h.log.length} check-ins`,
+          preview: t('trash.checkins', { count: h.log.length }),
         })),
       ...workspace.goals
         .filter((g) => g.isDeleted)
@@ -166,7 +180,7 @@ export function TrashPage(): JSX.Element {
           title: `${g.emoji} ${g.title}`,
           type: 'goal' as TrashKind,
           deletedAt: g.deletedAt || g.updatedAt,
-          preview: `${g.steps.length} steps`,
+          preview: t('trash.steps', { count: g.steps.length }),
         })),
     ];
     return items.sort((a, b) => new Date(b.deletedAt).getTime() - new Date(a.deletedAt).getTime());
@@ -182,6 +196,7 @@ export function TrashPage(): JSX.Element {
     workspace.links,
     workspace.habits,
     workspace.goals,
+    t,
   ]);
 
   const restore = (item: TrashItem): void => {
@@ -233,14 +248,14 @@ export function TrashPage(): JSX.Element {
                     <p className="mt-0.5 line-clamp-2 text-[11.5px] text-ash">{item.preview}</p>
                   ) : null}
                   <p className="mt-1 text-[11px] text-ash">
-                    {t('trash.deleted')} {relativeTime(item.deletedAt)}
+                    {t('trash.deleted')} {item.deletedAt ? agoLabel(item.deletedAt, t, locale) : '—'}
                   </p>
                 </div>
 
                 <div className="flex shrink-0 items-center gap-1.5">
                   <IconButton
                     label={t('trash.restore')}
-                    title="Restore item"
+                    title={t('trash.restoreItem')}
                     className="text-teal-500 hover:bg-teal-500/10"
                     onClick={() => restore(item)}
                   >

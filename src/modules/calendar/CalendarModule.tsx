@@ -15,12 +15,13 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Modal } from '@/components/ui/Modal';
 import { ProgressBar } from '@/components/ui/ProgressRing';
 import type { TaskStatus, Todo } from '@/lib/types';
-import { cn, formatDate } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 import { useRequireAuth } from '@/state/useRequireAuth';
 import { useWorkspace } from '@/state/workspaceStore';
 import { TaskCheckbox } from '@/modules/todo/TaskCard';
 import { TaskEditor } from '@/modules/todo/TaskEditor';
-import { dueInfo, PRIORITY_LABEL, PRIORITY_TONE, STATUS_LABEL, STATUS_TONE } from '@/modules/todo/taskMeta';
+import { dueInfo, PRIORITY_TONE, STATUS_TONE } from '@/modules/todo/taskMeta';
 import { MenuButton } from '@/components/shell/MenuButton';
 
 const DAY_MS = 86_400_000;
@@ -54,6 +55,28 @@ function dayIndex(from: Date, to: Date): number {
 }
 function toInputDate(d: Date): string {
   return startOfDay(d).toISOString().slice(0, 10);
+}
+
+type T = (key: string, vars?: Record<string, string | number>) => string;
+
+function shortDate(iso: string, locale: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+/** Same wording rules as taskMeta's dueInfo, in the current language. */
+function dueLabel(task: Todo, t: T, locale: string): string {
+  if (!task.dueDate) return '';
+  const due = new Date(task.dueDate);
+  const days = dayIndex(new Date(), due);
+  const on = (): string => t('cal.due.on', { date: due.toLocaleDateString(locale, { month: 'short', day: 'numeric' }) });
+  if (task.status === 'completed') return on();
+  if (days < 0) return t('cal.due.overdue', { count: Math.abs(days) });
+  if (days === 0) return t('cal.due.today');
+  if (days === 1) return t('cal.due.tomorrow');
+  if (days <= 7) return t('cal.due.inDays', { count: days });
+  return on();
 }
 
 interface Placement {
@@ -183,6 +206,7 @@ function TaskDetailCard({
   onToggleDone: () => void;
   onDelete: () => void;
 }): JSX.Element | null {
+  const { t, locale } = useLanguage();
   if (!task) return null;
   const due = dueInfo(task);
 
@@ -190,27 +214,27 @@ function TaskDetailCard({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Task"
+      title={t('cal.task')}
       width="sm"
       footer={
         <>
-          <ConfirmDelete onConfirm={onDelete} label="Delete task" />
+          <ConfirmDelete onConfirm={onDelete} label={t('cal.deleteTask')} />
           <Button onClick={onEdit} icon={<Pencil size={13} strokeWidth={1.9} />}>
-            Edit
+            {t('cal.edit')}
           </Button>
           <Button variant="primary" onClick={() => onOpenChange(false)}>
-            Close
+            {t('cal.close')}
           </Button>
         </>
       }
     >
       <div className="flex flex-wrap items-center gap-1.5">
-        <StatusBadge tone={STATUS_TONE[task.status]}>{STATUS_LABEL[task.status]}</StatusBadge>
-        <StatusBadge tone={PRIORITY_TONE[task.priority]}>{PRIORITY_LABEL[task.priority]}</StatusBadge>
+        <StatusBadge tone={STATUS_TONE[task.status]}>{t(`cal.status.${task.status}`)}</StatusBadge>
+        <StatusBadge tone={PRIORITY_TONE[task.priority]}>{t(`cal.priority.${task.priority}`)}</StatusBadge>
         {task.recurrence !== 'none' ? (
           <span className="inline-flex items-center gap-1 rounded-[4px] bg-[rgb(var(--tint-rgb)/0.05)] px-1.5 py-[2px] text-[11px] text-fog">
             <Repeat size={10} strokeWidth={1.9} aria-hidden />
-            {task.recurrence}
+            {t(`cal.recurrence.${task.recurrence}`)}
           </span>
         ) : null}
       </div>
@@ -228,7 +252,7 @@ function TaskDetailCard({
 
       <div className="mt-4">
         <div className="mb-1.5 flex items-center justify-between text-[11px] text-ash">
-          <span>Progress</span>
+          <span>{t('cal.progress')}</span>
           <span className="num">{PROGRESS_BY_STATUS[task.status]}%</span>
         </div>
         <ProgressBar value={PROGRESS_BY_STATUS[task.status]} />
@@ -237,9 +261,10 @@ function TaskDetailCard({
       <div className="mt-4 flex items-center justify-between border-t border-graphite pt-3.5">
         <span className="flex items-center gap-1.5 text-[12px] text-ash">
           <CalendarClock size={13} strokeWidth={1.8} aria-hidden />
-          {task.startDate ? formatDate(task.startDate) : 'No start'} → {task.dueDate ? formatDate(task.dueDate) : 'No due date'}
+          {task.startDate ? shortDate(task.startDate, locale) : t('cal.noStart')} <span className="inline-block rtl:-scale-x-100">→</span>{' '}
+          {task.dueDate ? shortDate(task.dueDate, locale) : t('cal.noDue')}
         </span>
-        {due ? <StatusBadge tone={due.tone}>{due.label}</StatusBadge> : null}
+        {due ? <StatusBadge tone={due.tone}>{dueLabel(task, t, locale)}</StatusBadge> : null}
       </div>
     </Modal>
   );
@@ -248,7 +273,8 @@ function TaskDetailCard({
 export function CalendarModule(): JSX.Element {
   const { workspace, createRecord, updateRecord, removeRecord } = useWorkspace();
   const requireAuth = useRequireAuth();
-  const todos = workspace.todos.filter((t) => t.status !== 'archived');
+  const { t, locale } = useLanguage();
+  const todos = workspace.todos.filter((x) => x.status !== 'archived');
 
   const [viewStart, setViewStart] = useState<Date>(() => startOfDay(addDays(new Date(), -3)));
   const [editorOpen, setEditorOpen] = useState(false);
@@ -280,7 +306,7 @@ export function CalendarModule(): JSX.Element {
     return out;
   }, [todos, viewStart]);
 
-  const unscheduled = useMemo(() => todos.filter((t) => !t.startDate && !t.dueDate), [todos]);
+  const unscheduled = useMemo(() => todos.filter((x) => !x.startDate && !x.dueDate), [todos]);
 
   const openDetail = (task: Todo): void => {
     setDetailTask(task);
@@ -303,7 +329,7 @@ export function CalendarModule(): JSX.Element {
   };
 
   const save = (task: Todo): void => {
-    if (workspace.todos.some((t) => t.id === task.id)) {
+    if (workspace.todos.some((x) => x.id === task.id)) {
       updateRecord('todos', task.id, task);
     } else {
       createRecord('todos', task);
@@ -336,7 +362,7 @@ export function CalendarModule(): JSX.Element {
     updateRecord('todos', task.id, { dueDate: next.toISOString() });
   };
 
-  const rangeLabel = `${days[0]?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${days[DAY_SPAN - 1]?.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  const rangeLabel = `${days[0]?.toLocaleDateString(locale, { month: 'short', day: 'numeric' })} – ${days[DAY_SPAN - 1]?.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })}`;
 
   const gridWidth = LABEL_W + DAY_SPAN * DAY_W;
   const gridHeight = (placements.length + 1) * ROW_H;
@@ -348,28 +374,28 @@ export function CalendarModule(): JSX.Element {
           <MenuButton className="md:hidden" />
           <div className="min-w-0 flex-1 basis-[190px]">
             <h1 className="truncate text-[17px] font-medium leading-tight tracking-[-0.016em] text-paper md:text-[19px]">
-              Calendar
+              {t('cal.title')}
             </h1>
-            <p className="mt-1 text-[12.5px] text-ash">{rangeLabel} · drag a bar to move it, drag its edges to resize</p>
+            <p className="mt-1 text-[12.5px] text-ash">{t('cal.subtitle', { range: rangeLabel })}</p>
           </div>
           <div className="ml-auto flex shrink-0 items-center gap-2">
             <div className="flex items-center gap-0.5 rounded-[7px] bg-[rgb(var(--tint-rgb)/0.03)] p-[3px] shadow-[inset_0_0_0_1px_var(--color-graphite)]">
-              <IconButton label="Earlier" onClick={() => setViewStart((d) => addDays(d, -7))}>
-                <ChevronLeft size={14} strokeWidth={1.9} />
+              <IconButton label={t('cal.earlier')} onClick={() => setViewStart((d) => addDays(d, -7))}>
+                <ChevronLeft size={14} strokeWidth={1.9} className="rtl:-scale-x-100" />
               </IconButton>
               <button
                 type="button"
                 onClick={() => setViewStart(startOfDay(addDays(new Date(), -3)))}
                 className="px-2 text-[12px] text-ash hover:text-mist"
               >
-                Today
+                {t('cal.today')}
               </button>
-              <IconButton label="Later" onClick={() => setViewStart((d) => addDays(d, 7))}>
-                <ChevronRight size={14} strokeWidth={1.9} />
+              <IconButton label={t('cal.later')} onClick={() => setViewStart((d) => addDays(d, 7))}>
+                <ChevronRight size={14} strokeWidth={1.9} className="rtl:-scale-x-100" />
               </IconButton>
             </div>
             <Button variant="primary" icon={<Plus size={14} strokeWidth={2} />} onClick={openNew}>
-              New task
+              {t('cal.newTask')}
             </Button>
           </div>
         </header>
@@ -379,11 +405,11 @@ export function CalendarModule(): JSX.Element {
             <div className="p-6">
               <EmptyState
                 icon={<CalendarIcon size={18} strokeWidth={1.6} />}
-                title="Nothing scheduled in this window"
-                hint="Tasks appear here once they have a start or due date. Create one, or jump to another week."
+                title={t('cal.empty.title')}
+                hint={t('cal.empty.hint')}
                 action={
                   <Button variant="primary" icon={<Plus size={14} strokeWidth={2} />} onClick={openNew}>
-                    New task
+                    {t('cal.newTask')}
                   </Button>
                 }
               />
@@ -416,7 +442,7 @@ export function CalendarModule(): JSX.Element {
                       )}
                       style={{ gridColumn: i + 2, gridRow: 1 }}
                     >
-                      <span className="text-ash">{d.toLocaleDateString('en-US', { weekday: 'narrow' })}</span>
+                      <span className="text-ash">{d.toLocaleDateString(locale, { weekday: 'narrow' })}</span>
                       <span className={cn('num', isToday ? 'font-semibold text-acid' : 'text-mist')}>{d.getDate()}</span>
                     </div>
                   );
@@ -441,7 +467,7 @@ export function CalendarModule(): JSX.Element {
                         <span className={cn('block truncate text-[12px]', p.task.status === 'completed' ? 'text-ash line-through' : 'text-mist')}>
                           {p.task.title}
                         </span>
-                        {due ? <span className={cn('text-[10px]', due.overdue ? 'text-coral' : 'text-ash')}>{due.label}</span> : null}
+                        {due ? <span className={cn('text-[10px]', due.overdue ? 'text-coral' : 'text-ash')}>{dueLabel(p.task, t, locale)}</span> : null}
                       </span>
                     </div>
                   );
@@ -479,18 +505,18 @@ export function CalendarModule(): JSX.Element {
           {unscheduled.length > 0 ? (
             <div className="border-t border-graphite px-4 py-4 md:px-7">
               <p className="mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">
-                Not scheduled yet ({unscheduled.length})
+                {t('cal.unscheduled', { count: unscheduled.length })}
               </p>
               <div className="flex flex-wrap gap-2">
-                {unscheduled.map((t) => (
+                {unscheduled.map((x) => (
                   <button
-                    key={t.id}
+                    key={x.id}
                     type="button"
-                    onClick={() => scheduleNow(t)}
+                    onClick={() => scheduleNow(x)}
                     className="flex items-center gap-2 rounded-[7px] bg-[rgb(var(--tint-rgb)/0.025)] px-2.5 py-1.5 text-[12px] text-mist shadow-[inset_0_0_0_1px_var(--color-graphite)] transition-colors hover:bg-[rgb(var(--tint-rgb)/0.045)]"
                   >
                     <Plus size={11} strokeWidth={2} className="text-ash" aria-hidden />
-                    {t.title}
+                    {x.title}
                   </button>
                 ))}
               </div>

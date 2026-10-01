@@ -6,7 +6,8 @@ import { FieldRow, Label, TextInput } from '@/components/ui/Field';
 import { Modal } from '@/components/ui/Modal';
 import type { Medicine, TreatmentPlan } from '@/lib/types';
 import { nowISO, uid } from '@/lib/utils';
-import { frequencyLabel } from './medsMeta';
+import { useLanguage } from '@/state/languageStore';
+import { doseUnitLabel, frequencyLabel, SELF_MANAGED } from './medsMeta';
 
 export function TreatmentPlanEditor({
   open,
@@ -33,6 +34,7 @@ export function TreatmentPlanEditor({
   onUngroup?: (planId: string) => void;
   onComplete?: (planId: string) => void;
 }): JSX.Element {
+  const { t } = useLanguage();
   const [condition, setCondition] = useState('');
   const [prescriber, setPrescriber] = useState('');
   const [touched, setTouched] = useState(false);
@@ -62,7 +64,7 @@ export function TreatmentPlanEditor({
     onSave({
       ...base,
       condition: condition.trim(),
-      prescriber: prescriber.trim() || 'Self-managed',
+      prescriber: prescriber.trim() || SELF_MANAGED,
       updatedAt: nowISO(),
     });
     if (!plan) onOpenChange(false);
@@ -72,61 +74,61 @@ export function TreatmentPlanEditor({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title={plan ? 'Edit treatment plan' : 'Create treatment plan'}
-      description="Group medicines by condition, doctor, or goal."
+      title={plan ? t('med.plan.editTitle') : t('med.plan.createTitle')}
+      description={t('med.plan.description')}
       width="lg"
       footer={
         <div className="flex w-full items-center justify-between gap-2">
           {plan ? (
             <div className="flex items-center gap-2">
               {onUngroup ? (
-                <ConfirmDelete onConfirm={() => onUngroup(plan.id)} label="Ungroup plan" />
+                <ConfirmDelete onConfirm={() => onUngroup(plan.id)} label={t('med.plan.ungroup')} />
               ) : null}
               {onComplete && plan.status !== 'completed' ? (
-                <Button onClick={() => onComplete(plan.id)}>Complete</Button>
+                <Button onClick={() => onComplete(plan.id)}>{t('med.plan.complete')}</Button>
               ) : null}
             </div>
           ) : (
             <span />
           )}
           <div className="flex items-center gap-2">
-            <Button onClick={() => onOpenChange(false)}>{plan ? 'Done' : 'Cancel'}</Button>
+            <Button onClick={() => onOpenChange(false)}>{plan ? t('med.common.done') : t('med.common.cancel')}</Button>
             <Button variant="primary" onClick={submit}>
-              {plan ? 'Save changes' : 'Create plan'}
+              {plan ? t('med.common.saveChanges') : t('med.plan.createButton')}
             </Button>
           </div>
         </div>
       }
     >
       <FieldRow>
-        <Label htmlFor="plan-condition">Condition / goal</Label>
+        <Label htmlFor="plan-condition">{t('med.plan.conditionLabel')}</Label>
         <TextInput
           id="plan-condition"
           autoFocus
           value={condition}
           onChange={(e) => setCondition(e.target.value)}
-          placeholder="What is it treatment for? (e.g. Tooth Infection)"
+          placeholder={t('med.plan.conditionPlaceholder')}
         />
-        {touched && !valid ? <p className="mt-1.5 text-[12px] text-coral">A condition or goal is required.</p> : null}
+        {touched && !valid ? <p className="mt-1.5 text-[12px] text-coral">{t('med.plan.conditionRequired')}</p> : null}
       </FieldRow>
 
       <FieldRow>
-        <Label htmlFor="plan-prescriber">Prescriber</Label>
+        <Label htmlFor="plan-prescriber">{t('med.plan.prescriberLabel')}</Label>
         <TextInput
           id="plan-prescriber"
           value={prescriber}
           onChange={(e) => setPrescriber(e.target.value)}
-          placeholder="Self-managed, or Dr. Chen…"
+          placeholder={t('med.plan.prescriberPlaceholder')}
         />
       </FieldRow>
 
       {plan ? (
         <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <p className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">In this plan</p>
+            <p className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('med.plan.inThisPlan')}</p>
             <div className="space-y-1.5">
               {assignedMedicines.length === 0 ? (
-                <p className="py-3 text-[12px] text-ash">No medicines assigned yet.</p>
+                <p className="py-3 text-[12px] text-ash">{t('med.plan.noneAssigned')}</p>
               ) : (
                 assignedMedicines.map((m) => (
                   <div
@@ -136,13 +138,13 @@ export function TreatmentPlanEditor({
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[12.5px] text-paper">{m.name}</p>
                       <p className="text-[11px] text-ash">
-                        {m.dosage} {m.unit} · {frequencyLabel(m)}
+                        {m.dosage} {doseUnitLabel(m.unit)} · {frequencyLabel(m)}
                       </p>
                     </div>
                     <button
                       type="button"
                       className="btn-icon"
-                      aria-label={`Remove ${m.name} from plan`}
+                      aria-label={t('med.plan.removeFromPlan', { name: m.name })}
                       onClick={() => onUnassign(m.id)}
                     >
                       <ArrowDown size={13} strokeWidth={1.9} />
@@ -154,10 +156,10 @@ export function TreatmentPlanEditor({
           </div>
 
           <div>
-            <p className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">Available</p>
+            <p className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('med.plan.available')}</p>
             <div className="space-y-1.5">
               {unassignedMedicines.length === 0 ? (
-                <p className="py-3 text-[12px] text-ash">Every medicine is already assigned somewhere.</p>
+                <p className="py-3 text-[12px] text-ash">{t('med.plan.allAssigned')}</p>
               ) : (
                 unassignedMedicines.map((m) => (
                   <div
@@ -167,13 +169,13 @@ export function TreatmentPlanEditor({
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[12.5px] text-paper">{m.name}</p>
                       <p className="text-[11px] text-ash">
-                        {m.dosage} {m.unit} · {frequencyLabel(m)}
+                        {m.dosage} {doseUnitLabel(m.unit)} · {frequencyLabel(m)}
                       </p>
                     </div>
                     <button
                       type="button"
                       className="btn-icon"
-                      aria-label={`Add ${m.name} to plan`}
+                      aria-label={t('med.plan.addToPlan', { name: m.name })}
                       onClick={() => onAssign(m.id, plan.id)}
                     >
                       <ArrowUp size={13} strokeWidth={1.9} />

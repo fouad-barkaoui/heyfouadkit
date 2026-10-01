@@ -1,5 +1,6 @@
 import { Table2 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
+import { useI18n } from '@/components/ui/useI18n';
 import { cn } from '@/lib/utils';
 
 /**
@@ -22,6 +23,7 @@ export function ChartFrame({
   className?: string;
 }): JSX.Element {
   const [showTable, setShowTable] = useState(false);
+  const { t } = useI18n();
 
   return (
     <figure className={cn('surface-card m-0 p-4', className)}>
@@ -40,7 +42,7 @@ export function ChartFrame({
           )}
         >
           <Table2 size={12} strokeWidth={1.8} aria-hidden />
-          {showTable ? 'Chart' : 'Table'}
+          {showTable ? t('sh.chart.chart') : t('sh.chart.table')}
         </button>
       </figcaption>
 
@@ -48,7 +50,7 @@ export function ChartFrame({
 
       {showTable ? (
         <div className="scroll-y max-h-[260px] overflow-x-auto">
-          <table className="w-full border-collapse text-left">
+          <table className="w-full border-collapse text-start">
             <thead>
               <tr className="border-b border-graphite text-[11px] uppercase tracking-[0.06em] text-ash">
                 {table.columns.map((col) => (

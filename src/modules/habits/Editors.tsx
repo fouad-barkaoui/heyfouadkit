@@ -4,14 +4,20 @@ import { Label, TextArea, TextInput } from '@/components/ui/Field';
 import { Modal } from '@/components/ui/Modal';
 import type { Goal, Habit } from '@/lib/types';
 import { cn, nowISO, uid } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 import { HABIT_COLORS, HABIT_EMOJI } from './habitMath';
 
-const WEEK = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-const WEEK_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const WEEK = [0, 1, 2, 3, 4, 5, 6];
+
+/** Weekday name for index 0–6 (2026-09-27 is a Sunday). */
+function weekdayName(day: number, locale: string, weekday: 'narrow' | 'long'): string {
+  return new Date(2026, 8, 27 + day).toLocaleDateString(locale, { weekday });
+}
 
 function Swatches({ value, onChange }: { value: string; onChange: (c: string) => void }): JSX.Element {
+  const { t } = useLanguage();
   return (
-    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Colour">
+    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('hab.colour')}>
       {HABIT_COLORS.map((c) => (
         <button
           key={c}
@@ -29,8 +35,9 @@ function Swatches({ value, onChange }: { value: string; onChange: (c: string) =>
 }
 
 function EmojiPick({ value, onChange }: { value: string; onChange: (e: string) => void }): JSX.Element {
+  const { t } = useLanguage();
   return (
-    <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Icon">
+    <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={t('hab.icon')}>
       {HABIT_EMOJI.map((e) => (
         <button
           key={e}
@@ -60,6 +67,7 @@ export function HabitEditor({
   onSave: (h: Habit) => void;
   onDelete: (h: Habit) => void;
 }): JSX.Element {
+  const { t, locale } = useLanguage();
   const [name, setName] = useState('');
   const [emoji, setEmoji] = useState(HABIT_EMOJI[0]!);
   const [color, setColor] = useState(HABIT_COLORS[0]!);
@@ -99,26 +107,26 @@ export function HabitEditor({
     <Modal
       open={open}
       onOpenChange={(o) => (!o ? onClose() : undefined)}
-      title={habit ? 'Edit habit' : 'New habit'}
-      description="Small, specific and daily beats big and vague."
+      title={habit ? t('hab.editHabit') : t('hab.newHabit')}
+      description={t('hab.habitHint')}
       width="sm"
       footer={
         <>
           {habit ? (
             <Button variant="quiet" className="me-auto text-coral" onClick={() => onDelete(habit)}>
-              Delete
+              {t('hab.delete')}
             </Button>
           ) : null}
-          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={onClose}>{t('hab.cancel')}</Button>
           <Button variant="primary" disabled={!name.trim()} onClick={save}>
-            {habit ? 'Save' : 'Create habit'}
+            {habit ? t('hab.save') : t('hab.createHabit')}
           </Button>
         </>
       }
     >
       <div className="space-y-4">
         <div>
-          <Label htmlFor="hb-name">Habit</Label>
+          <Label htmlFor="hb-name">{t('hab.habit')}</Label>
           <div className="flex items-center gap-2">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-[20px]" style={{ background: `${color}22` }}>
               {emoji}
@@ -129,40 +137,40 @@ export function HabitEditor({
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && save()}
-              placeholder="Read 10 pages, drink water, pray on time…"
+              placeholder={t('hab.habitPlaceholder')}
             />
           </div>
         </div>
         <div>
-          <Label>Icon</Label>
+          <Label>{t('hab.icon')}</Label>
           <EmojiPick value={emoji} onChange={setEmoji} />
         </div>
         <div>
-          <Label>Colour</Label>
+          <Label>{t('hab.colour')}</Label>
           <Swatches value={color} onChange={setColor} />
         </div>
         <div>
-          <Label>Repeat</Label>
+          <Label>{t('hab.repeat')}</Label>
           <div className="mb-2 flex flex-wrap gap-1.5">
             <button type="button" className="pill" data-active={preset === 'daily'} onClick={() => setDays([])}>
-              Every day
+              {t('hab.everyDay')}
             </button>
             <button type="button" className="pill" data-active={preset === 'weekdays'} onClick={() => setDays([1, 2, 3, 4, 5])}>
-              Weekdays
+              {t('hab.weekdays')}
             </button>
             <button type="button" className="pill" data-active={preset === 'custom'} onClick={() => setDays(days.length ? days : [1, 3, 5])}>
-              Custom
+              {t('hab.custom')}
             </button>
           </div>
           <div className="flex gap-1.5">
-            {WEEK.map((d, i) => {
+            {WEEK.map((i) => {
               const on = days.length === 0 || days.includes(i);
               return (
                 <button
                   key={i}
                   type="button"
                   aria-pressed={on}
-                  aria-label={WEEK_LONG[i]}
+                  aria-label={weekdayName(i, locale, 'long')}
                   onClick={() => {
                     const base = days.length === 0 ? [0, 1, 2, 3, 4, 5, 6] : days;
                     const next = base.includes(i) ? base.filter((x) => x !== i) : [...base, i];
@@ -171,7 +179,7 @@ export function HabitEditor({
                   className={cn('hb-day flex h-9 w-9 items-center justify-center rounded-full text-[12px] font-medium', on && 'is-on')}
                   style={on ? { background: color, color: '#0b0c0e' } : undefined}
                 >
-                  {d}
+                  {weekdayName(i, locale, 'narrow')}
                 </button>
               );
             })}
@@ -193,6 +201,7 @@ export function GoalEditor({
   onClose: () => void;
   onSave: (g: Goal) => void;
 }): JSX.Element {
+  const { t } = useLanguage();
   const [title, setTitle] = useState('');
   const [why, setWhy] = useState('');
   const [emoji, setEmoji] = useState('🎯');
@@ -240,48 +249,48 @@ export function GoalEditor({
     <Modal
       open={open}
       onOpenChange={(o) => (!o ? onClose() : undefined)}
-      title={goal ? 'Edit goal' : 'New goal'}
-      description="Name the outcome, then break it into steps you can act on."
+      title={goal ? t('hab.editGoal') : t('hab.newGoal')}
+      description={t('hab.goalHint')}
       footer={
         <>
-          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={onClose}>{t('hab.cancel')}</Button>
           <Button variant="primary" disabled={!title.trim()} onClick={save}>
-            {goal ? 'Save' : 'Create goal'}
+            {goal ? t('hab.save') : t('hab.createGoal')}
           </Button>
         </>
       }
     >
       <div className="space-y-4">
         <div>
-          <Label htmlFor="gl-title">Goal</Label>
-          <TextInput id="gl-title" autoFocus value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Pass the CompTIA Security+ exam" />
+          <Label htmlFor="gl-title">{t('hab.goal')}</Label>
+          <TextInput id="gl-title" autoFocus value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('hab.goalPlaceholder')} />
         </div>
         <div>
-          <Label htmlFor="gl-why">Why it matters</Label>
-          <TextArea id="gl-why" rows={2} value={why} onChange={(e) => setWhy(e.target.value)} placeholder="Your reason — shown on the goal to keep you going." />
+          <Label htmlFor="gl-why">{t('hab.why')}</Label>
+          <TextArea id="gl-why" rows={2} value={why} onChange={(e) => setWhy(e.target.value)} placeholder={t('hab.whyPlaceholder')} />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <Label htmlFor="gl-due">Target date</Label>
+            <Label htmlFor="gl-due">{t('hab.targetDate')}</Label>
             <TextInput id="gl-due" type="date" value={due} onChange={(e) => setDue(e.target.value)} />
           </div>
           <div>
-            <Label>Colour</Label>
+            <Label>{t('hab.colour')}</Label>
             <Swatches value={color} onChange={setColor} />
           </div>
         </div>
         <div>
-          <Label>Icon</Label>
+          <Label>{t('hab.icon')}</Label>
           <EmojiPick value={emoji} onChange={setEmoji} />
         </div>
         <div>
-          <Label htmlFor="gl-steps">{goal ? 'Add steps' : 'Steps'} — one per line</Label>
+          <Label htmlFor="gl-steps">{goal ? t('hab.addStepsLine') : t('hab.stepsLine')}</Label>
           <TextArea
             id="gl-steps"
             rows={4}
             value={stepsText}
             onChange={(e) => setStepsText(e.target.value)}
-            placeholder={'Book the exam\nFinish the video course\nDo 3 practice tests'}
+            placeholder={t('hab.stepsPlaceholder')}
           />
         </div>
       </div>

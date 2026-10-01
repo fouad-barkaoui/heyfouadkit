@@ -1,5 +1,6 @@
 import { Check, CloudOff, CloudUpload } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useI18n } from '@/components/ui/useI18n';
 import { useWorkspace } from '@/state/workspaceStore';
 
 /**
@@ -13,6 +14,7 @@ export function OfflinePill(): JSX.Element | null {
   const [slow, setSlow] = useState(false);
   const [justSynced, setJustSynced] = useState(false);
   const surfaced = useRef(false);
+  const { t } = useI18n();
 
   // Only call it "syncing" if the queue doesn't drain within a second.
   useEffect(() => {
@@ -44,7 +46,7 @@ export function OfflinePill(): JSX.Element | null {
   }, [state, online, pendingChanges]);
 
   const n = pendingChanges;
-  const plural = n === 1 ? '' : 's';
+  const one = n === 1;
   return (
     <div className="offline-pill-wrap" aria-live="polite">
       {state ? (
@@ -52,19 +54,21 @@ export function OfflinePill(): JSX.Element | null {
           {state === 'off' ? (
             <>
               <CloudOff size={14} strokeWidth={2} aria-hidden />
-              <span>Offline{live && n > 0 ? ` · ${n} change${plural} saved here` : ' · changes stay on this device'}</span>
+              <span>
+                {live && n > 0
+                  ? t(one ? 'sh.offline.savedOne' : 'sh.offline.savedMany', { count: n })
+                  : t('sh.offline.local')}
+              </span>
             </>
           ) : state === 'busy' ? (
             <>
               <CloudUpload size={14} strokeWidth={2} aria-hidden className="offline-pill-pulse" />
-              <span>
-                Syncing {n} change{plural}…
-              </span>
+              <span>{t(one ? 'sh.offline.syncingOne' : 'sh.offline.syncingMany', { count: n })}</span>
             </>
           ) : (
             <>
               <Check size={14} strokeWidth={2.4} aria-hidden />
-              <span>Back online · all changes synced</span>
+              <span>{t('sh.offline.back')}</span>
             </>
           )}
         </div>

@@ -1,0 +1,38 @@
+import { defineDictionary } from './types';
+
+export default defineDictionary({
+  en: {
+    'home2.untitled.note': 'Untitled note',
+    'home2.untitled.article': 'Untitled article',
+    'home2.untitled.document': 'Untitled document',
+    'home2.untitled.course': 'Untitled course',
+    'home2.untitled.story': 'Untitled story',
+    'home2.untitled.medicine': 'Untitled medicine',
+    'home2.kind.note': 'Note',
+    'home2.kind.task': 'Task',
+    'home2.kind.article': 'Article',
+    'home2.kind.document': 'Document',
+    'home2.kind.course': 'Course',
+    'home2.kind.news': 'News',
+    'home2.kind.medicine': 'Medicine',
+    'home2.you': 'You',
+    'home2.yourTeam': 'your team',
+  },
+  ar: {
+    'home2.untitled.note': 'ملاحظة بلا عنوان',
+    'home2.untitled.article': 'مقال بلا عنوان',
+    'home2.untitled.document': 'وثيقة بلا عنوان',
+    'home2.untitled.course': 'دورة بلا عنوان',
+    'home2.untitled.story': 'خبر بلا عنوان',
+    'home2.untitled.medicine': 'دواء بلا اسم',
+    'home2.kind.note': 'ملاحظة',
+    'home2.kind.task': 'مهمة',
+    'home2.kind.article': 'مقال',
+    'home2.kind.document': 'وثيقة',
+    'home2.kind.course': 'دورة',
+    'home2.kind.news': 'خبر',
+    'home2.kind.medicine': 'دواء',
+    'home2.you': 'أنت',
+    'home2.yourTeam': 'فريقك',
+  },
+});

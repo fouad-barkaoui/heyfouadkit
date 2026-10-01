@@ -1,23 +1,12 @@
 import { HardDrive, Lock, RefreshCw, ShieldCheck } from 'lucide-react';
 import { MAX_CLOUD_BYTES, MAX_TOTAL_CLOUD_BYTES, humanLimit } from '@/data/attachments';
+import { useLanguage } from '@/state/languageStore';
 import { ConsentSheet } from './ConsentSheet';
 
-const RULES: { icon: typeof Lock; title: string; body: string }[] = [
-  {
-    icon: ShieldCheck,
-    title: 'This space is only yours',
-    body: 'Row-level security in the database enforces it — nobody else can read or write your rows or files.',
-  },
-  {
-    icon: HardDrive,
-    title: `Storage is limited to ${humanLimit(MAX_TOTAL_CLOUD_BYTES)}`,
-    body: `Each file can be up to ${humanLimit(MAX_CLOUD_BYTES)}. Once you reach the total, remove something before adding more.`,
-  },
-  {
-    icon: RefreshCw,
-    title: 'You are always in control',
-    body: 'Back up, restore, or wipe your cloud copy any time from the Account panel. Signing out never deletes this device’s copy.',
-  },
+const RULES: { icon: typeof Lock; key: string }[] = [
+  { icon: ShieldCheck, key: 'private' },
+  { icon: HardDrive, key: 'storage' },
+  { icon: RefreshCw, key: 'control' },
 ];
 
 /**
@@ -33,39 +22,40 @@ export function CloudTermsModal({
   onAccept: () => void;
   onCancel: () => void;
 }): JSX.Element {
+  const { t } = useLanguage();
+  const limits = { total: humanLimit(MAX_TOTAL_CLOUD_BYTES), each: humanLimit(MAX_CLOUD_BYTES) };
   return (
     <ConsentSheet
       open={open}
       tone="green"
-      partner="CLOUD"
-      title="Turn On Cloud Sync"
+      partner={t('ob.cloud.partner')}
+      title={t('ob.cloud.title')}
       body={
-        <p>
-          Kanz uses a private cloud for your library, so your notes, tasks and files are on every device right away.
-        </p>
+        <p>{t('ob.cloud.body')}</p>
       }
       boxIcon={Lock}
       box={(link) => (
         <p>
-          By continuing, you accept {link('Kanz’s terms of use')} and agree to your cloud storage being limited to{' '}
-          {humanLimit(MAX_TOTAL_CLOUD_BYTES)}, with each file up to {humanLimit(MAX_CLOUD_BYTES)}.
+          {t('ob.cloud.boxBefore')}
+          {link(t('ob.cloud.boxLink'))}
+          {t('ob.cloud.boxAfter', limits)}
         </p>
       )}
       details={
         <ul className="space-y-2.5">
-          {RULES.map(({ icon: Icon, title, body }) => (
-            <li key={title} className="flex items-start gap-2.5">
+          {RULES.map(({ icon: Icon, key }) => (
+            <li key={key} className="flex items-start gap-2.5">
               <Icon size={14} strokeWidth={1.9} className="mt-[2px] shrink-0 text-[#1d1c1a]" aria-hidden />
               <span>
-                <span className="block font-medium text-[#1d1c1a]">{title}</span>
-                <span className="block text-[#6b6a66]">{body}</span>
+                <span className="block font-medium text-[#1d1c1a]">{t(`ob.cloud.rule.${key}.title`, limits)}</span>
+                <span className="block text-[#6b6a66]">{t(`ob.cloud.rule.${key}.body`, limits)}</span>
               </span>
             </li>
           ))}
         </ul>
       }
-      acceptLabel="Accept Terms and Continue"
-      cancelLabel="Decline"
+      acceptLabel={t('ob.cloud.accept')}
+      cancelLabel={t('ob.decline')}
       onAccept={onAccept}
       onCancel={onCancel}
     />

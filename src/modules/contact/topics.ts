@@ -1,16 +1,40 @@
 import { Bug, Handshake, Lightbulb, MessageSquareHeart, MessagesSquare, type LucideIcon } from 'lucide-react';
 import type { ContactTopic } from '@/data/contact';
+import { translate } from '@/state/languageStore';
 
-export const TOPICS: { id: ContactTopic; label: string; icon: LucideIcon; hint: string }[] = [
-  { id: 'feedback', label: 'Feedback', icon: MessageSquareHeart, hint: 'What you like, what feels off' },
-  { id: 'bug', label: 'Bug report', icon: Bug, hint: 'What you did, what you expected, what happened' },
-  { id: 'idea', label: 'Feature idea', icon: Lightbulb, hint: 'The problem it would solve for you' },
-  { id: 'collab', label: 'Collaboration', icon: Handshake, hint: 'Who you are and what you have in mind' },
-  { id: 'other', label: 'Other', icon: MessagesSquare, hint: 'Anything else' },
+export interface TopicInfo {
+  id: ContactTopic;
+  /** Translated when read, so it always follows the current language. */
+  readonly label: string;
+  icon: LucideIcon;
+  readonly hint: string;
+}
+
+function topic(id: ContactTopic, icon: LucideIcon): TopicInfo {
+  return {
+    id,
+    icon,
+    get label() {
+      return translate(`cf.topic.${id}`);
+    },
+    get hint() {
+      return translate(`cf.topic.${id}.hint`);
+    },
+  };
+}
+
+export const TOPICS: TopicInfo[] = [
+  topic('feedback', MessageSquareHeart),
+  topic('bug', Bug),
+  topic('idea', Lightbulb),
+  topic('collab', Handshake),
+  topic('other', MessagesSquare),
 ];
 
-export const TOPIC_LABEL: Record<ContactTopic, string> = Object.fromEntries(TOPICS.map((t) => [t.id, t.label])) as Record<
-  ContactTopic,
-  string
->;
-
+/** `TOPIC_LABEL[id]` — each entry is a getter, translated on every read. */
+export const TOPIC_LABEL = Object.defineProperties(
+  {},
+  Object.fromEntries(
+    TOPICS.map((t) => [t.id, { enumerable: true, get: () => translate(`cf.topic.${t.id}`) }]),
+  ),
+) as Record<ContactTopic, string>;

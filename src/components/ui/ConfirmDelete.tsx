@@ -1,6 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { IconButton } from './Button';
+import { useI18n } from './useI18n';
 
 /**
  * Two-step delete: the first press arms the button, the second commits.
@@ -8,7 +9,7 @@ import { IconButton } from './Button';
  */
 export function ConfirmDelete({
   onConfirm,
-  label = 'Delete',
+  label: labelProp,
   size = 14,
 }: {
   onConfirm: () => void;
@@ -16,6 +17,8 @@ export function ConfirmDelete({
   size?: number;
 }): JSX.Element {
   const [armed, setArmed] = useState(false);
+  const { t } = useI18n();
+  const label = labelProp ?? t('sh.delete');
   const timer = useRef<number | null>(null);
 
   useEffect(
@@ -27,7 +30,7 @@ export function ConfirmDelete({
 
   return (
     <IconButton
-      label={armed ? `${label} — press again to confirm` : label}
+      label={armed ? t('sh.confirmAgain', { label }) : label}
       danger
       data-armed={armed}
       className={armed ? 'bg-coral/15 text-coral' : undefined}

@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { groupOf, HOME_ID, MODULE_MAP, NAV_GROUPS, type ModuleMeta, type NavGroup } from '@/modules/registry';
 import { prefetchModule } from '@/modules/prefetch';
 import { getDisplayName, useAuth } from '@/state/authStore';
-import { useLanguage } from '@/state/languageStore';
+import { useI18n } from '@/components/ui/useI18n';
 import { useUI } from '@/state/uiStore';
 import { useWorkspace } from '@/state/workspaceStore';
 import {
@@ -67,6 +67,7 @@ function RailRow({
   count?: number;
 }): JSX.Element {
   const Icon = meta.icon;
+  const { t } = useI18n();
   const countLabel = count > 99 ? '99+' : String(count);
   return (
     <RailTip
@@ -76,7 +77,7 @@ function RailRow({
           {label}
           {flag ? (
             <span style={{ color: FLAG_LOOK[flag].color }} className="ms-1.5">
-              · {FLAG_TOOLTIP[flag]}
+              · {t(FLAG_TOOLTIP[flag])}
             </span>
           ) : null}
         </>
@@ -86,7 +87,9 @@ function RailRow({
         type="button"
         onClick={onSelect}
         data-active={active}
-        aria-label={flag ? `${label} — ${FLAG_TOOLTIP[flag]}` : count ? `${label} (${count} new)` : label}
+        aria-label={
+          flag ? `${label} — ${t(FLAG_TOOLTIP[flag])}` : count ? t('sh.withNew', { label, count }) : label
+        }
         aria-current={active ? 'page' : undefined}
         onPointerEnter={() => prefetchModule(meta.id)}
         onFocus={() => prefetchModule(meta.id)}
@@ -224,7 +227,7 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
   const { user, configured, avatarUrl } = useAuth();
   const { inboxNew } = useNotifications();
   const pro = isProUser(user);
-  const { t } = useLanguage();
+  const { t } = useI18n();
   const flagFor = useRowFlag();
   const expanded = railExpanded;
   const listRef = useRef<HTMLDivElement>(null);
@@ -395,17 +398,17 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
   return (
     <Tooltip.Provider>
       <nav
-        aria-label="Modules"
+        aria-label={t('sh.nav.modules')}
         data-expanded={expanded}
         data-overlay={overlay}
         className={cn('rail relative flex h-full shrink-0 flex-col', expanded ? 'w-[240px] px-3' : 'w-[64px] px-[13px]')}
       >
         {/* Edge toggle — straddles the rail's inner edge in both states */}
-        <RailTip enabled label={<>{expanded ? 'Collapse' : 'Expand'} <kbd className="rail-kbd">[</kbd></>}>
+        <RailTip enabled label={<>{expanded ? t('sh.nav.collapseShort') : t('sh.nav.expandShort')} <kbd className="rail-kbd">[</kbd></>}>
           <button
             type="button"
             onClick={toggleRail}
-            aria-label={expanded ? 'Collapse navigation' : 'Expand navigation'}
+            aria-label={expanded ? t('sh.nav.collapse') : t('sh.nav.expand')}
             aria-expanded={expanded}
             className="rail-edge-toggle"
           >
@@ -517,7 +520,7 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
                     <ChevronDown
                       size={13}
                       strokeWidth={2}
-                      className={cn('shrink-0 transition-transform duration-200', isOpen ? 'rotate-0' : '-rotate-90')}
+                      className={cn('shrink-0 transition-transform duration-200', isOpen ? 'rotate-0' : '-rotate-90 rtl:rotate-90')}
                       aria-hidden
                     />
                   </button>
@@ -549,7 +552,7 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
               className={cn('nav-row', expanded ? 'rail-account' : 'is-compact')}
             >
               <span className="relative shrink-0">
-                <Avatar src={avatarUrl} name={user ? accountName : 'Guest'} size={expanded ? 28 : 24} pro={pro} />
+                <Avatar src={avatarUrl} name={user ? accountName : t('sh.guest')} size={expanded ? 28 : 24} pro={pro} />
                 {configured ? (
                   <span
                     className="rail-sync-dot absolute -bottom-0.5 -end-0.5 flex h-[13px] w-[13px] items-center justify-center rounded-full bg-void"

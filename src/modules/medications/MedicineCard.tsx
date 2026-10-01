@@ -2,15 +2,18 @@ import { Check, Hourglass } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/BadgeChip';
 import type { Medicine } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { formatDaysShort, frequencyLabel } from './medsMeta';
+import { useLanguage } from '@/state/languageStore';
+import { doseUnitLabel, formatDaysShort, frequencyLabel } from './medsMeta';
 
 export function MedicineCard({ medicine, onClick }: { medicine: Medicine; onClick: () => void }): JSX.Element {
+  // Subscribe to language changes so the helper labels below re-render.
+  useLanguage();
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        'flex w-full items-center gap-3 rounded-[10px] bg-[rgb(var(--tint-rgb)/0.022)] p-3 text-left shadow-[inset_0_0_0_1px_var(--color-graphite)]',
+        'flex w-full items-center gap-3 rounded-[10px] bg-[rgb(var(--tint-rgb)/0.022)] p-3 text-start shadow-[inset_0_0_0_1px_var(--color-graphite)]',
         'transition-[background-color,box-shadow] duration-150 hover:bg-[rgb(var(--tint-rgb)/0.04)] hover:shadow-[inset_0_0_0_1px_var(--color-smoke)]',
         medicine.completed && 'opacity-55',
       )}
@@ -27,7 +30,7 @@ export function MedicineCard({ medicine, onClick }: { medicine: Medicine; onClic
           {medicine.name}
         </p>
         <p className="mt-0.5 truncate text-[11.5px] text-ash">
-          {medicine.dosage} {medicine.unit}
+          {medicine.dosage} {doseUnitLabel(medicine.unit)}
           {medicine.type === 'scheduled' ? ` · ${formatDaysShort(medicine.days)}` : ''}
         </p>
       </div>

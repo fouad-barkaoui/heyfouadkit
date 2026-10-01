@@ -1,8 +1,9 @@
 import { Check, Clock, Copy, ExternalLink, Star, Trash2 } from 'lucide-react';
 import { useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent } from 'react';
 import type { SavedLink } from '@/lib/types';
-import { cn, relativeTime } from '@/lib/utils';
-import { KIND_META } from './linkIntel';
+import { cn } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
+import { KIND_META, relativeTimeT } from './linkIntel';
 import { KindBadge, LinkMedia, SiteIcon } from './LinkVisuals';
 
 export interface LinkActions {
@@ -41,6 +42,7 @@ export function LinkCard({
   ...actions
 }: LinkActions & { link: SavedLink; enriching: boolean; highlighted: boolean; index: number }): JSX.Element {
   const ref = useRef<HTMLElement>(null);
+  const { t, locale } = useLanguage();
   const [copied, copy] = useCopy();
   const ratio = link.kind === 'video' ? '16 / 9' : link.kind === 'repo' ? '2 / 1' : link.image ? undefined : '16 / 10';
 
@@ -74,7 +76,7 @@ export function LinkCard({
         type="button"
         className="save-card-inner block w-full text-start"
         onClick={() => actions.onOpen(link)}
-        aria-label={`Open ${link.title}`}
+        aria-label={t('si.openLink', { title: link.title })}
       >
         <LinkMedia link={link} ratio={ratio} className={cn(!ratio && 'max-h-[320px] min-h-[120px]')} />
         <div className="relative p-3.5">
@@ -82,11 +84,11 @@ export function LinkCard({
             <SiteIcon link={link} size={15} />
             <span className="min-w-0 truncate">{link.siteName || link.domain}</span>
             <span aria-hidden>·</span>
-            <span className="shrink-0">{relativeTime(link.createdAt)}</span>
-            {link.status === 'unread' ? <span className="save-unread ms-auto" title="Unread" aria-label="Unread" /> : null}
+            <span className="shrink-0">{relativeTimeT(link.createdAt, locale)}</span>
+            {link.status === 'unread' ? <span className="save-unread ms-auto" title={t('si.unread')} aria-label={t('si.unread')} /> : null}
           </div>
           {enriching ? (
-            <div className="space-y-1.5 py-0.5" aria-label="Fetching preview">
+            <div className="space-y-1.5 py-0.5" aria-label={t('si.fetching')}>
               <div className="save-skel h-3.5 w-[92%]" />
               <div className="save-skel h-3.5 w-[64%]" />
             </div>
@@ -103,7 +105,7 @@ export function LinkCard({
             <KindBadge kind={link.kind} />
             {link.readingMinutes ? (
               <span className="inline-flex items-center gap-1 text-[11px] text-ash">
-                <Clock size={11} strokeWidth={2} aria-hidden /> {link.readingMinutes} min read
+                <Clock size={11} strokeWidth={2} aria-hidden /> {t('si.minRead', { count: link.readingMinutes })}
               </span>
             ) : null}
             {link.tags.slice(0, 3).map((t) => (
@@ -119,19 +121,19 @@ export function LinkCard({
         <button
           type="button"
           className={cn('save-fab', link.isInteresting && 'is-on')}
-          aria-label={link.isInteresting ? 'Unfavorite' : 'Favorite'}
+          aria-label={link.isInteresting ? t('si.unfavorite') : t('si.favorite')}
           aria-pressed={link.isInteresting}
           onClick={stop(() => actions.onToggleStar(link))}
         >
           <Star size={14} strokeWidth={2} fill={link.isInteresting ? 'currentColor' : 'none'} />
         </button>
-        <button type="button" className="save-fab" aria-label="Copy link" onClick={stop(() => copy(link.url))}>
+        <button type="button" className="save-fab" aria-label={t('si.copyLink')} onClick={stop(() => copy(link.url))}>
           {copied ? <Check size={14} strokeWidth={2.4} /> : <Copy size={14} strokeWidth={2} />}
         </button>
-        <button type="button" className="save-fab" aria-label="Open website" onClick={stop(() => actions.onVisit(link))}>
+        <button type="button" className="save-fab" aria-label={t('si.openWebsite')} onClick={stop(() => actions.onVisit(link))}>
           <ExternalLink size={14} strokeWidth={2} />
         </button>
-        <button type="button" className="save-fab is-danger" aria-label="Move to trash" onClick={stop(() => actions.onDelete(link))}>
+        <button type="button" className="save-fab is-danger" aria-label={t('si.moveToTrash')} onClick={stop(() => actions.onDelete(link))}>
           <Trash2 size={14} strokeWidth={2} />
         </button>
       </div>
@@ -147,6 +149,7 @@ export function LinkRow({
   ...actions
 }: LinkActions & { link: SavedLink; enriching: boolean; highlighted: boolean }): JSX.Element {
   const [copied, copy] = useCopy();
+  const { t } = useLanguage();
   return (
     <div
       data-link-id={link.id}
@@ -159,7 +162,7 @@ export function LinkRow({
           <span className="flex items-center gap-2 text-[11.5px] text-ash">
             <SiteIcon link={link} size={13} />
             <span className="truncate">{link.domain}</span>
-            {link.status === 'unread' ? <span className="save-unread" aria-label="Unread" /> : null}
+            {link.status === 'unread' ? <span className="save-unread" aria-label={t('si.unread')} /> : null}
           </span>
           <span className={cn('mt-0.5 block truncate text-[13.5px] text-paper', enriching && 'opacity-60')}>{link.title}</span>
           <span className="mt-1 flex items-center gap-2">
@@ -172,18 +175,18 @@ export function LinkRow({
         <button
           type="button"
           className={cn('btn-icon', link.isInteresting && 'text-[#f5a524]')}
-          aria-label={link.isInteresting ? 'Unfavorite' : 'Favorite'}
+          aria-label={link.isInteresting ? t('si.unfavorite') : t('si.favorite')}
           onClick={() => actions.onToggleStar(link)}
         >
           <Star size={14} strokeWidth={2} fill={link.isInteresting ? 'currentColor' : 'none'} />
         </button>
-        <button type="button" className="btn-icon" aria-label="Copy link" onClick={() => copy(link.url)}>
+        <button type="button" className="btn-icon" aria-label={t('si.copyLink')} onClick={() => copy(link.url)}>
           {copied ? <Check size={14} strokeWidth={2.4} /> : <Copy size={14} strokeWidth={2} />}
         </button>
-        <button type="button" className="btn-icon" aria-label="Open website" onClick={() => actions.onVisit(link)}>
+        <button type="button" className="btn-icon" aria-label={t('si.openWebsite')} onClick={() => actions.onVisit(link)}>
           <ExternalLink size={14} strokeWidth={2} />
         </button>
-        <button type="button" className="btn-icon btn-icon-danger" aria-label="Move to trash" onClick={() => actions.onDelete(link)}>
+        <button type="button" className="btn-icon btn-icon-danger" aria-label={t('si.moveToTrash')} onClick={() => actions.onDelete(link)}>
           <Trash2 size={14} strokeWidth={2} />
         </button>
       </div>

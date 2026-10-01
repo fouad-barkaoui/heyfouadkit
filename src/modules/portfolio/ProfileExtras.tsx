@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { KanzStar } from '@/components/ui/KanzWordmark';
+import { useLanguage } from '@/state/languageStore';
 import { HOME_TZ, describeGap, formatDuration, formatMonth, tzOffsetMinutes } from './localTime';
 
 /* ── Cover: the Kanz star drawn as an isometric prism ─────────────────── */
@@ -59,6 +60,7 @@ const INNER = prism(44, 470, 128, 22, 14);
 const GUIDES = [-260, -130, 0, 130, 260, 390, 520, 650, 780];
 
 export function KanzCover({ children }: { children?: ReactNode }): JSX.Element {
+  const { t } = useLanguage();
   return (
     <div className="cp-cover">
       <svg className="cp-cover-art" viewBox="0 0 760 210" preserveAspectRatio="xMidYMid slice" aria-hidden>
@@ -84,7 +86,7 @@ export function KanzCover({ children }: { children?: ReactNode }): JSX.Element {
         ))}
       </svg>
       <span className="cp-cover-fig">
-        <span>Fig. 1.</span> Kanz — the treasure kept inside
+        <span>{t('pf.cover.fig')}</span> {t('pf.cover.caption')}
       </span>
       {children}
     </div>
@@ -112,26 +114,28 @@ function Row({ icon: Icon, children }: { icon: LucideIcon; children: ReactNode }
 }
 
 function LocalTime(): JSX.Element {
+  const { t, locale } = useLanguage();
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 20_000);
     return () => window.clearInterval(id);
   }, []);
   const time = useMemo(
-    () => now.toLocaleTimeString('en-US', { timeZone: HOME_TZ, hour: 'numeric', minute: '2-digit' }),
-    [now],
+    () => now.toLocaleTimeString(locale, { timeZone: HOME_TZ, hour: 'numeric', minute: '2-digit' }),
+    [now, locale],
   );
   const gap = describeGap(tzOffsetMinutes(HOME_TZ, now), -now.getTimezoneOffset());
   return (
     <>
       <time className="cp-ov-time">{time}</time>
       <span className="cp-ov-comment"> // {gap}</span>
-      <span className="sr-only"> in Morocco</span>
+      <span className="sr-only">{t('pf.ov.inMorocco')}</span>
     </>
   );
 }
 
 function CopyEmail({ email }: { email: string }): JSX.Element {
+  const { t } = useLanguage();
   const [copied, setCopied] = useState(false);
   useEffect(() => {
     if (!copied) return;
@@ -147,7 +151,7 @@ function CopyEmail({ email }: { email: string }): JSX.Element {
         type="button"
         className="cp-copy"
         data-copied={copied || undefined}
-        aria-label={copied ? 'Email copied' : 'Copy email address'}
+        aria-label={t(copied ? 'pf.ov.emailCopied' : 'pf.ov.copyEmail')}
         onClick={() => {
           void navigator.clipboard?.writeText(email).then(() => setCopied(true), () => undefined);
         }}
@@ -155,29 +159,30 @@ function CopyEmail({ email }: { email: string }): JSX.Element {
         {copied ? <Check size={14} strokeWidth={2.4} aria-hidden /> : <Copy size={14} strokeWidth={1.8} aria-hidden />}
       </button>
       <span className="sr-only" aria-live="polite">
-        {copied ? 'Copied to clipboard' : ''}
+        {copied ? t('pf.ov.copiedToClipboard') : ''}
       </span>
     </>
   );
 }
 
 export function Overview({ email, flag }: { email: string; flag: ReactNode }): JSX.Element {
+  const { t } = useLanguage();
   return (
     <section className="cp-section" aria-labelledby="cp-overview">
-      <Note>the basics</Note>
+      <Note>{t('pf.note.basics')}</Note>
       <h3 id="cp-overview" className="sr-only">
-        Overview
+        {t('pf.section.overview')}
       </h3>
       <ul className="cp-ov">
-        <Row icon={Briefcase}>SOC analyst &amp; fullstack developer</Row>
-        <Row icon={Sparkles}>Vibe coder &amp; prompt engineer</Row>
+        <Row icon={Briefcase}>{t('pf.ov.role')}</Row>
+        <Row icon={Sparkles}>{t('pf.ov.craft')}</Row>
         <Row icon={Clock}>
           <LocalTime />
         </Row>
         <Row icon={MapPin}>
-          Morocco {flag}
+          {t('pf.ov.country')} {flag}
         </Row>
-        <Row icon={Languages}>Darija · Arabic · French · English</Row>
+        <Row icon={Languages}>{t('pf.ov.languages')}</Row>
         <Row icon={Mail}>
           <CopyEmail email={email} />
         </Row>
@@ -193,29 +198,33 @@ export function Overview({ email, flag }: { email: string; flag: ReactNode }): J
 
 /* ── Stack ────────────────────────────────────────────────────────────── */
 
+/** Tool names stay as written; entries starting with `pf.` are translation keys. */
+const label = (t: (key: string) => string, text: string): string => (text.startsWith('pf.') ? t(text) : text);
+
 const STACK: { group: string; items: string[] }[] = [
-  { group: 'Security', items: ['ELK Stack', 'OpenSearch', 'Kibana', 'Threat intel (CTI)', 'OSINT', 'Firecrawl'] },
-  { group: 'Languages', items: ['Python', 'TypeScript', 'JavaScript', 'SQL'] },
-  { group: 'Frontend', items: ['React', 'Vite', 'Tailwind CSS', 'Three.js'] },
-  { group: 'Backend & data', items: ['REST APIs', 'Supabase', 'PostgreSQL', 'IndexedDB'] },
-  { group: 'Infra & tools', items: ['Kali Linux', 'Docker', 'Git', 'GitHub', 'Vercel', 'Claude'] },
+  { group: 'pf.stack.security', items: ['ELK Stack', 'OpenSearch', 'Kibana', 'pf.stack.cti', 'OSINT', 'Firecrawl'] },
+  { group: 'pf.stack.languages', items: ['Python', 'TypeScript', 'JavaScript', 'SQL'] },
+  { group: 'pf.stack.frontend', items: ['React', 'Vite', 'Tailwind CSS', 'Three.js'] },
+  { group: 'pf.stack.backend', items: ['REST APIs', 'Supabase', 'PostgreSQL', 'IndexedDB'] },
+  { group: 'pf.stack.infra', items: ['Kali Linux', 'Docker', 'Git', 'GitHub', 'Vercel', 'Claude'] },
 ];
 
 export function Stack(): JSX.Element {
+  const { t } = useLanguage();
   return (
     <section className="cp-section" aria-labelledby="cp-stack">
-      <Note>my daily tools</Note>
+      <Note>{t('pf.note.tools')}</Note>
       <h3 id="cp-stack" className="cp-section-title">
-        Stack
+        {t('pf.section.stack')}
       </h3>
       <dl className="cp-stack">
         {STACK.map((s) => (
           <div key={s.group} className="cp-stack-row">
-            <dt>{s.group}</dt>
+            <dt>{t(s.group)}</dt>
             <dd>
               {s.items.map((item) => (
                 <span key={item} className="cp-chip">
-                  {item}
+                  {label(t, item)}
                 </span>
               ))}
             </dd>
@@ -243,6 +252,7 @@ export function Note({ children }: { children: ReactNode }): JSX.Element {
 
 /* ── Projects ───────────────────────────────────────────────────────── */
 
+/** title, kind, points, where and status are translation keys; tags use `label`. */
 interface Role {
   title: string;
   icon: LucideIcon;
@@ -264,42 +274,31 @@ interface Venture {
 const PROJECTS: Venture[] = [
   {
     name: 'ASSAS',
-    where: 'Morocco (Remote)',
-    status: 'In development',
+    where: 'pf.proj.remote',
+    status: 'pf.proj.status.dev',
     roles: [
       {
-        title: 'Founder & Security Developer',
+        title: 'pf.proj.assas.title',
         icon: ShieldCheck,
-        kind: 'Own SaaS',
+        kind: 'pf.proj.kind.saas',
         start: '2026-09',
-        points: [
-          'A SaaS that scans a full codebase for threats, bugs and violations of security rules.',
-          'Checks authentication, encryption, session handling, input validation, rate limiting and error handling.',
-          'Covers logging, backups, monitoring and dependency scanning, then reports every finding in one place.',
-          'Monitors live targets with Firecrawl, crawling sites to catch new exposures as they appear.',
-          'Built as a multi-tenant cloud service, one workspace per team.',
-        ],
-        tags: ['Python', 'Static analysis', 'Dependency scanning', 'Firecrawl', 'REST APIs', 'Docker', 'SaaS'],
+        points: ['pf.proj.assas.p1', 'pf.proj.assas.p2', 'pf.proj.assas.p3', 'pf.proj.assas.p4', 'pf.proj.assas.p5'],
+        tags: ['Python', 'pf.proj.tag.static', 'pf.proj.tag.deps', 'Firecrawl', 'REST APIs', 'Docker', 'SaaS'],
       },
     ],
   },
   {
     name: 'Kanz',
-    where: 'Morocco (Remote)',
-    status: 'Live',
+    where: 'pf.proj.remote',
+    status: 'pf.proj.status.live',
     url: 'https://kanz-workspace.vercel.app',
     roles: [
       {
-        title: 'Founder & Fullstack Developer',
+        title: 'pf.proj.kanz.title',
         icon: Code2,
-        kind: 'Own product',
+        kind: 'pf.proj.kind.product',
         start: '2026-09',
-        points: [
-          'A private workspace that keeps notes, tasks, articles, courses, docs and analytics on one spatial canvas.',
-          'Works offline first and syncs through Supabase, with row-level security on every table.',
-          'Google sign-in, team invites and roles, and a private contact inbox.',
-          'Designed the brand end to end: the KANZ wordmark, the star icon and this page.',
-        ],
+        points: ['pf.proj.kanz.p1', 'pf.proj.kanz.p2', 'pf.proj.kanz.p3', 'pf.proj.kanz.p4'],
         tags: ['React', 'TypeScript', 'Vite', 'Tailwind CSS', 'Supabase', 'PostgreSQL', 'Vercel', 'Claude Code'],
       },
     ],
@@ -307,6 +306,7 @@ const PROJECTS: Venture[] = [
 ];
 
 function RoleItem({ role }: { role: Role }): JSX.Element {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(true);
   const id = useId();
   const Icon = role.icon;
@@ -324,11 +324,11 @@ function RoleItem({ role }: { role: Role }): JSX.Element {
           <Icon size={15} strokeWidth={1.8} />
         </span>
         <span className="cp-role-main">
-          <span className="cp-role-title">{role.title}</span>
+          <span className="cp-role-title">{t(role.title)}</span>
           <span className="cp-role-meta">
-            <span>{role.kind}</span>
+            <span>{t(role.kind)}</span>
             <span>
-              {formatMonth(role.start)} — <span aria-label="present">∞</span>
+              {formatMonth(role.start)} — <span aria-label={t('pf.present')}>∞</span>
             </span>
             <span>{formatDuration(role.start, now)}</span>
           </span>
@@ -342,13 +342,13 @@ function RoleItem({ role }: { role: Role }): JSX.Element {
       <div id={id} className="cp-role-body" hidden={!open}>
         <ul className="cp-role-points">
           {role.points.map((p) => (
-            <li key={p}>{p}</li>
+            <li key={p}>{t(p)}</li>
           ))}
         </ul>
         <div className="cp-role-tags">
-          {role.tags.map((t) => (
-            <span key={t} className="cp-tag">
-              {t}
+          {role.tags.map((tag) => (
+            <span key={tag} className="cp-tag">
+              {label(t, tag)}
             </span>
           ))}
         </div>
@@ -358,11 +358,12 @@ function RoleItem({ role }: { role: Role }): JSX.Element {
 }
 
 export function Projects(): JSX.Element {
+  const { t } = useLanguage();
   return (
     <section className="cp-section" aria-labelledby="cp-projects">
-      <Note>what I'm building</Note>
+      <Note>{t('pf.note.building')}</Note>
       <h3 id="cp-projects" className="cp-section-title">
-        Projects <sup className="cp-count">({PROJECTS.length})</sup>
+        {t('pf.section.projects')} <sup className="cp-count">({PROJECTS.length})</sup>
       </h3>
       <div className="cp-exp">
         {PROJECTS.map((v) => (
@@ -376,9 +377,9 @@ export function Projects(): JSX.Element {
                 <span className="cp-venture-name">{v.name}</span>
               )}
               <span className="cp-venture-where">
-                {v.where}
-                <span className="cp-venture-status" data-status={v.status === 'Live' ? 'live' : 'dev'}>
-                  {v.status}
+                {t(v.where)}
+                <span className="cp-venture-status" data-status={v.status === 'pf.proj.status.live' ? 'live' : 'dev'}>
+                  {t(v.status)}
                 </span>
               </span>
             </header>
@@ -416,11 +417,12 @@ const BUILT_WITH = [
 ];
 
 export function BuiltWith(): JSX.Element {
+  const { t } = useLanguage();
   return (
     <section className="cp-built" aria-labelledby="cp-built">
-      <Note>big thanks</Note>
+      <Note>{t('pf.note.thanks')}</Note>
       <h3 id="cp-built" className="cp-built-title">
-        Built with
+        {t('pf.section.builtWith')}
       </h3>
       <ul className="cp-built-grid">
         {BUILT_WITH.map((b) => {
@@ -452,34 +454,37 @@ export function Rule(): JSX.Element {
 
 /** A hatched placeholder panel with a Soon badge, for sections still being filled. */
 function SoonPanel({ children }: { children: ReactNode }): JSX.Element {
+  const { t } = useLanguage();
   return (
     <div className="cp-soon">
-      <span className="cp-status">Soon</span>
+      <span className="cp-status">{t('pf.status.soon')}</span>
       <p>{children}</p>
     </div>
   );
 }
 
 export function ExperienceSoon(): JSX.Element {
+  const { t } = useLanguage();
   return (
     <section className="cp-section" aria-labelledby="cp-experience">
-      <Note>where I've worked</Note>
+      <Note>{t('pf.note.worked')}</Note>
       <h3 id="cp-experience" className="cp-section-title">
-        Experience
+        {t('pf.section.experience')}
       </h3>
-      <SoonPanel>Roles, internships and positions will be listed here.</SoonPanel>
+      <SoonPanel>{t('pf.soon.experience')}</SoonPanel>
     </section>
   );
 }
 
 export function RecognitionSoon(): JSX.Element {
+  const { t } = useLanguage();
   return (
     <section className="cp-section" aria-labelledby="cp-recognition">
-      <Note>milestones</Note>
+      <Note>{t('pf.note.milestones')}</Note>
       <h3 id="cp-recognition" className="cp-section-title">
-        Recognition
+        {t('pf.section.recognition')}
       </h3>
-      <SoonPanel>Certificates, awards and programs will be listed here.</SoonPanel>
+      <SoonPanel>{t('pf.soon.recognition')}</SoonPanel>
     </section>
   );
 }
@@ -487,6 +492,7 @@ export function RecognitionSoon(): JSX.Element {
 /* ── Motto ────────────────────────────────────────────────────────────── */
 
 export function Motto(): JSX.Element {
+  const { t, isArabic } = useLanguage();
   return (
     <div className="cp-motto-wrap">
       <figure className="cp-motto">
@@ -495,9 +501,9 @@ export function Motto(): JSX.Element {
         </span>
         <KanzStar size={26} className="cp-motto-sticker" />
         <blockquote>
-          <p>&ldquo;Inspired by the fear of being average.&rdquo;</p>
+          <p>{isArabic ? `«${t('pf.motto.quote')}»` : `\u201C${t('pf.motto.quote')}\u201D`}</p>
         </blockquote>
-        <figcaption>— Unknown</figcaption>
+        <figcaption>{t('pf.motto.author')}</figcaption>
       </figure>
     </div>
   );

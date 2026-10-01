@@ -1,3 +1,4 @@
+import { useI18n } from '@/components/ui/useI18n';
 import { useAuth } from '@/state/authStore';
 
 /**
@@ -6,11 +7,12 @@ import { useAuth } from '@/state/authStore';
  */
 export function LiveStatus({ expanded = true }: { expanded?: boolean }): JSX.Element | null {
   const { user } = useAuth();
+  const { t } = useI18n();
   if (!user) return null;
   return (
-    <div className="live-status" data-compact={!expanded || undefined} role="status" title="Live · signed in">
+    <div className="live-status" data-compact={!expanded || undefined} role="status" title={t('sh.liveSignedIn')}>
       <span className="live-status-dot" aria-hidden />
-      {expanded ? <span>Live · signed in</span> : <span className="sr-only">Live · signed in</span>}
+      {expanded ? <span>{t('sh.liveSignedIn')}</span> : <span className="sr-only">{t('sh.liveSignedIn')}</span>}
     </div>
   );
 }

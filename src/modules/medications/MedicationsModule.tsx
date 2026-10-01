@@ -7,6 +7,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Modal } from '@/components/ui/Modal';
 import type { Medicine, TreatmentPlan } from '@/lib/types';
 import { nowISO } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 import { useRequireAuth } from '@/state/useRequireAuth';
 import { useWorkspace } from '@/state/workspaceStore';
 import { MedicineCard } from './MedicineCard';
@@ -27,36 +28,37 @@ function AddChoiceModal({
   onPickMedicine: () => void;
   onPickPlan: () => void;
 }): JSX.Element {
+  const { t } = useLanguage();
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="Add new" description="What would you like to add?">
+    <Modal open={open} onOpenChange={onOpenChange} title={t('med.add.title')} description={t('med.add.description')}>
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
         <button
           type="button"
           onClick={onPickMedicine}
-          className="flex flex-col items-start gap-2.5 rounded-[10px] bg-[rgb(var(--tint-rgb)/0.03)] p-3.5 text-left shadow-[inset_0_0_0_1px_var(--color-graphite)] transition-shadow hover:shadow-[inset_0_0_0_1px_var(--color-smoke)]"
+          className="flex flex-col items-start gap-2.5 rounded-[10px] bg-[rgb(var(--tint-rgb)/0.03)] p-3.5 text-start shadow-[inset_0_0_0_1px_var(--color-graphite)] transition-shadow hover:shadow-[inset_0_0_0_1px_var(--color-smoke)]"
         >
           <span className="flex h-9 w-9 items-center justify-center rounded-[9px] bg-acid/15 text-accent">
             <Pill size={16} strokeWidth={1.8} />
           </span>
           <span>
-            <span className="block text-[13.5px] text-paper">Medicine</span>
+            <span className="block text-[13.5px] text-paper">{t('med.add.medicine')}</span>
             <span className="mt-0.5 block text-[12px] leading-[1.5] text-ash">
-              Track daily, temporary, or as-needed medicines.
+              {t('med.add.medicineHint')}
             </span>
           </span>
         </button>
         <button
           type="button"
           onClick={onPickPlan}
-          className="flex flex-col items-start gap-2.5 rounded-[10px] bg-[rgb(var(--tint-rgb)/0.03)] p-3.5 text-left shadow-[inset_0_0_0_1px_var(--color-graphite)] transition-shadow hover:shadow-[inset_0_0_0_1px_var(--color-smoke)]"
+          className="flex flex-col items-start gap-2.5 rounded-[10px] bg-[rgb(var(--tint-rgb)/0.03)] p-3.5 text-start shadow-[inset_0_0_0_1px_var(--color-graphite)] transition-shadow hover:shadow-[inset_0_0_0_1px_var(--color-smoke)]"
         >
           <span className="flex h-9 w-9 items-center justify-center rounded-[9px] bg-lavender/15 text-lavender">
             <HeartPulse size={16} strokeWidth={1.8} />
           </span>
           <span>
-            <span className="block text-[13.5px] text-paper">Treatment Plan</span>
+            <span className="block text-[13.5px] text-paper">{t('med.add.plan')}</span>
             <span className="mt-0.5 block text-[12px] leading-[1.5] text-ash">
-              Group medicines by condition, doctor, or goal.
+              {t('med.plan.description')}
             </span>
           </span>
         </button>
@@ -68,6 +70,7 @@ function AddChoiceModal({
 export function MedicationsModule(): JSX.Element {
   const { workspace, createRecord, updateRecord } = useWorkspace();
   const requireAuth = useRequireAuth();
+  const { t } = useLanguage();
 
   const medicines = useMemo(() => workspace.medicines.filter((m) => !m.isDeleted), [workspace.medicines]);
   const plans = useMemo(() => workspace.treatmentPlans.filter((p) => !p.isDeleted), [workspace.treatmentPlans]);
@@ -140,19 +143,19 @@ export function MedicationsModule(): JSX.Element {
   return (
     <>
       <ModuleLayout
-        panelTitle="Catalog"
+        panelTitle={t('med.panelTitle')}
         panelCount={medicines.length}
         panelActions={
-          <IconButton label="Add new" onClick={() => setChoiceOpen(true)}>
+          <IconButton label={t('med.add.title')} onClick={() => setChoiceOpen(true)}>
             <Plus size={15} strokeWidth={1.9} />
           </IconButton>
         }
-        panelSearch={{ value: query, onChange: setQuery, placeholder: 'Search medicines…' }}
+        panelSearch={{ value: query, onChange: setQuery, placeholder: t('med.searchPlaceholder') }}
         panelFilters={
           <div className="flex flex-wrap gap-1.5">
             {(['all', 'scheduled', 'as_needed'] as FilterMode[]).map((f) => (
               <button key={f} type="button" className="pill" data-active={filter === f} onClick={() => setFilter(f)}>
-                {f === 'all' ? 'All' : f === 'scheduled' ? 'Scheduled' : 'As needed'}
+                {f === 'all' ? t('med.filter.all') : f === 'scheduled' ? t('med.type.scheduled') : t('med.type.asNeeded')}
               </button>
             ))}
           </div>
@@ -164,7 +167,7 @@ export function MedicationsModule(): JSX.Element {
                 key={p.id}
                 type="button"
                 onClick={() => openEditPlan(p)}
-                className="mb-[3px] flex w-full items-center gap-2.5 rounded-[6px] px-2.5 py-2 text-left transition-colors duration-120 hover:bg-[rgb(var(--tint-rgb)/0.035)]"
+                className="mb-[3px] flex w-full items-center gap-2.5 rounded-[6px] px-2.5 py-2 text-start transition-colors duration-120 hover:bg-[rgb(var(--tint-rgb)/0.035)]"
               >
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] bg-lavender/15 text-lavender">
                   <HeartPulse size={12} strokeWidth={1.8} />
@@ -174,17 +177,25 @@ export function MedicationsModule(): JSX.Element {
             ))}
           </div>
         }
-        title="Medications Catalog"
+        title={t('nav.medications')}
         subtitle={
           <span className="flex flex-wrap items-center gap-2">
-            <span className="num">{medicines.length} medicines</span>
+            <span className="num">
+              {medicines.length === 1
+                ? t('med.subtitle.medicines.one', { count: medicines.length })
+                : t('med.subtitle.medicines.many', { count: medicines.length })}
+            </span>
             <span aria-hidden>·</span>
-            <span className="num">{activePlans.length} active plans</span>
+            <span className="num">
+              {activePlans.length === 1
+                ? t('med.subtitle.activePlans.one', { count: activePlans.length })
+                : t('med.subtitle.activePlans.many', { count: activePlans.length })}
+            </span>
           </span>
         }
         actions={
           <Button variant="primary" icon={<Plus size={14} strokeWidth={2} />} onClick={() => setChoiceOpen(true)}>
-            Add
+            {t('med.add.button')}
           </Button>
         }
         detailOpenOnMobile
@@ -192,7 +203,7 @@ export function MedicationsModule(): JSX.Element {
         <div ref={contentRef} className="mx-auto max-w-[900px] space-y-7">
           <section>
             <div className="mb-3 flex items-center gap-2.5">
-              <h2 className="text-[13px] font-medium tracking-[-0.011em] text-paper">Treatment Plans</h2>
+              <h2 className="text-[13px] font-medium tracking-[-0.011em] text-paper">{t('med.section.plans')}</h2>
               <span className="h-px flex-1 bg-graphite" aria-hidden />
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -210,9 +221,9 @@ export function MedicationsModule(): JSX.Element {
                 <span className="flex h-9 w-9 items-center justify-center rounded-[9px] bg-[rgb(var(--tint-rgb)/0.05)] text-ash">
                   <HeartPulse size={16} strokeWidth={1.7} />
                 </span>
-                <span className="text-[12.5px] text-mist">Create Treatment Plan</span>
+                <span className="text-[12.5px] text-mist">{t('med.plan.createCard')}</span>
                 <span className="max-w-[180px] text-[11px] leading-[1.4] text-ash">
-                  Group medicines by condition, doctor, or goal
+                  {t('med.plan.createCardHint')}
                 </span>
               </button>
             </div>
@@ -220,18 +231,18 @@ export function MedicationsModule(): JSX.Element {
 
           <section>
             <div className="mb-3 flex items-center gap-2.5">
-              <h2 className="text-[13px] font-medium tracking-[-0.011em] text-paper">Individual Medicines</h2>
+              <h2 className="text-[13px] font-medium tracking-[-0.011em] text-paper">{t('med.section.individual')}</h2>
               <span className="h-px flex-1 bg-graphite" aria-hidden />
               <span className="mono num text-[11px] text-ash">{unassigned.length}</span>
             </div>
             {unassigned.length === 0 ? (
               <EmptyState
                 icon={<Pill size={18} strokeWidth={1.6} />}
-                title={medicines.length === 0 ? 'No medicines yet' : 'Everything is grouped into a plan'}
-                hint="Medicines not assigned to a treatment plan show up here."
+                title={medicines.length === 0 ? t('med.empty.none') : t('med.empty.allGrouped')}
+                hint={t('med.empty.hint')}
                 action={
                   <Button variant="primary" icon={<Plus size={14} strokeWidth={2} />} onClick={() => openNewMedicine()}>
-                    New medicine
+                    {t('med.editor.newTitle')}
                   </Button>
                 }
               />

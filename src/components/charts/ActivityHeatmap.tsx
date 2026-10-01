@@ -1,6 +1,6 @@
 import gsap from 'gsap';
 import { useLayoutEffect, useRef, useState } from 'react';
-import { formatDate } from '@/lib/utils';
+import { fmtDate, useI18n } from '@/components/ui/useI18n';
 import { rampStep, SEQUENTIAL } from './tokens';
 
 export interface HeatCell {
@@ -8,7 +8,8 @@ export interface HeatCell {
   count: number;
 }
 
-const DAY_LABELS = ['Mon', '', 'Wed', '', 'Fri', '', ''];
+/** Translation keys; blank rows stay unlabelled. */
+const DAY_LABELS = ['sh.chart.mon', '', 'sh.chart.wed', '', 'sh.chart.fri', '', ''];
 
 /**
  * Calendar heatmap — a single-hue sequential ramp, lightest step meaning
@@ -17,6 +18,8 @@ const DAY_LABELS = ['Mon', '', 'Wed', '', 'Fri', '', ''];
 export function ActivityHeatmap({ cells, weeks = 18 }: { cells: HeatCell[]; weeks?: number }): JSX.Element {
   const root = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<HeatCell | null>(null);
+  const { t, locale } = useI18n();
+  const items = (count: number): string => t(count === 1 ? 'sh.chart.itemOne' : 'sh.chart.itemMany', { count });
   const max = Math.max(1, ...cells.map((c) => c.count));
 
   useLayoutEffect(() => {
@@ -38,11 +41,11 @@ export function ActivityHeatmap({ cells, weeks = 18 }: { cells: HeatCell[]; week
   return (
     <div ref={root} className="relative">
       <div className="flex gap-[3px] overflow-x-auto pb-1">
-        <div className="mr-1 flex shrink-0 flex-col gap-[3px] pt-[1px]">
+        <div className="me-1 flex shrink-0 flex-col gap-[3px] pt-[1px]">
           {DAY_LABELS.map((label, i) => (
             // eslint-disable-next-line react/no-array-index-key
             <span key={i} className="h-[12px] text-[9px] leading-[12px] text-ash/70">
-              {label}
+              {label ? t(label) : ''}
             </span>
           ))}
         </div>
@@ -55,7 +58,7 @@ export function ActivityHeatmap({ cells, weeks = 18 }: { cells: HeatCell[]; week
                 data-heat-cell
                 tabIndex={0}
                 role="img"
-                aria-label={`${formatDate(cell.date)}: ${cell.count} item${cell.count === 1 ? '' : 's'}`}
+                aria-label={`${fmtDate(cell.date, locale)}: ${items(cell.count)}`}
                 onMouseEnter={() => setHover(cell)}
                 onMouseLeave={() => setHover(null)}
                 onFocus={() => setHover(cell)}
@@ -69,16 +72,16 @@ export function ActivityHeatmap({ cells, weeks = 18 }: { cells: HeatCell[]; week
       </div>
 
       <div className="mt-3 flex items-center gap-2 text-[11px] text-ash">
-        <span>Less</span>
+        <span>{t('sh.chart.less')}</span>
         <span className="h-[10px] w-[10px] rounded-[2px] bg-[rgb(var(--tint-rgb)/0.035)]" aria-hidden />
         {SEQUENTIAL.map((step) => (
           <span key={step} className="h-[10px] w-[10px] rounded-[2px]" style={{ background: step }} aria-hidden />
         ))}
-        <span>More</span>
+        <span>{t('sh.chart.more')}</span>
         {hover ? (
-          <span className="ml-auto text-mist">
-            {formatDate(hover.date)} — <span className="num">{hover.count}</span> item
-            {hover.count === 1 ? '' : 's'}
+          <span className="ms-auto text-mist">
+            {fmtDate(hover.date, locale)} — <span className="num">{hover.count}</span>{' '}
+            {t(hover.count === 1 ? 'sh.chart.item' : 'sh.chart.items')}
           </span>
         ) : null}
       </div>

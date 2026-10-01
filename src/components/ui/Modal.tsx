@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { IconButton } from './Button';
+import { useI18n } from './useI18n';
 
 export function Modal({
   open,
@@ -27,6 +28,7 @@ export function Modal({
     lg: 'max-w-[760px]',
     xl: 'max-w-[1040px]',
   }[width];
+  const { t } = useI18n();
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -54,7 +56,7 @@ export function Modal({
               ) : null}
             </div>
             <Dialog.Close asChild>
-              <IconButton label="Close" className="-mr-1 -mt-1 shrink-0">
+              <IconButton label={t('sh.close')} className="-me-1 -mt-1 shrink-0">
                 <X size={15} strokeWidth={1.75} />
               </IconButton>
             </Dialog.Close>

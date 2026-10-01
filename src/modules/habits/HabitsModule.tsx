@@ -19,8 +19,9 @@ import { ModuleLayout } from '@/components/shell/ModuleLayout';
 import { ProgressRing } from '@/components/ui/ProgressRing';
 import { normalizeTodo } from '@/data/normalize';
 import type { Goal, GoalStep, Habit } from '@/lib/types';
-import { cn, formatDate, nowISO, uid } from '@/lib/utils';
+import { cn, nowISO, uid } from '@/lib/utils';
 import { completionBurst } from '@/modules/todo/burst';
+import { translate, useLanguage } from '@/state/languageStore';
 import { useUI } from '@/state/uiStore';
 import { useRequireAuth } from '@/state/useRequireAuth';
 import { useWorkspace } from '@/state/workspaceStore';
@@ -39,11 +40,22 @@ import {
 import { YearGrid } from './YearGrid';
 
 type Tab = 'habits' | 'goals';
-const WEEKDAY = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+/** Narrow weekday initial (S M T … / ح ن ث …) for a weekday index 0–6. */
+function weekdayInitial(day: number, locale: string): string {
+  // 2026-09-27 is a Sunday.
+  return new Date(2026, 8, 27 + day).toLocaleDateString(locale, { weekday: 'narrow' });
+}
+
+/** `key.one` for exactly one, `key` otherwise. */
+function plural(key: string, count: number, vars: Record<string, string | number> = {}): string {
+  return translate(count === 1 ? `${key}.one` : key, { count, ...vars });
+}
 
 export function HabitsModule(): JSX.Element {
   const { workspace, createRecord, updateRecord } = useWorkspace();
   const { setModule } = useUI();
+  const { t, locale } = useLanguage();
   const requireAuth = useRequireAuth();
 
   const habits = useMemo(() => workspace.habits.filter((h) => !h.isDeleted && !h.archived), [workspace.habits]);
@@ -117,7 +129,7 @@ export function HabitsModule(): JSX.Element {
       const todo = normalizeTodo({
         id: uid('todo'),
         title: s.title,
-        description: `Step of the goal “${g.emoji} ${g.title}”.`,
+        description: translate('hab.todoDescription', { goal: `${g.emoji} ${g.title}` }),
         priority: 'medium',
         status: 'backlog',
         dueDate: s.dueDate ?? g.dueDate,
@@ -153,17 +165,21 @@ export function HabitsModule(): JSX.Element {
         <ProgressRing value={todayPct} size={52} stroke={4} color="#2dd4a0" label={`${todayPct}%`} />
         <div className="min-w-0">
           <p className="text-[13px] text-paper">
-            {dueToday.length === 0 ? 'Nothing due today' : doneToday === dueToday.length ? 'All done today 🎉' : `${doneToday} of ${dueToday.length} done today`}
+            {dueToday.length === 0
+              ? t('hab.nothingDue')
+              : doneToday === dueToday.length
+                ? t('hab.allDone')
+                : t('hab.doneOfToday', { done: doneToday, total: dueToday.length })}
           </p>
           <p className="mt-0.5 text-[11.5px] text-ash">
-            {stats.longestNow > 0 ? `Longest active streak: ${stats.longestNow} days` : 'Start a streak today'}
+            {stats.longestNow > 0 ? plural('hab.longestActive', stats.longestNow) : t('hab.startStreak')}
           </p>
         </div>
       </div>
 
       <div>
-        <p className="mb-1.5 px-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">Habits</p>
-        {habits.length === 0 ? <p className="px-2 text-[12px] text-ash">No habits yet.</p> : null}
+        <p className="mb-1.5 px-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('hab.habits')}</p>
+        {habits.length === 0 ? <p className="px-2 text-[12px] text-ash">{t('hab.noHabits')}</p> : null}
         {habits.map((h) => {
           const streak = currentStreak(h);
           return (
@@ -190,8 +206,8 @@ export function HabitsModule(): JSX.Element {
       </div>
 
       <div>
-        <p className="mb-1.5 px-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">Goals</p>
-        {goals.length === 0 ? <p className="px-2 text-[12px] text-ash">No goals yet.</p> : null}
+        <p className="mb-1.5 px-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('hab.goals')}</p>
+        {goals.length === 0 ? <p className="px-2 text-[12px] text-ash">{t('hab.noGoals')}</p> : null}
         {goals.map((g) => {
           const p = goalProgress(g, todos);
           return (
@@ -214,12 +230,12 @@ export function HabitsModule(): JSX.Element {
       <div className="space-y-6">
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {[
-            { label: 'Today', value: `${doneToday}/${dueToday.length}`, icon: CheckCircle2 },
-            { label: 'Best streak', value: `${stats.best}d`, icon: Trophy },
-            { label: '30-day rate', value: `${stats.rate}%`, icon: Target },
-            { label: 'Check-ins', value: String(stats.checkins), icon: Flame },
-          ].map(({ label, value, icon: Icon }) => (
-            <div key={label} data-stagger className="surface-card p-3.5">
+            { id: 'today', label: t('hab.stat.today'), value: `${doneToday}/${dueToday.length}`, icon: CheckCircle2 },
+            { id: 'best', label: t('hab.stat.best'), value: t('hab.daysShort', { count: stats.best }), icon: Trophy },
+            { id: 'rate', label: t('hab.stat.rate'), value: `${stats.rate}%`, icon: Target },
+            { id: 'checkins', label: t('hab.stat.checkins'), value: String(stats.checkins), icon: Flame },
+          ].map(({ id, label, value, icon: Icon }) => (
+            <div key={id} data-stagger className="surface-card p-3.5">
               <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.07em] text-ash">
                 <Icon size={12} strokeWidth={2} aria-hidden /> {label}
               </p>
@@ -247,23 +263,23 @@ export function HabitsModule(): JSX.Element {
                     <p className="mt-0.5 flex items-center gap-1.5 overflow-hidden whitespace-nowrap text-[11.5px] text-ash">
                       {streak > 0 ? (
                         <span className="hb-streak inline-flex items-center gap-0.5 font-medium">
-                          <Flame size={12} strokeWidth={2.2} aria-hidden /> {streak}d
+                          <Flame size={12} strokeWidth={2.2} aria-hidden /> {t('hab.daysShort', { count: streak })}
                         </span>
                       ) : (
-                        <span>No streak yet</span>
+                        <span>{t('hab.noStreak')}</span>
                       )}
                       <span aria-hidden>·</span>
-                      <span className="truncate">{h.days.length === 0 ? 'Every day' : h.days.map((d) => WEEKDAY[d]).join(' ')}</span>
+                      <span className="truncate">{h.days.length === 0 ? t('hab.everyDay') : h.days.map((d) => weekdayInitial(d, locale)).join(' ')}</span>
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={(e) => (scheduled || done ? toggle(h, todayKey, e) : undefined)}
                     aria-pressed={done}
-                    aria-label={done ? `Undo ${h.name} today` : `Mark ${h.name} done today`}
+                    aria-label={done ? t('hab.undoToday', { name: h.name }) : t('hab.markToday', { name: h.name })}
                     className={cn('hb-check flex h-11 w-11 shrink-0 items-center justify-center rounded-full', done && 'is-on')}
                     disabled={!scheduled && !done}
-                    title={!scheduled && !done ? 'Rest day' : undefined}
+                    title={!scheduled && !done ? t('hab.restDay') : undefined}
                   >
                     <Check size={20} strokeWidth={2.6} />
                   </button>
@@ -281,10 +297,13 @@ export function HabitsModule(): JSX.Element {
                         type="button"
                         onClick={(e) => toggle(h, key, e)}
                         aria-pressed={on}
-                        aria-label={`${d.toLocaleDateString(undefined, { weekday: 'long' })}: ${on ? 'done' : 'not done'}`}
+                        aria-label={t('hab.dayState', {
+                          day: d.toLocaleDateString(locale, { weekday: 'long' }),
+                          state: on ? t('hab.done') : t('hab.notDone'),
+                        })}
                         className={cn('hb-dot flex flex-col items-center gap-1', k === 6 && 'is-today')}
                       >
-                        <span className="text-[10px] text-ash">{WEEKDAY[d.getDay()]}</span>
+                        <span className="text-[10px] text-ash">{weekdayInitial(d.getDay(), locale)}</span>
                         <span className={cn('hb-dot-ball h-6 w-6 rounded-full', on && 'is-on', !sched && 'is-off')} />
                       </button>
                     );
@@ -294,7 +313,7 @@ export function HabitsModule(): JSX.Element {
                 <button
                   type="button"
                   className="hb-edit btn-icon absolute right-2 top-2"
-                  aria-label={`Edit ${h.name}`}
+                  aria-label={t('hab.editName', { name: h.name })}
                   onClick={() => setHabitEditor({ open: true, habit: h })}
                 >
                   <Pencil size={13} strokeWidth={2} />
@@ -308,15 +327,15 @@ export function HabitsModule(): JSX.Element {
             className="hb-add flex min-h-[150px] flex-col items-center justify-center gap-2 rounded-[16px] text-[13px] text-fog"
             onClick={() => requireAuth() && setHabitEditor({ open: true, habit: null })}
           >
-            <Plus size={20} strokeWidth={1.8} /> New habit
+            <Plus size={20} strokeWidth={1.8} /> {t('hab.newHabit')}
           </button>
         </div>
 
         <section data-stagger className="surface-card p-4 md:p-5">
           <div className="mb-3 flex flex-wrap items-center gap-2">
-            <h2 className="me-auto text-[14px] font-medium text-paper">Your year</h2>
+            <h2 className="me-auto text-[14px] font-medium text-paper">{t('hab.yourYear')}</h2>
             <button type="button" className="pill" data-active={gridHabit === 'all'} onClick={() => setGridHabit('all')}>
-              All habits
+              {t('hab.allHabits')}
             </button>
             {habits.map((h) => (
               <button key={h.id} type="button" className="pill" data-active={gridHabit === h.id} onClick={() => setGridHabit(h.id)}>
@@ -350,15 +369,20 @@ export function HabitsModule(): JSX.Element {
             <h3 className="text-[16px] font-medium leading-snug tracking-[-0.012em] text-paper">{g.title}</h3>
             <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11.5px] text-ash">
               <span className="num">
-                {p.done}/{p.total} steps · {p.pct}%
+                {t('hab.stepsProgress', { done: p.done, total: p.total, pct: p.pct })}
               </span>
               {g.dueDate ? (
                 <span className={cn(daysLeft !== null && daysLeft < 0 && g.status !== 'achieved' && 'text-coral')}>
-                  · {daysLeft !== null && daysLeft >= 0 ? `${daysLeft} days left` : `was due ${formatDate(g.dueDate)}`}
+                  ·{' '}
+                  {daysLeft !== null && daysLeft >= 0
+                    ? plural('hab.daysLeft', daysLeft)
+                    : t('hab.wasDue', {
+                        date: new Date(g.dueDate).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' }),
+                      })}
                 </span>
               ) : null}
-              {g.status === 'paused' ? <span className="gl-status">Paused</span> : null}
-              {g.status === 'achieved' ? <span className="gl-status is-win">Achieved</span> : null}
+              {g.status === 'paused' ? <span className="gl-status">{t('hab.paused')}</span> : null}
+              {g.status === 'achieved' ? <span className="gl-status is-win">{t('hab.achieved')}</span> : null}
             </p>
           </div>
           <GoalMenu
@@ -381,25 +405,25 @@ export function HabitsModule(): JSX.Element {
                   type="button"
                   onClick={(e) => toggleStep(g, s, e)}
                   aria-pressed={done}
-                  aria-label={done ? `Mark “${s.title}” not done` : `Mark “${s.title}” done`}
+                  aria-label={done ? t('hab.markStepUndone', { title: s.title }) : t('hab.markStepDone', { title: s.title })}
                   className={cn('gl-tick flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px]', done && 'is-on')}
                 >
                   {done ? <Check size={13} strokeWidth={3} /> : null}
                 </button>
                 <span className={cn('min-w-0 flex-1 truncate text-[13px]', done ? 'text-ash line-through' : 'text-mist')}>{s.title}</span>
                 {inTasks ? (
-                  <button type="button" className="gl-chip is-linked" onClick={() => setModule('todo')} title="Open in Tasks">
-                    In Tasks <ArrowUpRight size={11} strokeWidth={2.2} />
+                  <button type="button" className="gl-chip is-linked" onClick={() => setModule('todo')} title={t('hab.openInTasks')}>
+                    {t('hab.inTasks')} <ArrowUpRight size={11} strokeWidth={2.2} className="rtl:-scale-x-100" />
                   </button>
                 ) : !done ? (
-                  <button type="button" className="gl-chip" onClick={() => sendToTasks(g, [s])} title="Create a task for this step">
-                    <Send size={11} strokeWidth={2.2} /> Task
+                  <button type="button" className="gl-chip" onClick={() => sendToTasks(g, [s])} title={t('hab.createTaskForStep')}>
+                    <Send size={11} strokeWidth={2.2} className="rtl:-scale-x-100" /> {t('hab.task')}
                   </button>
                 ) : null}
                 <button
                   type="button"
                   className="btn-icon h-6 w-6 opacity-0 group-hover/step:opacity-100 focus:opacity-100"
-                  aria-label={`Remove step “${s.title}”`}
+                  aria-label={t('hab.removeStep', { title: s.title })}
                   onClick={() => removeStep(g, s)}
                 >
                   <Trash2 size={12} strokeWidth={2} />
@@ -413,12 +437,12 @@ export function HabitsModule(): JSX.Element {
         <div className="mt-3 flex flex-wrap gap-2">
           {openSteps.length ? (
             <button type="button" className="btn btn-ghost" onClick={() => sendToTasks(g, openSteps)}>
-              <ListPlus size={13} strokeWidth={2} /> Send {openSteps.length} step{openSteps.length === 1 ? '' : 's'} to Tasks
+              <ListPlus size={13} strokeWidth={2} /> {plural('hab.sendSteps', openSteps.length)}
             </button>
           ) : null}
           {p.total > 0 && p.done === p.total && g.status !== 'achieved' ? (
             <button type="button" className="btn btn-primary" onClick={(e) => { updateRecord('goals', g.id, { status: 'achieved' }); completionBurst(e.currentTarget, 28); }}>
-              <Trophy size={13} strokeWidth={2} /> Mark achieved
+              <Trophy size={13} strokeWidth={2} /> {t('hab.markAchieved')}
             </button>
           ) : null}
         </div>
@@ -439,13 +463,13 @@ export function HabitsModule(): JSX.Element {
             className="hb-add flex min-h-[180px] flex-col items-center justify-center gap-2 rounded-[18px] text-[13px] text-fog"
             onClick={() => requireAuth() && setGoalEditor({ open: true, goal: null })}
           >
-            <Target size={20} strokeWidth={1.8} /> New goal
+            <Target size={20} strokeWidth={1.8} /> {t('hab.newGoal')}
           </button>
         </div>
         {achievedGoals.length ? (
           <section>
             <h2 className="mb-3 flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.08em] text-ash">
-              <Trophy size={13} strokeWidth={2} /> Achieved
+              <Trophy size={13} strokeWidth={2} /> {t('hab.achieved')}
             </h2>
             <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr))]">{achievedGoals.map(goalCard)}</div>
           </section>
@@ -456,45 +480,45 @@ export function HabitsModule(): JSX.Element {
   return (
     <>
       <ModuleLayout
-        panelTitle="Habits & Goals"
+        panelTitle={t('nav.habits')}
         panelCount={habits.length + goals.length}
-        panelSearch={{ value: query, onChange: setQuery, placeholder: 'Search habits and goals…' }}
+        panelSearch={{ value: query, onChange: setQuery, placeholder: t('hab.search') }}
         panel={panel}
         detailOpenOnMobile
-        title="Habits & Goals"
+        title={t('nav.habits')}
         subtitle={
           tab === 'habits'
             ? dueToday.length
-              ? `${doneToday} of ${dueToday.length} habits done today`
-              : 'Build streaks, one day at a time'
-            : `${activeGoals.length} active goal${activeGoals.length === 1 ? '' : 's'}`
+              ? t('hab.habitsDoneToday', { done: doneToday, total: dueToday.length })
+              : t('hab.buildStreaks')
+            : plural('hab.activeGoals', activeGoals.length)
         }
         actions={
           <div className="flex items-center gap-2">
-            <div role="tablist" aria-label="Section" className="save-views flex rounded-[10px] p-[3px]">
-              {(['habits', 'goals'] as const).map((t) => (
+            <div role="tablist" aria-label={t('hab.section')} className="save-views flex rounded-[10px] p-[3px]">
+              {(['habits', 'goals'] as const).map((key) => (
                 <button
-                  key={t}
+                  key={key}
                   type="button"
                   role="tab"
-                  aria-selected={tab === t}
-                  onClick={() => setTab(t)}
+                  aria-selected={tab === key}
+                  onClick={() => setTab(key)}
                   className="save-view-btn inline-flex items-center gap-1.5 rounded-[7px] px-3 py-1.5 text-[12.5px]"
                 >
-                  {t === 'habits' ? <Flame size={14} strokeWidth={1.9} /> : <Target size={14} strokeWidth={1.9} />}
-                  {t === 'habits' ? 'Habits' : 'Goals'}
+                  {key === 'habits' ? <Flame size={14} strokeWidth={1.9} /> : <Target size={14} strokeWidth={1.9} />}
+                  {key === 'habits' ? t('hab.habits') : t('hab.goals')}
                 </button>
               ))}
             </div>
             <button
               type="button"
               className="btn btn-primary"
-              aria-label={tab === 'habits' ? 'New habit' : 'New goal'}
+              aria-label={tab === 'habits' ? t('hab.newHabit') : t('hab.newGoal')}
               onClick={() =>
                 requireAuth() && (tab === 'habits' ? setHabitEditor({ open: true, habit: null }) : setGoalEditor({ open: true, goal: null }))
               }
             >
-              <Plus size={14} strokeWidth={2.2} /> <span className="hidden sm:inline">{tab === 'habits' ? 'New habit' : 'New goal'}</span>
+              <Plus size={14} strokeWidth={2.2} /> <span className="hidden sm:inline">{tab === 'habits' ? t('hab.newHabit') : t('hab.newGoal')}</span>
             </button>
           </div>
         }
@@ -522,6 +546,7 @@ export function HabitsModule(): JSX.Element {
 }
 
 function StepAdder({ onAdd }: { onAdd: (title: string) => void }): JSX.Element {
+  const { t } = useLanguage();
   const [v, setV] = useState('');
   const ref = useRef<HTMLInputElement>(null);
   return (
@@ -539,8 +564,8 @@ function StepAdder({ onAdd }: { onAdd: (title: string) => void }): JSX.Element {
         ref={ref}
         value={v}
         onChange={(e) => setV(e.target.value)}
-        placeholder="Add a step…"
-        aria-label="Add a step"
+        placeholder={t('hab.addStepPlaceholder')}
+        aria-label={t('hab.addStep')}
         className="min-w-0 flex-1 bg-transparent py-1 text-[13px] text-mist outline-none placeholder:text-ash"
       />
     </form>
@@ -558,34 +583,35 @@ function GoalMenu({
   onStatus: (s: Goal['status']) => void;
   onDelete: () => void;
 }): JSX.Element {
+  const { t } = useLanguage();
   const item =
     'flex cursor-pointer items-center gap-2 rounded-[8px] px-2.5 py-2 text-[13px] text-mist outline-none data-[highlighted]:bg-[rgb(var(--tint-rgb)/0.06)] data-[highlighted]:text-paper';
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger className="btn-icon shrink-0" aria-label={`Goal options for ${goal.title}`}>
+      <DropdownMenu.Trigger className="btn-icon shrink-0" aria-label={t('hab.goalOptions', { title: goal.title })}>
         <MoreHorizontal size={16} strokeWidth={2} />
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content align="end" sideOffset={6} className="rail-flyout z-50 w-[190px] rounded-[12px] p-1.5">
           <DropdownMenu.Item className={item} onSelect={onEdit}>
-            <Pencil size={13} /> Edit goal
+            <Pencil size={13} /> {t('hab.editGoal')}
           </DropdownMenu.Item>
           {goal.status !== 'active' ? (
             <DropdownMenu.Item className={item} onSelect={() => onStatus('active')}>
-              <Target size={13} /> Mark active
+              <Target size={13} /> {t('hab.markActive')}
             </DropdownMenu.Item>
           ) : (
             <DropdownMenu.Item className={item} onSelect={() => onStatus('paused')}>
-              <Target size={13} /> Pause
+              <Target size={13} /> {t('hab.pause')}
             </DropdownMenu.Item>
           )}
           {goal.status !== 'achieved' ? (
             <DropdownMenu.Item className={item} onSelect={() => onStatus('achieved')}>
-              <Trophy size={13} /> Mark achieved
+              <Trophy size={13} /> {t('hab.markAchieved')}
             </DropdownMenu.Item>
           ) : null}
           <DropdownMenu.Item className={cn(item, 'text-coral data-[highlighted]:text-coral')} onSelect={onDelete}>
-            <Trash2 size={13} /> Move to trash
+            <Trash2 size={13} /> {t('hab.moveToTrash')}
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
@@ -594,35 +620,36 @@ function GoalMenu({
 }
 
 function EmptyHabits({ onCreate }: { onCreate: () => void }): JSX.Element {
+  const { t } = useLanguage();
   return (
     <div className="anim-rise mx-auto flex max-w-[520px] flex-col items-center py-12 text-center">
       <div className="hb-empty-flame mb-5 flex h-16 w-16 items-center justify-center rounded-[20px]" aria-hidden>
         <Flame size={30} strokeWidth={1.7} />
       </div>
-      <h2 className="text-[20px] font-medium tracking-[-0.018em] text-paper">Small things, every day.</h2>
+      <h2 className="text-[20px] font-medium tracking-[-0.018em] text-paper">{t('hab.emptyHabitsTitle')}</h2>
       <p className="mt-2 max-w-[400px] text-[13px] leading-[1.6] text-ash">
-        Pick a habit, tick it off each day, and watch your streak — and your year — fill up.
+        {t('hab.emptyHabitsBody')}
       </p>
       <button type="button" className="btn btn-primary mt-5" onClick={onCreate}>
-        <Plus size={14} strokeWidth={2.2} /> Create your first habit
+        <Plus size={14} strokeWidth={2.2} /> {t('hab.emptyHabitsCta')}
       </button>
     </div>
   );
 }
 
 function EmptyGoals({ onCreate }: { onCreate: () => void }): JSX.Element {
+  const { t } = useLanguage();
   return (
     <div className="anim-rise mx-auto flex max-w-[520px] flex-col items-center py-12 text-center">
       <div className="hb-empty-flame is-goal mb-5 flex h-16 w-16 items-center justify-center rounded-[20px]" aria-hidden>
         <Target size={30} strokeWidth={1.7} />
       </div>
-      <h2 className="text-[20px] font-medium tracking-[-0.018em] text-paper">Big goals, small steps.</h2>
+      <h2 className="text-[20px] font-medium tracking-[-0.018em] text-paper">{t('hab.emptyGoalsTitle')}</h2>
       <p className="mt-2 max-w-[400px] text-[13px] leading-[1.6] text-ash">
-        Name what you want to achieve, break it into steps, and send each step to Tasks when you're ready to do it.
-        Finishing the task ticks the step.
+        {t('hab.emptyGoalsBody')}
       </p>
       <button type="button" className="btn btn-primary mt-5" onClick={onCreate}>
-        <Target size={14} strokeWidth={2.2} /> Set your first goal
+        <Target size={14} strokeWidth={2.2} /> {t('hab.emptyGoalsCta')}
       </button>
     </div>
   );

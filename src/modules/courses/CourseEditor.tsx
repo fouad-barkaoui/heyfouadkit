@@ -5,6 +5,7 @@ import { FieldRow, Label, TextArea, TextInput } from '@/components/ui/Field';
 import { Modal } from '@/components/ui/Modal';
 import type { Badge, Course } from '@/lib/types';
 import { isValidUrl, nowISO, uid } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 
 export function CourseEditor({
   open,
@@ -21,6 +22,7 @@ export function CourseEditor({
   onSave: (course: Course) => void;
   onCreateBadge: () => void;
 }): JSX.Element {
+  const { t } = useLanguage();
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
@@ -62,19 +64,19 @@ export function CourseEditor({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title={course ? 'Edit course' : 'New course'}
-      description="Badges scoped to the Course Hub keep this list separate from Docs Storage."
+      title={course ? t('crs.edit') : t('crs.newCourse')}
+      description={t('crs.editor.desc')}
       footer={
         <>
-          <Button onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={() => onOpenChange(false)}>{t('crs.editor.cancel')}</Button>
           <Button variant="primary" onClick={submit}>
-            {course ? 'Save changes' : 'Add course'}
+            {course ? t('crs.editor.saveChanges') : t('crs.editor.add')}
           </Button>
         </>
       }
     >
       <FieldRow>
-        <Label htmlFor="course-title">Title</Label>
+        <Label htmlFor="course-title">{t('crs.editor.title')}</Label>
         <TextInput
           id="course-title"
           autoFocus
@@ -82,11 +84,11 @@ export function CourseEditor({
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Active Directory Enumeration & Attacks"
         />
-        {touched && !validTitle ? <p className="mt-1.5 text-[12px] text-coral">A title is required.</p> : null}
+        {touched && !validTitle ? <p className="mt-1.5 text-[12px] text-coral">{t('crs.editor.titleRequired')}</p> : null}
       </FieldRow>
 
       <FieldRow>
-        <Label htmlFor="course-url">Link</Label>
+        <Label htmlFor="course-url">{t('crs.editor.link')}</Label>
         <TextInput
           id="course-url"
           value={url}
@@ -94,23 +96,23 @@ export function CourseEditor({
           placeholder="https://academy.hackthebox.com"
         />
         {touched && !validUrl ? (
-          <p className="mt-1.5 text-[12px] text-coral">That does not look like an http(s) URL.</p>
+          <p className="mt-1.5 text-[12px] text-coral">{t('crs.editor.badUrl')}</p>
         ) : null}
       </FieldRow>
 
       <FieldRow>
-        <Label htmlFor="course-desc">Description</Label>
+        <Label htmlFor="course-desc">{t('crs.editor.description')}</Label>
         <TextArea
           id="course-desc"
           rows={2}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="What this covers, and why it is on the list."
+          placeholder={t('crs.editor.descPlaceholder')}
         />
       </FieldRow>
 
       <FieldRow>
-        <Label htmlFor="course-progress">Progress — {progress}%</Label>
+        <Label htmlFor="course-progress">{t('crs.editor.progress', { value: progress })}</Label>
         <input
           id="course-progress"
           type="range"
@@ -124,7 +126,7 @@ export function CourseEditor({
       </FieldRow>
 
       <FieldRow>
-        <Label>Badge</Label>
+        <Label>{t('crs.badge')}</Label>
         <div className="flex flex-wrap items-center gap-1.5">
           <button
             type="button"
@@ -132,7 +134,7 @@ export function CourseEditor({
             data-active={badgeId === null}
             onClick={() => setBadgeId(null)}
           >
-            None
+            {t('crs.editor.none')}
           </button>
           {badges.map((badge) => (
             <BadgeChip
@@ -148,7 +150,7 @@ export function CourseEditor({
             onClick={onCreateBadge}
             className="rounded-full border border-dashed border-graphite px-2.5 py-[3px] text-[12px] text-ash transition-colors hover:border-smoke hover:text-mist"
           >
-            + New badge
+            {t('crs.editor.newBadge')}
           </button>
         </div>
       </FieldRow>

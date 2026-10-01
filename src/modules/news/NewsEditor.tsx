@@ -5,6 +5,7 @@ import { Modal } from '@/components/ui/Modal';
 import { TagInput } from '@/components/ui/TagInput';
 import type { NewsItem, NewsStage } from '@/lib/types';
 import { nowISO, uid } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 import { NEWS_STAGES, STAGE_LABEL } from './newsMeta';
 
 interface NewsDraft {
@@ -30,6 +31,7 @@ export function NewsEditor({
   initialStage?: NewsStage;
   onSave: (item: NewsItem) => void;
 }): JSX.Element {
+  const { t } = useLanguage();
   const [draft, setDraft] = useState<NewsDraft>(blank);
   const [touched, setTouched] = useState(false);
 
@@ -60,7 +62,7 @@ export function NewsEditor({
     };
     onSave({
       ...base,
-      title: draft.title.trim() || 'Untitled story',
+      title: draft.title.trim() || t('news.untitled'),
       content: draft.content,
       stage: draft.stage,
       tags: draft.tags,
@@ -73,35 +75,35 @@ export function NewsEditor({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title={item ? 'Edit story' : 'New story'}
-      description="Move it across the board as it goes from an idea to a published piece."
+      title={item ? t('news.editStory') : t('news.newStory')}
+      description={t('news.editor.description')}
       width="lg"
       footer={
         <>
-          <Button onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={() => onOpenChange(false)}>{t('news.cancel')}</Button>
           <Button variant="primary" onClick={submit}>
-            {item ? 'Save changes' : 'Create story'}
+            {item ? t('news.saveChanges') : t('news.createStory')}
           </Button>
         </>
       }
     >
       <FieldRow>
-        <Label htmlFor="news-title">Title</Label>
+        <Label htmlFor="news-title">{t('news.field.title')}</Label>
         <TextInput
           id="news-title"
           autoFocus
           value={draft.title}
           onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-          placeholder="Headline or working title"
+          placeholder={t('news.field.titlePlaceholder')}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && e.metaKey) submit();
           }}
         />
-        {touched && !valid ? <p className="mt-1.5 text-[12px] text-coral">A title is required.</p> : null}
+        {touched && !valid ? <p className="mt-1.5 text-[12px] text-coral">{t('news.field.titleRequired')}</p> : null}
       </FieldRow>
 
       <FieldRow>
-        <Label htmlFor="news-stage">Stage</Label>
+        <Label htmlFor="news-stage">{t('news.field.stage')}</Label>
         <Select
           id="news-stage"
           value={draft.stage}
@@ -116,18 +118,18 @@ export function NewsEditor({
       </FieldRow>
 
       <FieldRow>
-        <Label htmlFor="news-content">Body</Label>
+        <Label htmlFor="news-content">{t('news.field.body')}</Label>
         <TextArea
           id="news-content"
           rows={8}
           value={draft.content}
           onChange={(e) => setDraft({ ...draft, content: e.target.value })}
-          placeholder="Notes, sources, the draft itself — whatever this stage needs."
+          placeholder={t('news.field.bodyPlaceholder')}
         />
       </FieldRow>
 
       <FieldRow>
-        <Label>Tags</Label>
+        <Label>{t('news.field.tags')}</Label>
         <TagInput tags={draft.tags} onChange={(tags) => setDraft({ ...draft, tags })} />
       </FieldRow>
     </Modal>

@@ -2,6 +2,8 @@ import { HeartPulse } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/BadgeChip';
 import type { Medicine, TreatmentPlan } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
+import { prescriberLabel } from './medsMeta';
 
 export function TreatmentPlanCard({
   plan,
@@ -12,12 +14,13 @@ export function TreatmentPlanCard({
   medicines: Medicine[];
   onClick: () => void;
 }): JSX.Element {
+  const { t } = useLanguage();
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        'flex w-full flex-col gap-2.5 rounded-[12px] bg-[rgb(var(--tint-rgb)/0.022)] p-4 text-left shadow-[inset_0_0_0_1px_var(--color-graphite)]',
+        'flex w-full flex-col gap-2.5 rounded-[12px] bg-[rgb(var(--tint-rgb)/0.022)] p-4 text-start shadow-[inset_0_0_0_1px_var(--color-graphite)]',
         'transition-[background-color,box-shadow] duration-150 hover:bg-[rgb(var(--tint-rgb)/0.04)] hover:shadow-[inset_0_0_0_1px_var(--color-smoke)]',
         plan.status === 'completed' && 'opacity-55',
       )}
@@ -27,15 +30,17 @@ export function TreatmentPlanCard({
           <HeartPulse size={16} strokeWidth={1.8} />
         </span>
         <StatusBadge tone={plan.status === 'active' ? 'success' : 'neutral'}>
-          {plan.status === 'active' ? 'Active' : 'Completed'}
+          {plan.status === 'active' ? t('med.plan.active') : t('med.plan.completed')}
         </StatusBadge>
       </div>
       <div>
         <p className="truncate text-[14px] text-paper">{plan.condition}</p>
-        <p className="mt-0.5 truncate text-[11.5px] text-ash">{plan.prescriber}</p>
+        <p className="mt-0.5 truncate text-[11.5px] text-ash">{prescriberLabel(plan.prescriber)}</p>
       </div>
       <p className="text-[11px] text-ash">
-        {medicines.length} medicine{medicines.length === 1 ? '' : 's'}
+        {medicines.length === 1
+          ? t('med.plan.medicineCount.one', { count: medicines.length })
+          : t('med.plan.medicineCount.many', { count: medicines.length })}
       </p>
     </button>
   );

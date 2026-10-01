@@ -1,8 +1,10 @@
 import { Copy, Printer } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/Button';
 import type { Workspace } from '@/lib/types';
-import { cn, formatDate } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { fmtDate } from '@/modules/docs/localTime';
+import { useLanguage } from '@/state/languageStore';
 import { useTeam } from '@/state/teamStore';
 import { useWorkspace } from '@/state/workspaceStore';
 import { MenuButton } from '@/components/shell/MenuButton';
@@ -10,12 +12,27 @@ import { ScrollIndex } from '@/components/motion/ScrollIndex';
 
 type RangeId = '7' | '30' | '90' | 'all';
 
-const RANGES: { id: RangeId; label: string; days: number | null }[] = [
-  { id: '7', label: '7 days', days: 7 },
-  { id: '30', label: '30 days', days: 30 },
-  { id: '90', label: '90 days', days: 90 },
-  { id: 'all', label: 'All time', days: null },
+const RANGES: { id: RangeId; days: number | null }[] = [
+  { id: '7', days: 7 },
+  { id: '30', days: 30 },
+  { id: '90', days: 90 },
+  { id: 'all', days: null },
 ];
+
+/** Task statuses with their own phrase; anything else falls back to the raw id. */
+const KNOWN_STATUSES = new Set(['backlog', 'in_progress', 'completed', 'archived']);
+
+/** Render a translated phrase, putting `slot` where its `{count}` placeholder sits. */
+function withSlot(text: string, slot: ReactNode): JSX.Element {
+  const [before = '', after = ''] = text.split('{count}');
+  return (
+    <>
+      {before}
+      {slot}
+      {after}
+    </>
+  );
+}
 
 function within(iso: string, days: number | null): boolean {
   if (days === null) return true;
@@ -33,6 +50,7 @@ export function ReportingModule(): JSX.Element {
   const { activeTeam, members } = useTeam();
   const [range, setRange] = useState<RangeId>('30');
   const [copied, setCopied] = useState(false);
+  const { t } = useLanguage();
 
   const days = RANGES.find((r) => r.id === range)?.days ?? 30;
 
@@ -77,26 +95,39 @@ export function ReportingModule(): JSX.Element {
     };
   }, [workspace, days]);
 
-  const rangeLabel = RANGES.find((r) => r.id === range)?.label ?? '30 days';
+  const rangeLabel = t(`rep.range.${range}`);
+  const rangeSpan = t(`rep.span.${range}`);
   const memberCount = members.length || 1;
 
   const asText = useMemo(() => {
     const lines = [
-      `Activity report — ${activeTeam?.name ?? 'Personal'} — ${rangeLabel} (generated ${formatDate(new Date().toISOString())})`,
+      t('rep.text.header', {
+        team: activeTeam?.name ?? t('rep.text.personal'),
+        range: rangeLabel,
+        date: fmtDate(new Date().toISOString()),
+      }),
       '',
-      `Team: ${members.length} member${members.length === 1 ? '' : 's'}`,
-      `Tasks completed: ${report.doneInRange}`,
-      `Tasks overdue: ${report.overdue}`,
-      `Content produced: ${report.produced} item${report.produced === 1 ? '' : 's'} (${report.notesCreated} notes, ${report.articlesCreated} articles, ${report.docsCreated} docs)`,
-      `New tasks logged: ${report.todosCreated}`,
-      `New courses added: ${report.coursesCreated}`,
-      `Average course progress: ${Math.round(report.avgCourseProgress)}%`,
+      t(members.length === 1 ? 'rep.text.team.one' : 'rep.text.team.other', { count: members.length }),
+      t('rep.text.done', { count: report.doneInRange }),
+      t('rep.text.overdue', { count: report.overdue }),
+      t(report.produced === 1 ? 'rep.text.produced.one' : 'rep.text.produced.other', {
+        count: report.produced,
+        notes: report.notesCreated,
+        articles: report.articlesCreated,
+        docs: report.docsCreated,
+      }),
+      t('rep.text.newTasks', { count: report.todosCreated }),
+      t('rep.text.newCourses', { count: report.coursesCreated }),
+      t('rep.text.avgProgress', { pct: Math.round(report.avgCourseProgress) }),
       '',
-      'Task status breakdown:',
-      ...Object.entries(report.byStatus).map(([status, count]) => `  ${status.replace('_', ' ')}: ${count}`),
+      t('rep.text.breakdown'),
+      ...Object.entries(report.byStatus).map(
+        ([status, count]) =>
+          `  ${KNOWN_STATUSES.has(status) ? t(`rep.text.status.${status}`) : status.replace('_', ' ')}: ${count}`,
+      ),
     ];
     return lines.join('\n');
-  }, [activeTeam, rangeLabel, members.length, report]);
+  }, [activeTeam, rangeLabel, members.length, report, t]);
 
   const copyReport = async (): Promise<void> => {
     try {
@@ -109,10 +140,10 @@ export function ReportingModule(): JSX.Element {
   };
 
   const statusRows: { id: keyof Workspace | string; label: string; count: number }[] = [
-    { id: 'backlog', label: 'Backlog', count: report.byStatus.backlog ?? 0 },
-    { id: 'in_progress', label: 'In progress', count: report.byStatus.in_progress ?? 0 },
-    { id: 'completed', label: 'Completed', count: report.byStatus.completed ?? 0 },
-    { id: 'archived', label: 'Archived', count: report.byStatus.archived ?? 0 },
+    { id: 'backlog', label: t('rep.status.backlog'), count: report.byStatus.backlog ?? 0 },
+    { id: 'in_progress', label: t('rep.status.in_progress'), count: report.byStatus.in_progress ?? 0 },
+    { id: 'completed', label: t('rep.status.completed'), count: report.byStatus.completed ?? 0 },
+    { id: 'archived', label: t('rep.status.archived'), count: report.byStatus.archived ?? 0 },
   ];
   const maxStatus = Math.max(1, ...statusRows.map((r) => r.count));
 
@@ -122,16 +153,18 @@ export function ReportingModule(): JSX.Element {
         <MenuButton className="md:hidden" />
         <div className="min-w-0 flex-1 basis-[190px]">
           <h1 className="truncate text-[17px] font-medium leading-tight tracking-[-0.016em] text-paper md:text-[19px]">
-            Reporting
+            {t('nav.reporting')}
           </h1>
-          <p className="mt-1 text-[12.5px] text-ash">A written summary for {activeTeam?.name ?? 'your workspace'} — {rangeLabel}.</p>
+          <p className="mt-1 text-[12.5px] text-ash">
+            {t('rep.subtitle', { team: activeTeam?.name ?? t('rep.yourWorkspace'), range: rangeLabel })}
+          </p>
         </div>
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        <div className="ms-auto flex shrink-0 items-center gap-2">
           <Button onClick={() => void copyReport()} icon={<Copy size={13.5} strokeWidth={1.9} />}>
-            {copied ? 'Copied' : 'Copy as text'}
+            {copied ? t('rep.copied') : t('rep.copy')}
           </Button>
           <Button onClick={() => window.print()} icon={<Printer size={13.5} strokeWidth={1.9} />}>
-            Print
+            {t('rep.print')}
           </Button>
         </div>
       </header>
@@ -149,7 +182,7 @@ export function ReportingModule(): JSX.Element {
                 range === r.id ? 'bg-obsidian text-paper shadow-[inset_0_0_0_1px_rgb(var(--tint-rgb) / 0.06)]' : 'text-ash hover:text-mist',
               )}
             >
-              {r.label}
+              {t(`rep.range.${r.id}`)}
             </button>
           ))}
         </div>
@@ -159,29 +192,35 @@ export function ReportingModule(): JSX.Element {
         <ScrollIndex />
         <article className="mx-auto max-w-[720px] rounded-[10px] bg-[rgb(var(--tint-rgb)/0.02)] p-6 shadow-[inset_0_0_0_1px_var(--color-graphite)] md:p-8">
           <p className="mono text-[10.5px] uppercase tracking-[0.08em] text-ash">
-            {activeTeam?.name ?? 'Personal workspace'} · {formatDate(new Date().toISOString())}
+            {activeTeam?.name ?? t('rep.personalWorkspace')} · {fmtDate(new Date().toISOString())}
           </p>
           <h2 className="mt-1.5 text-[21px] font-medium tracking-[-0.017em] text-paper">
-            Activity report — {rangeLabel}
+            {t('rep.title', { range: rangeLabel })}
           </h2>
 
           <p className="mt-4 text-[13.5px] leading-[1.75] text-mist">
-            Over the last {rangeLabel.toLowerCase()}, {memberCount} member{memberCount === 1 ? '' : 's'}{' '}
-            completed <strong className="text-paper">{report.doneInRange}</strong> task
-            {report.doneInRange === 1 ? '' : 's'} and produced{' '}
-            <strong className="text-paper">{report.produced}</strong> new piece{report.produced === 1 ? '' : 's'} of
-            content across notes, articles and documents.{' '}
-            {report.overdue > 0 ? (
-              <>
-                <strong className="text-coral">{report.overdue}</strong> task{report.overdue === 1 ? ' is' : 's are'} currently overdue and worth a look.
-              </>
-            ) : (
-              'Nothing is currently overdue.'
-            )}
+            {t(memberCount === 1 ? 'rep.para.members.one' : 'rep.para.members.other', {
+              range: rangeSpan,
+              count: memberCount,
+            })}{' '}
+            {withSlot(
+              t(report.doneInRange === 1 ? 'rep.para.tasks.one' : 'rep.para.tasks.other'),
+              <strong className="text-paper">{report.doneInRange}</strong>,
+            )}{' '}
+            {withSlot(
+              t(report.produced === 1 ? 'rep.para.produced.one' : 'rep.para.produced.other'),
+              <strong className="text-paper">{report.produced}</strong>,
+            )}{' '}
+            {report.overdue > 0
+              ? withSlot(
+                  t(report.overdue === 1 ? 'rep.para.overdue.one' : 'rep.para.overdue.other'),
+                  <strong className="text-coral">{report.overdue}</strong>,
+                )
+              : t('rep.para.noOverdue')}
           </p>
 
           <div className="mt-6 border-t border-graphite pt-5">
-            <h3 className="text-[12px] font-medium uppercase tracking-[0.07em] text-ash">Task status</h3>
+            <h3 className="text-[12px] font-medium uppercase tracking-[0.07em] text-ash">{t('rep.taskStatus')}</h3>
             <div className="mt-3 space-y-2">
               {statusRows.map((row) => (
                 <div key={row.id} className="flex items-center gap-3">
@@ -192,7 +231,7 @@ export function ReportingModule(): JSX.Element {
                       style={{ width: `${Math.round((row.count / maxStatus) * 100)}%` }}
                     />
                   </span>
-                  <span className="num w-6 shrink-0 text-right text-[12.5px] text-ash">{row.count}</span>
+                  <span className="num w-6 shrink-0 text-end text-[12.5px] text-ash">{row.count}</span>
                 </div>
               ))}
             </div>
@@ -201,37 +240,37 @@ export function ReportingModule(): JSX.Element {
           <div className="mt-6 grid grid-cols-2 gap-4 border-t border-graphite pt-5 sm:grid-cols-3">
             <div>
               <p className="num text-[20px] text-paper">{report.notesCreated}</p>
-              <p className="text-[11.5px] text-ash">notes added</p>
+              <p className="text-[11.5px] text-ash">{t('rep.kpi.notes')}</p>
             </div>
             <div>
               <p className="num text-[20px] text-paper">{report.articlesCreated}</p>
-              <p className="text-[11.5px] text-ash">articles added</p>
+              <p className="text-[11.5px] text-ash">{t('rep.kpi.articles')}</p>
             </div>
             <div>
               <p className="num text-[20px] text-paper">{report.docsCreated}</p>
-              <p className="text-[11.5px] text-ash">docs added</p>
+              <p className="text-[11.5px] text-ash">{t('rep.kpi.docs')}</p>
             </div>
             <div>
               <p className="num text-[20px] text-paper">{report.todosCreated}</p>
-              <p className="text-[11.5px] text-ash">tasks logged</p>
+              <p className="text-[11.5px] text-ash">{t('rep.kpi.tasks')}</p>
             </div>
             <div>
               <p className="num text-[20px] text-paper">{report.coursesCreated}</p>
-              <p className="text-[11.5px] text-ash">courses added</p>
+              <p className="text-[11.5px] text-ash">{t('rep.kpi.courses')}</p>
             </div>
             <div>
               <p className="num text-[20px] text-paper">{Math.round(report.avgCourseProgress)}%</p>
-              <p className="text-[11.5px] text-ash">avg. course progress</p>
+              <p className="text-[11.5px] text-ash">{t('rep.kpi.avgProgress')}</p>
             </div>
           </div>
 
           <div className="mt-6 border-t border-graphite pt-5">
-            <h3 className="text-[12px] font-medium uppercase tracking-[0.07em] text-ash">Team</h3>
+            <h3 className="text-[12px] font-medium uppercase tracking-[0.07em] text-ash">{t('rep.team')}</h3>
             <p className="mt-2 text-[12.5px] leading-[1.7] text-mist">
               {members.length === 0
-                ? 'No members yet.'
+                ? t('rep.noMembers')
                 : members
-                    .map((m) => m.username || m.email || 'Member')
+                    .map((m) => m.username || m.email || t('rep.member'))
                     .join(', ')}
             </p>
           </div>

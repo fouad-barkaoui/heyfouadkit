@@ -18,7 +18,8 @@ import {
   writeLocalAvatar,
 } from '@/data/avatar';
 import { cloudConfigured, fetchEnabledProviders, getSupabase } from '@/data/supabaseClient';
-import { parseOAuthRedirectError, rememberReturnRoute, takeReturnRoute } from './oauthReturn';
+import { friendlyOAuthError, parseOAuthRedirectError, rememberReturnRoute, takeReturnRoute } from './oauthReturn';
+import { translate } from './languageStore';
 
 export type AuthResult =
   | { ok: true; message?: string; signedIn?: boolean }
@@ -33,7 +34,9 @@ export type GoogleStatus = 'checking' | 'on' | 'off' | 'unknown';
  * Read them once, before the router or the Supabase client look at the
  * address bar, clean them out, and keep the message for the sign-in screen.
  */
-const initialOAuthError: string | null = (() => {
+/* The raw code and description are kept (not the sentence) so the message is
+ * worded in the person's language once the language provider has started. */
+const initialOAuthError: { code: string; description: string } | null = (() => {
   if (typeof window === 'undefined') return null;
   const parsed = parseOAuthRedirectError(window.location.href);
   if (!parsed) return null;
@@ -43,7 +46,7 @@ const initialOAuthError: string | null = (() => {
   } catch {
     /* sandboxed frame — the stale parameters are harmless */
   }
-  return parsed.message;
+  return { code: parsed.code, description: parsed.description };
 })();
 
 interface AuthContextValue {
@@ -110,15 +113,15 @@ export function getDisplayName(user: User | null): string {
     const v = typeof meta[k] === 'string' ? (meta[k] as string).trim() : '';
     if (v) return v;
   }
-  return user.email ? (user.email.split('@')[0] ?? user.email) : 'there';
+  return user.email ? (user.email.split('@')[0] ?? user.email) : translate('core.auth.nameFallback');
 }
 
 const USERNAME_PATTERN = /^[a-zA-Z0-9 _-]+$/;
 
 function validateUsername(raw: string): string | null {
   const trimmed = raw.trim();
-  if (trimmed.length < 2 || trimmed.length > 24) return 'Usernames are 2–24 characters.';
-  if (!USERNAME_PATTERN.test(trimmed)) return 'Use only letters, numbers, spaces, - and _.';
+  if (trimmed.length < 2 || trimmed.length > 24) return translate('core.auth.usernameLength');
+  if (!USERNAME_PATTERN.test(trimmed)) return translate('core.auth.usernameChars');
   return null;
 }
 
@@ -144,12 +147,12 @@ async function withRetry<T extends { error: { message: string } | null }>(run: (
 /** Supabase phrases these tersely; the UI should say what to do next. */
 function friendly(message: string): string {
   const m = message.toLowerCase();
-  if (m.includes('invalid login credentials')) return 'That email and password combination does not match an account.';
-  if (m.includes('user already registered')) return 'An account with that email already exists — sign in instead.';
-  if (m.includes('password should be')) return 'Use a password of at least 6 characters.';
-  if (m.includes('email not confirmed')) return 'Confirm the email we sent you, then sign in.';
-  if (m.includes('rate limit') || m.includes('too many')) return 'Too many attempts. Wait a minute and try again.';
-  if (m.includes('failed to fetch') || m.includes('network')) return 'No connection to the cloud right now — your work stays saved on this device.';
+  if (m.includes('invalid login credentials')) return translate('core.auth.badCredentials');
+  if (m.includes('user already registered')) return translate('core.auth.alreadyRegistered');
+  if (m.includes('password should be')) return translate('core.auth.passwordMin6');
+  if (m.includes('email not confirmed')) return translate('core.auth.emailNotConfirmed');
+  if (m.includes('rate limit') || m.includes('too many')) return translate('core.auth.rateLimit');
+  if (m.includes('failed to fetch') || m.includes('network')) return translate('core.auth.offline');
   return message;
 }
 
@@ -215,7 +218,9 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
 
   /* ── Google ──────────────────────────────────────────────────────── */
   const [googleStatus, setGoogleStatus] = useState<GoogleStatus>(cloudConfigured ? 'checking' : 'off');
-  const [oauthError, setOAuthError] = useState<string | null>(initialOAuthError);
+  const [oauthError, setOAuthError] = useState<string | null>(() =>
+    initialOAuthError ? friendlyOAuthError(initialOAuthError.code, initialOAuthError.description) : null,
+  );
   const clearOAuthError = useCallback(() => setOAuthError(null), []);
 
   // Ask Supabase whether Google is switched on, so the button only appears
@@ -232,7 +237,7 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
 
   const signIn = useCallback(
     async (email: string, password: string): Promise<AuthResult> => {
-      if (!supabase) return { ok: false, error: 'This build is not connected to a cloud project.' };
+      if (!supabase) return { ok: false, error: translate('core.notConfigured') };
       const { error } = await withRetry(() => supabase.auth.signInWithPassword({ email: email.trim(), password }));
       return error ? { ok: false, error: friendly(error.message) } : { ok: true };
     },
@@ -241,7 +246,7 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
 
   const signUp = useCallback(
     async (email: string, password: string, username?: string): Promise<AuthResult> => {
-      if (!supabase) return { ok: false, error: 'This build is not connected to a cloud project.' };
+      if (!supabase) return { ok: false, error: translate('core.notConfigured') };
       const trimmedUsername = username?.trim();
       if (trimmedUsername) {
         const problem = validateUsername(trimmedUsername);
@@ -259,10 +264,10 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
         return {
           ok: true,
           signedIn: false,
-          message: 'Account created. Check your inbox to confirm the address, then sign in.',
+          message: translate('core.auth.accountCreatedConfirm'),
         };
       }
-      return { ok: true, signedIn: true, message: 'Account created — you are signed in.' };
+      return { ok: true, signedIn: true, message: translate('core.auth.accountCreatedSignedIn') };
     },
     [supabase],
   );
@@ -271,12 +276,12 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
    * switched on in the Supabase project's Auth settings, and this origin to
    * be on its Redirect URLs allow list. */
   const signInWithGoogle = useCallback(async (): Promise<AuthResult> => {
-    if (!supabase) return { ok: false, error: 'This build is not connected to a cloud project.' };
+    if (!supabase) return { ok: false, error: translate('core.notConfigured') };
     if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-      return { ok: false, error: 'You are offline. Connect to the internet to sign in with Google.' };
+      return { ok: false, error: translate('core.auth.googleOffline') };
     }
     if (googleStatus === 'off') {
-      return { ok: false, error: 'Google sign-in is not switched on for this app yet. Use your email and password for now.' };
+      return { ok: false, error: translate('core.auth.googleOff') };
     }
     rememberReturnRoute(window.location.hash);
     const { error } = await supabase.auth.signInWithOAuth({
@@ -302,13 +307,13 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
 
   const sendReset = useCallback(
     async (email: string): Promise<AuthResult> => {
-      if (!supabase) return { ok: false, error: 'This build is not connected to a cloud project.' };
+      if (!supabase) return { ok: false, error: translate('core.notConfigured') };
       const { error } = await withRetry(() =>
         supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin }),
       );
       return error
         ? { ok: false, error: friendly(error.message) }
-        : { ok: true, message: 'If that address has an account, a reset link is on its way.' };
+        : { ok: true, message: translate('core.auth.resetSent') };
     },
     [supabase],
   );
@@ -316,12 +321,12 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
   /** Set a new password for the signed-in account, without leaving the app. */
   const changePassword = useCallback(
     async (next: string): Promise<AuthResult> => {
-      if (!supabase) return { ok: false, error: 'This build is not connected to a cloud project.' };
-      if (next.length < 8) return { ok: false, error: 'Use a password of at least 8 characters.' };
+      if (!supabase) return { ok: false, error: translate('core.notConfigured') };
+      if (next.length < 8) return { ok: false, error: translate('core.auth.passwordMin8') };
       const { error } = await supabase.auth.updateUser({ password: next });
       return error
         ? { ok: false, error: friendly(error.message) }
-        : { ok: true, message: 'Password updated. Use it the next time you sign in.' };
+        : { ok: true, message: translate('core.auth.passwordUpdated') };
     },
     [supabase],
   );
@@ -329,11 +334,11 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
   /** Set or change the display name shown instead of the account's email. */
   const updateUsername = useCallback(
     async (next: string): Promise<AuthResult> => {
-      if (!supabase) return { ok: false, error: 'This build is not connected to a cloud project.' };
+      if (!supabase) return { ok: false, error: translate('core.notConfigured') };
       const problem = validateUsername(next);
       if (problem) return { ok: false, error: problem };
       const { error } = await supabase.auth.updateUser({ data: { username: next.trim() } });
-      return error ? { ok: false, error: friendly(error.message) } : { ok: true, message: 'Username updated.' };
+      return error ? { ok: false, error: friendly(error.message) } : { ok: true, message: translate('core.auth.usernameUpdated') };
     },
     [supabase],
   );
@@ -362,12 +367,12 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
       if (!current || !supabase) {
         if (!image) {
           writeLocalAvatar(null);
-          return { ok: true, message: 'Picture removed.' };
+          return { ok: true, message: translate('core.auth.pictureRemoved') };
         }
         const saved = writeLocalAvatar(await blobToDataUrl(image));
         return saved
-          ? { ok: true, message: 'Picture saved on this device.' }
-          : { ok: false, error: 'This browser would not let us save the picture (storage is full or blocked).' };
+          ? { ok: true, message: translate('core.auth.pictureSavedDevice') }
+          : { ok: false, error: translate('core.auth.pictureBlocked') };
       }
       try {
         // Written to both keys: `avatar_custom` is the one Google sign-ins
@@ -377,13 +382,13 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
           if (error) return { ok: false, error: friendly(error.message) };
           if (data.user) setSession((s) => (s ? { ...s, user: data.user } : s));
           void pruneCloudAvatars(current.id, null);
-          return { ok: true, message: 'Picture removed.' };
+          return { ok: true, message: translate('core.auth.pictureRemoved') };
         }
         const url = await uploadCloudAvatar(current.id, image);
         const { data, error } = await supabase.auth.updateUser({ data: { avatar_url: url, avatar_custom: url } });
         if (error) return { ok: false, error: friendly(error.message) };
         if (data.user) setSession((s) => (s ? { ...s, user: data.user } : s));
-        return { ok: true, message: 'Profile picture updated.' };
+        return { ok: true, message: translate('core.auth.pictureUpdated') };
       } catch (err) {
         return { ok: false, error: friendly(err instanceof Error ? err.message : String(err)) };
       }

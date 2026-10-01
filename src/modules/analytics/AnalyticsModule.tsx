@@ -11,7 +11,9 @@ import { ModuleLayout } from '@/components/shell/ModuleLayout';
 import { Timeline, type TimelineEntry } from '@/components/ui/Timeline';
 import { ProgressRing } from '@/components/ui/ProgressRing';
 import type { Workspace } from '@/lib/types';
-import { formatDateTime, relativeTime, wordCount } from '@/lib/utils';
+import { wordCount } from '@/lib/utils';
+import { fmtDateTime, relTime } from '@/modules/docs/localTime';
+import { useLanguage } from '@/state/languageStore';
 import { useWorkspace } from '@/state/workspaceStore';
 
 const DAY = 86_400_000;
@@ -31,6 +33,7 @@ function collectTimestamps(ws: Workspace): string[] {
 
 export function AnalyticsModule(): JSX.Element {
   const { workspace } = useWorkspace();
+  const { t, locale } = useLanguage();
 
   const stats = useMemo(() => {
     const doneTasks = workspace.todos.filter((t) => t.status === 'completed').length;
@@ -95,34 +98,34 @@ export function AnalyticsModule(): JSX.Element {
     return Array.from({ length: 30 }, (_, i) => {
       const day = new Date(today.getTime() - (29 - i) * DAY);
       return {
-        label: day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        label: day.toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
         value: counts.get(day.toISOString().slice(0, 10)) ?? 0,
       };
     });
-  }, [workspace]);
+  }, [workspace, locale]);
 
   const mix = useMemo<BarDatum[]>(
     () => [
       {
-        label: 'Notes',
+        label: t('an.mix.notes'),
         value: workspace.notes.length,
         color: CATEGORICAL[0],
-        hint: `${workspace.notes.reduce((s, n) => s + wordCount(n.content), 0)} words written`,
+        hint: t('an.mix.wordsWritten', { count: workspace.notes.reduce((s, n) => s + wordCount(n.content), 0) }),
       },
       {
-        label: 'Articles & media',
+        label: t('an.mix.articles'),
         value: workspace.articles.length,
         color: CATEGORICAL[1],
-        hint: `${workspace.articles.filter((a) => a.kind !== 'written').length} uploaded files`,
+        hint: t('an.detail.uploaded', { count: workspace.articles.filter((a) => a.kind !== 'written').length }),
       },
       {
-        label: 'Documents',
+        label: t('an.mix.documents'),
         value: workspace.docs.length,
         color: CATEGORICAL[2],
-        hint: `${new Set(workspace.docs.map((d) => d.folder)).size} folders`,
+        hint: t('an.mix.folders', { count: new Set(workspace.docs.map((d) => d.folder)).size }),
       },
     ],
-    [workspace],
+    [workspace, t],
   );
 
   const tagBars = useMemo<BarDatum[]>(() => {
@@ -141,73 +144,75 @@ export function AnalyticsModule(): JSX.Element {
       [...workspace.courses]
         .sort((a, b) => b.progress - a.progress)
         .slice(0, 8)
-        .map((c) => ({ label: c.title, value: c.progress, hint: `Updated ${relativeTime(c.updatedAt)}` })),
-    [workspace.courses],
+        .map((c) => ({ label: c.title, value: c.progress, hint: t('an.courses.updated', { time: relTime(c.updatedAt) }) })),
+    [workspace.courses, t],
   );
 
   const recent = useMemo<TimelineEntry[]>(() => {
     const rows = [
-      ...workspace.notes.map((n) => ({ id: n.id, title: n.title, when: n.updatedAt, kind: 'Note' })),
-      ...workspace.articles.map((a) => ({ id: a.id, title: a.title, when: a.updatedAt, kind: 'Article' })),
-      ...workspace.docs.map((d) => ({ id: d.id, title: d.title, when: d.updatedAt, kind: 'Document' })),
-      ...workspace.todos.map((t) => ({ id: t.id, title: t.title, when: t.updatedAt, kind: 'Task' })),
+      ...workspace.notes.map((n) => ({ id: n.id, title: n.title, when: n.updatedAt, kind: 'Note', kindKey: 'an.kind.note' })),
+      ...workspace.articles.map((a) => ({ id: a.id, title: a.title, when: a.updatedAt, kind: 'Article', kindKey: 'an.kind.article' })),
+      ...workspace.docs.map((d) => ({ id: d.id, title: d.title, when: d.updatedAt, kind: 'Document', kindKey: 'an.kind.document' })),
+      ...workspace.todos.map((t) => ({ id: t.id, title: t.title, when: t.updatedAt, kind: 'Task', kindKey: 'an.kind.task' })),
     ]
       .sort((a, b) => new Date(b.when).getTime() - new Date(a.when).getTime())
       .slice(0, 6);
 
     return rows.map((row, i) => ({
       id: `${row.kind}-${row.id}`,
-      timestamp: formatDateTime(row.when),
-      title: row.title || 'Untitled',
-      description: row.kind,
+      timestamp: fmtDateTime(row.when),
+      title: row.title || t('an.untitled'),
+      description: t(row.kindKey),
       state: i === 0 ? 'active' : 'done',
     }));
-  }, [workspace]);
+  }, [workspace, t]);
 
   const gridRef = useStagger([workspace]);
 
   return (
     <ModuleLayout
-      panelTitle="Insight"
+      panelTitle={t('nav.insight')}
       panelSearch={undefined}
       panel={
         <div className="space-y-3">
           <div className="rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
-            <p className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">Task completion</p>
+            <p className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('an.taskCompletion')}</p>
             <div className="flex items-center gap-3">
-              <ProgressRing value={stats.completion} size={52} label="Task completion rate" />
+              <ProgressRing value={stats.completion} size={52} label={t('an.taskCompletionRate')} />
               <div>
                 <p className="num text-[13px] text-paper">
                   {stats.doneTasks}
                   <span className="text-ash"> / {stats.tasks}</span>
                 </p>
-                <p className="text-[11.5px] text-ash">tasks done</p>
+                <p className="text-[11.5px] text-ash">{t('an.tasksDone')}</p>
               </div>
             </div>
           </div>
 
           <div className="rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
-            <p className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">Course progress</p>
+            <p className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('an.courseProgress')}</p>
             <div className="flex items-center gap-3">
-              <ProgressRing value={stats.avgProgress} size={52} color="#12a3b0" label="Average course progress" />
+              <ProgressRing value={stats.avgProgress} size={52} color="#12a3b0" label={t('an.avgCourseProgress')} />
               <div>
                 <p className="num text-[13px] text-paper">{stats.courses}</p>
-                <p className="text-[11.5px] text-ash">courses tracked</p>
+                <p className="text-[11.5px] text-ash">{t('an.coursesTracked')}</p>
               </div>
             </div>
           </div>
 
           <div className="rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
-            <p className="mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">Latest activity</p>
+            <p className="mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('an.latestActivity')}</p>
             <Timeline entries={recent.slice(0, 4)} />
           </div>
         </div>
       }
-      title="Analytics"
+      title={t('nav.analytics')}
       subtitle={
         <span className="num">
-          {stats.notes + stats.tasks + stats.articles + stats.courses + stats.docs} records ·{' '}
-          {stats.words.toLocaleString('en-US')} words written
+          {t('an.subtitle', {
+            records: stats.notes + stats.tasks + stats.articles + stats.courses + stats.docs,
+            words: stats.words.toLocaleString(locale),
+          })}
         </span>
       }
       detailOpenOnMobile
@@ -216,46 +221,46 @@ export function AnalyticsModule(): JSX.Element {
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
           <StatTile
             icon={<NotebookPen size={14} strokeWidth={1.7} />}
-            label="Notes"
+            label={t('an.stat.notes')}
             value={stats.notes}
-            detail={`${stats.words.toLocaleString('en-US')} words across the workspace`}
+            detail={t('an.detail.words', { words: stats.words.toLocaleString(locale) })}
           />
           <StatTile
             icon={<ListChecks size={14} strokeWidth={1.7} />}
-            label="Tasks"
+            label={t('an.stat.tasks')}
             value={stats.tasks}
-            detail={`${stats.doneTasks} completed · ${Math.round(stats.completion)}% rate`}
+            detail={t('an.detail.tasks', { done: stats.doneTasks, rate: Math.round(stats.completion) })}
           />
           <StatTile
             icon={<FileText size={14} strokeWidth={1.7} />}
-            label="Articles"
+            label={t('an.stat.articles')}
             value={stats.articles}
-            detail={`${workspace.articles.filter((a) => a.kind !== 'written').length} uploaded files`}
+            detail={t('an.detail.uploaded', { count: workspace.articles.filter((a) => a.kind !== 'written').length })}
           />
           <StatTile
             icon={<GraduationCap size={14} strokeWidth={1.7} />}
-            label="Courses"
+            label={t('an.stat.courses')}
             value={stats.courses}
-            detail={`${Math.round(stats.avgProgress)}% average progress`}
+            detail={t('an.detail.avgProgress', { pct: Math.round(stats.avgProgress) })}
           />
           <StatTile
             icon={<BookMarked size={14} strokeWidth={1.7} />}
-            label="Vaulted"
+            label={t('an.stat.vaulted')}
             value={stats.starred}
-            detail="items marked as interesting"
+            detail={t('an.detail.starred')}
           />
         </div>
 
         <div data-stagger>
           <ChartFrame
-            title="Activity — last 18 weeks"
-            caption="One cell per day; darker means more records created or edited."
+            title={t('an.heat.title')}
+            caption={t('an.heat.caption')}
             table={{
-              columns: ['Date', 'Items'],
+              columns: [t('an.col.date'), t('an.col.items')],
               rows: heat
                 .filter((c) => c.count > 0)
                 .slice(-40)
-                .map((c) => [new Date(c.date).toLocaleDateString('en-US'), c.count]),
+                .map((c) => [new Date(c.date).toLocaleDateString(locale), c.count]),
             }}
           >
             <ActivityHeatmap cells={heat} weeks={HEAT_WEEKS} />
@@ -264,40 +269,40 @@ export function AnalyticsModule(): JSX.Element {
 
         <div data-stagger>
           <ChartFrame
-            title="Items touched per day — last 30 days"
-            caption="Every create or edit across all modules."
-            table={{ columns: ['Day', 'Items'], rows: trend.map((p) => [p.label, p.value]) }}
+            title={t('an.trend.title')}
+            caption={t('an.trend.caption')}
+            table={{ columns: [t('an.col.day'), t('an.col.items')], rows: trend.map((p) => [p.label, p.value]) }}
           >
-            <AreaTrend data={trend} unit="items" />
+            <AreaTrend data={trend} unit={t('an.unit.items')} />
           </ChartFrame>
         </div>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div data-stagger>
             <ChartFrame
-              title="Library composition"
-              caption="How the written material is distributed."
+              title={t('an.mix.title')}
+              caption={t('an.mix.caption')}
               legend={
                 <>
-                  <LegendSwatch color={CATEGORICAL[0]} label="Notes" />
-                  <LegendSwatch color={CATEGORICAL[1]} label="Articles & media" />
-                  <LegendSwatch color={CATEGORICAL[2]} label="Documents" />
+                  <LegendSwatch color={CATEGORICAL[0]} label={t('an.mix.notes')} />
+                  <LegendSwatch color={CATEGORICAL[1]} label={t('an.mix.articles')} />
+                  <LegendSwatch color={CATEGORICAL[2]} label={t('an.mix.documents')} />
                 </>
               }
-              table={{ columns: ['Type', 'Count'], rows: mix.map((m) => [m.label, m.value]) }}
+              table={{ columns: [t('an.col.type'), t('an.col.count')], rows: mix.map((m) => [m.label, m.value]) }}
             >
-              <BarList data={mix} unit="records" />
+              <BarList data={mix} unit={t('an.unit.records')} />
             </ChartFrame>
           </div>
 
           <div data-stagger>
             <ChartFrame
-              title="Course progress"
-              caption="Percent complete, highest first."
-              table={{ columns: ['Course', '%'], rows: courseBars.map((c) => [c.label, c.value]) }}
+              title={t('an.courseProgress')}
+              caption={t('an.courses.caption')}
+              table={{ columns: [t('an.col.course'), '%'], rows: courseBars.map((c) => [c.label, c.value]) }}
             >
               {courseBars.length === 0 ? (
-                <p className="py-8 text-center text-[12.5px] text-ash">No courses tracked yet.</p>
+                <p className="py-8 text-center text-[12.5px] text-ash">{t('an.courses.empty')}</p>
               ) : (
                 <BarList data={courseBars} unit="%" />
               )}
@@ -307,14 +312,14 @@ export function AnalyticsModule(): JSX.Element {
 
         <div data-stagger>
           <ChartFrame
-            title="Most-used tags"
-            caption="Across notes and written articles."
-            table={{ columns: ['Tag', 'Uses'], rows: tagBars.map((t) => [t.label, t.value]) }}
+            title={t('an.tags.title')}
+            caption={t('an.tags.caption')}
+            table={{ columns: [t('an.col.tag'), t('an.col.uses')], rows: tagBars.map((t) => [t.label, t.value]) }}
           >
             {tagBars.length === 0 ? (
-              <p className="py-8 text-center text-[12.5px] text-ash">No tags yet.</p>
+              <p className="py-8 text-center text-[12.5px] text-ash">{t('an.tags.empty')}</p>
             ) : (
-              <BarList data={tagBars} unit="uses" />
+              <BarList data={tagBars} unit={t('an.unit.uses')} />
             )}
           </ChartFrame>
         </div>

@@ -3,8 +3,9 @@ import { StatusBadge } from '@/components/ui/BadgeChip';
 import { IconButton } from '@/components/ui/Button';
 import { ConfirmDelete } from '@/components/ui/ConfirmDelete';
 import type { NewsItem } from '@/lib/types';
-import { cn, excerpt, relativeTime } from '@/lib/utils';
-import { STAGE_LABEL, STAGE_TONE } from './newsMeta';
+import { cn, excerpt } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
+import { relativeTimeT, STAGE_LABEL, STAGE_TONE } from './newsMeta';
 
 export function NewsCard({
   item,
@@ -21,6 +22,7 @@ export function NewsCard({
   draggable?: boolean;
   compact?: boolean;
 }): JSX.Element {
+  const { t, locale } = useLanguage();
   return (
     <article
       data-stagger
@@ -54,12 +56,12 @@ export function NewsCard({
             {tag}
           </span>
         ))}
-        <span className="ml-auto text-[10.5px] text-ash/70">{relativeTime(item.updatedAt)}</span>
+        <span className="ml-auto text-[10.5px] text-ash/70">{relativeTimeT(item.updatedAt, locale)}</span>
       </div>
 
       <div className="absolute right-2 top-2 flex items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-within:opacity-100">
         <IconButton
-          label={item.isInteresting ? 'Remove from vault' : 'Add to vault'}
+          label={item.isInteresting ? t('news.removeFromVault') : t('news.addToVault')}
           className={cn('h-6 w-6', item.isInteresting && 'text-accent opacity-100')}
           onClick={(e) => {
             e.stopPropagation();
@@ -69,7 +71,7 @@ export function NewsCard({
           <Star size={12.5} strokeWidth={1.9} fill={item.isInteresting ? 'currentColor' : 'none'} />
         </IconButton>
         <IconButton
-          label="Edit story"
+          label={t('news.editStory')}
           className="h-6 w-6"
           onClick={(e) => {
             e.stopPropagation();
@@ -79,7 +81,7 @@ export function NewsCard({
           <Pencil size={12.5} strokeWidth={1.9} />
         </IconButton>
         <span onClick={(e) => e.stopPropagation()}>
-          <ConfirmDelete onConfirm={onDelete} label="Delete story" size={12.5} />
+          <ConfirmDelete onConfirm={onDelete} label={t('news.deleteStory')} size={12.5} />
         </span>
       </div>
     </article>

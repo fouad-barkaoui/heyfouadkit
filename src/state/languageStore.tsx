@@ -267,7 +267,10 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
 };
 
 /* Each area keeps its own phrases in src/i18n/<area>.ts; merge them all in. */
-const AREAS = import.meta.glob<{ default: Dictionary }>('../i18n/*.ts', { eager: true });
+// Test files and the type module are not dictionaries — never bundle them.
+const AREAS = import.meta.glob<{ default: Dictionary }>(['../i18n/*.ts', '!../i18n/*.test.ts', '!../i18n/types.ts'], {
+  eager: true,
+});
 for (const [path, mod] of Object.entries(AREAS)) {
   if (path.endsWith('/types.ts') || !mod.default) continue;
   Object.assign(TRANSLATIONS.en, mod.default.en);

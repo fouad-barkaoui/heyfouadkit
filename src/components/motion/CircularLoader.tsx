@@ -10,6 +10,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { MARK_SRC } from '@/components/ui/BrandMark';
+import { useI18n } from '@/components/ui/useI18n';
 
 /** Icons orbiting the mark — a cross-section of the app's own modules, not
  * generic decoration, so the loader still reads as "this app" mid-spin. */
@@ -41,6 +42,7 @@ export function CircularLoader({
 }): JSX.Element {
   const radius = size * 0.42;
   const count = ORBIT_ICONS.length;
+  const { t } = useI18n();
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 px-6 py-10" role="status" aria-live="polite">
@@ -76,7 +78,7 @@ export function CircularLoader({
 
       {title ? <p className="text-[14px] font-medium tracking-[-0.012em] text-paper">{title}</p> : null}
       {subtitle ? <p className="text-[12.5px] text-ash">{subtitle}</p> : null}
-      <span className="sr-only">Loading</span>
+      <span className="sr-only">{t('sh.loading')}</span>
     </div>
   );
 }

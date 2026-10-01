@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/Button';
 import { Label, TextInput } from '@/components/ui/Field';
 import { Modal } from '@/components/ui/Modal';
 import { MAX_TOTAL_CLOUD_BYTES, totalCloudBytes } from '@/data/attachments';
-import { cn, formatBytes } from '@/lib/utils';
+import { fmtBytes, rich, useI18n } from '@/components/ui/useI18n';
+import { cn } from '@/lib/utils';
 import { getDisplayName, useAuth } from '@/state/authStore';
 import { useTeam } from '@/state/teamStore';
 import { useUI } from '@/state/uiStore';
@@ -29,6 +30,7 @@ export function AccountPanel({
   const { workspace, syncState, syncMessage, recordCount, resetWorkspace, retrySync } = useWorkspace();
   const { activeTeam } = useTeam();
   const { setModule } = useUI();
+  const { t } = useI18n();
 
   const [busy, setBusy] = useState(false);
   const [newPassword, setNewPassword] = useState('');
@@ -53,7 +55,7 @@ export function AccountPanel({
     setBusy(false);
     if (result.ok) {
       setNewPassword('');
-      setPwFeedback({ tone: 'ok', text: result.message ?? 'Password updated.' });
+      setPwFeedback({ tone: 'ok', text: result.message ?? t('sh.account.pwUpdated') });
     } else {
       setPwFeedback({ tone: 'bad', text: result.error });
     }
@@ -65,7 +67,7 @@ export function AccountPanel({
     const result = await updateUsername(usernameField);
     setBusy(false);
     setUsernameFeedback(
-      result.ok ? { tone: 'ok', text: result.message ?? 'Username updated.' } : { tone: 'bad', text: result.error },
+      result.ok ? { tone: 'ok', text: result.message ?? t('sh.account.usernameUpdated') } : { tone: 'bad', text: result.error },
     );
   };
 
@@ -76,14 +78,16 @@ export function AccountPanel({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Account"
-      description="Your workspace lives in the cloud and updates live for everyone on your team."
-      footer={<Button onClick={() => onOpenChange(false)}>Close</Button>}
+      title={t('shell.account')}
+      description={t('sh.account.description')}
+      footer={<Button onClick={() => onOpenChange(false)}>{t('sh.close')}</Button>}
     >
       {!configured ? (
         <p className="text-[13px] leading-[1.6] text-ash">
-          This build has no cloud project configured. Set <span className="mono">VITE_SUPABASE_URL</span> and{' '}
-          <span className="mono">VITE_SUPABASE_ANON_KEY</span> and rebuild to enable accounts.
+          {rich(t('sh.account.noCloud'), {
+            url: <span className="mono">VITE_SUPABASE_URL</span>,
+            key: <span className="mono">VITE_SUPABASE_ANON_KEY</span>,
+          })}
         </p>
       ) : user ? (
         <div className="space-y-4">
@@ -103,24 +107,24 @@ export function AccountPanel({
                   <Cloud size={11} aria-hidden />
                 )}
                 {syncState === 'error'
-                  ? (syncMessage ?? 'Cloud sync failed')
+                  ? (syncMessage ?? t('sh.account.syncFailed'))
                   : syncState === 'syncing'
-                    ? 'Syncing…'
-                    : `Live in ${activeTeam?.name ?? 'your team'} · ${recordCount} records`}
+                    ? t('shell.syncing')
+                    : t('sh.account.liveIn', { team: activeTeam?.name ?? t('sh.account.yourTeam'), count: recordCount })}
               </p>
             </div>
             {syncState === 'error' ? (
               <Button className="ms-auto shrink-0" onClick={retrySync} icon={<RotateCcw size={12.5} strokeWidth={2} />}>
-                Retry
+                {t('sh.retry')}
               </Button>
             ) : null}
           </div>
 
           <div className="rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
             <div className="mb-2 flex items-center justify-between text-[11.5px] text-ash">
-              <span>Cloud storage</span>
+              <span>{t('sh.account.cloudStorage')}</span>
               <span className="num">
-                {formatBytes(usedCloudBytes)} / {formatBytes(MAX_TOTAL_CLOUD_BYTES)}
+                {fmtBytes(usedCloudBytes, t)} / {fmtBytes(MAX_TOTAL_CLOUD_BYTES, t)}
               </span>
             </div>
             <div className="h-[5px] overflow-hidden rounded-full bg-[rgb(var(--tint-rgb)/0.06)]">
@@ -139,18 +143,18 @@ export function AccountPanel({
             }}
             icon={<Users size={13.5} strokeWidth={1.9} />}
           >
-            Manage team & invites
+            {t('sh.account.manageTeam')}
           </Button>
 
           <div className="border-t border-graphite pt-4">
-            <Label htmlFor="account-username">Username</Label>
+            <Label htmlFor="account-username">{t('sh.account.username')}</Label>
             <div className="flex flex-wrap items-start gap-2">
               <TextInput
                 id="account-username"
                 autoComplete="off"
                 value={usernameField}
                 onChange={(e) => setUsernameField(e.target.value)}
-                placeholder="How should we address you?"
+                placeholder={t('sh.account.usernamePlaceholder')}
                 className="min-w-[180px] flex-1"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && usernameField) void submitUsername();
@@ -158,7 +162,7 @@ export function AccountPanel({
               />
               <Button disabled={busy || usernameField.trim().length < 2} onClick={() => void submitUsername()}>
                 {busy ? <Loader2 size={13} className="animate-spin" /> : <UserRound size={13} strokeWidth={1.9} />}
-                Save
+                {t('sh.save')}
               </Button>
             </div>
             {usernameFeedback ? (
@@ -174,7 +178,7 @@ export function AccountPanel({
           </div>
 
           <div className="border-t border-graphite pt-4">
-            <Label htmlFor="new-password">Change password</Label>
+            <Label htmlFor="new-password">{t('sh.account.changePassword')}</Label>
             <div className="flex flex-wrap items-start gap-2">
               <TextInput
                 id="new-password"
@@ -182,7 +186,7 @@ export function AccountPanel({
                 autoComplete="new-password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="At least 8 characters"
+                placeholder={t('sh.account.pwPlaceholder')}
                 className="min-w-[180px] flex-1"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && newPassword) void submitPassword();
@@ -190,7 +194,7 @@ export function AccountPanel({
               />
               <Button disabled={busy || newPassword.length < 8} onClick={() => void submitPassword()}>
                 {busy ? <Loader2 size={13} className="animate-spin" /> : <KeyRound size={13} strokeWidth={1.9} />}
-                Update
+                {t('sh.update')}
               </Button>
             </div>
             {pwFeedback ? (
@@ -207,17 +211,17 @@ export function AccountPanel({
 
           <div className="flex flex-wrap gap-2 border-t border-graphite pt-4">
             <Button onClick={() => void signOut()} icon={<LogOut size={13} strokeWidth={1.9} />}>
-              Sign out
+              {t('sh.signOut')}
             </Button>
             <Button
               onClick={() => {
-                if (window.confirm('Reset this device? Everything stored on it is cleared — your cloud copy is not touched.')) {
+                if (window.confirm(t('sh.account.resetConfirm'))) {
                   resetWorkspace();
                 }
               }}
               icon={<RotateCcw size={13} strokeWidth={1.9} />}
             >
-              Reset this device
+              {t('sh.account.resetDevice')}
             </Button>
           </div>
         </div>

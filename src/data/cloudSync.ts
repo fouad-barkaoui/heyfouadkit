@@ -2,6 +2,7 @@ import type { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js';
 import type { CollectionKey, Workspace } from '@/lib/types';
 import { retryTransient } from './cloudErrors';
 import { normalizeWorkspace } from './normalize';
+import { translate } from '@/state/languageStore';
 
 export const TABLES: Record<CollectionKey, string> = {
   badges: 'badges',
@@ -85,7 +86,7 @@ export async function fetchTeamWorkspace(client: SupabaseClient, teamId: string)
   );
   if (failed.length === WRITE_ORDER.length) {
     // Nothing loaded at all — that's an outage, not a partial problem.
-    throw new Error(failed[0]?.message ?? 'Could not reach the cloud.');
+    throw new Error(failed[0]?.message ?? translate('core.cloud.unreachable'));
   }
   return { workspace: normalizeWorkspace(Object.fromEntries(entries)), failed };
 }

@@ -18,7 +18,9 @@ import { ModuleLayout } from '@/components/shell/ModuleLayout';
 import { Button, IconButton } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { CollectionKey, ItemType, ModuleId } from '@/lib/types';
-import { cn, excerpt, relativeTime } from '@/lib/utils';
+import { cn, excerpt } from '@/lib/utils';
+import { relTime } from '@/modules/docs/localTime';
+import { translate, useLanguage } from '@/state/languageStore';
 import { useUI } from '@/state/uiStore';
 import { useWorkspace } from '@/state/workspaceStore';
 
@@ -32,33 +34,36 @@ interface VaultItem {
   updatedAt: string;
 }
 
+/** `label` is a translation key. */
 const TYPE_META: Record<ItemType, { label: string; icon: LucideIcon; color: string }> = {
-  note: { label: 'Note', icon: NotebookPen, color: '#6366f1' },
-  todo: { label: 'Task', icon: ListChecks, color: '#e4f222' },
-  article: { label: 'Article', icon: FileText, color: '#12a3b0' },
-  course: { label: 'Course', icon: GraduationCap, color: '#8b5cf6' },
-  doc: { label: 'Document', icon: BookMarked, color: '#dd6a4e' },
-  news: { label: 'News', icon: Newspaper, color: '#02b8cc' },
-  medicine: { label: 'Medicine', icon: Pill, color: '#27a644' },
-  link: { label: 'Saved link', icon: BookmarkPlus, color: '#f59e0b' },
-  habit: { label: 'Habit', icon: Flame, color: '#f97316' },
-  goal: { label: 'Goal', icon: Target, color: '#7c83ff' },
+  note: { label: 'vlt.type.note', icon: NotebookPen, color: '#6366f1' },
+  todo: { label: 'vlt.type.todo', icon: ListChecks, color: '#e4f222' },
+  article: { label: 'vlt.type.article', icon: FileText, color: '#12a3b0' },
+  course: { label: 'vlt.type.course', icon: GraduationCap, color: '#8b5cf6' },
+  doc: { label: 'vlt.type.doc', icon: BookMarked, color: '#dd6a4e' },
+  news: { label: 'vlt.type.news', icon: Newspaper, color: '#02b8cc' },
+  medicine: { label: 'vlt.type.medicine', icon: Pill, color: '#27a644' },
+  link: { label: 'vlt.type.link', icon: BookmarkPlus, color: '#f59e0b' },
+  habit: { label: 'vlt.type.habit', icon: Flame, color: '#f97316' },
+  goal: { label: 'vlt.type.goal', icon: Target, color: '#7c83ff' },
 };
 
+/** `label` is a translation key. */
 const FILTERS: { id: ItemType | 'all'; label: string }[] = [
-  { id: 'all', label: 'Everything' },
-  { id: 'note', label: 'Notes' },
-  { id: 'todo', label: 'Tasks' },
-  { id: 'article', label: 'Articles' },
-  { id: 'course', label: 'Courses' },
-  { id: 'doc', label: 'Documents' },
-  { id: 'news', label: 'News' },
-  { id: 'link', label: 'Links' },
+  { id: 'all', label: 'vlt.filter.all' },
+  { id: 'note', label: 'vlt.filter.note' },
+  { id: 'todo', label: 'vlt.filter.todo' },
+  { id: 'article', label: 'vlt.filter.article' },
+  { id: 'course', label: 'vlt.filter.course' },
+  { id: 'doc', label: 'vlt.filter.doc' },
+  { id: 'news', label: 'vlt.filter.news' },
+  { id: 'link', label: 'vlt.filter.link' },
 ];
 
 export function VaultModule(): JSX.Element {
   const { workspace, toggleInteresting } = useWorkspace();
   const { requestFocus, setModule } = useUI();
+  const { t } = useLanguage();
   const [filter, setFilter] = useState<ItemType | 'all'>('all');
   const [query, setQuery] = useState('');
 
@@ -71,7 +76,7 @@ export function VaultModule(): JSX.Element {
           collection: 'notes' as const,
           type: 'note' as const,
           module: 'notebook' as const,
-          title: n.title || 'Untitled note',
+          title: n.title || translate('vlt.untitledNote'),
           body: excerpt(n.content, 150),
           updatedAt: n.updatedAt,
         })),
@@ -148,7 +153,7 @@ export function VaultModule(): JSX.Element {
       .filter((r) => filter === 'all' || r.type === filter)
       .filter((r) => !q || r.title.toLowerCase().includes(q) || r.body.toLowerCase().includes(q))
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-  }, [workspace, filter, query]);
+  }, [workspace, filter, query, t]);
 
   const counts = useMemo(() => {
     const map = new Map<ItemType, number>();
@@ -160,12 +165,12 @@ export function VaultModule(): JSX.Element {
 
   return (
     <ModuleLayout
-      panelTitle="Vault"
+      panelTitle={t('nav.vault')}
       panelCount={items.length}
-      panelSearch={{ value: query, onChange: setQuery, placeholder: 'Search the vault…' }}
+      panelSearch={{ value: query, onChange: setQuery, placeholder: t('vlt.search') }}
       panel={
         <div>
-          <p className="mb-2 px-1 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash/70">Collections</p>
+          <p className="mb-2 px-1 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash/70">{t('vlt.collections')}</p>
           {FILTERS.map((f) => {
             const meta = f.id === 'all' ? null : TYPE_META[f.id];
             const Icon = meta?.icon ?? Star;
@@ -179,27 +184,31 @@ export function VaultModule(): JSX.Element {
                 className="nav-row mb-[2px] text-[12.5px]"
               >
                 <Icon size={14} strokeWidth={1.7} aria-hidden style={meta ? { color: meta.color } : undefined} />
-                <span className="flex-1 truncate text-left">{f.label}</span>
+                <span className="flex-1 truncate text-start">{t(f.label)}</span>
                 <span className="mono num text-[10.5px] text-ash">{count}</span>
               </button>
             );
           })}
 
           <p className="mt-4 px-1 text-[11.5px] leading-[1.55] text-ash/80">
-            Anything starred anywhere in the workspace surfaces here. Unstar it and it leaves.
+            {t('vlt.hint')}
           </p>
         </div>
       }
-      title="Vault"
-      subtitle={<span className="num">{items.length} curated item{items.length === 1 ? '' : 's'}</span>}
+      title={t('nav.vault')}
+      subtitle={
+        <span className="num">
+          {t(items.length === 1 ? 'vlt.count.one' : 'vlt.count.other', { count: items.length })}
+        </span>
+      }
       detailOpenOnMobile
     >
       {items.length === 0 ? (
         <EmptyState
           icon={<Star size={18} strokeWidth={1.6} />}
-          title={query || filter !== 'all' ? 'Nothing matches this filter' : 'The vault is empty'}
-          hint="Star a note, task, article, course or document anywhere in the workspace and it appears here."
-          action={<Button onClick={() => setModule('notebook')}>Go to the notebook</Button>}
+          title={query || filter !== 'all' ? t('vlt.empty.filtered') : t('vlt.empty.title')}
+          hint={t('vlt.empty.hint')}
+          action={<Button onClick={() => setModule('notebook')}>{t('vlt.goNotebook')}</Button>}
         />
       ) : (
         <div ref={gridRef} className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -232,7 +241,7 @@ export function VaultModule(): JSX.Element {
                     boxShadow: `inset 0 0 0 1px ${meta.color}40`,
                   }}
                 >
-                  {meta.label}
+                  {t(meta.label)}
                 </span>
 
                 <div className="mb-2.5 flex items-center gap-2">
@@ -242,10 +251,10 @@ export function VaultModule(): JSX.Element {
                   >
                     <Icon size={12.5} strokeWidth={1.8} aria-hidden />
                   </span>
-                  <span className="text-[11px] text-ash">{relativeTime(item.updatedAt)}</span>
+                  <span className="text-[11px] text-ash">{relTime(item.updatedAt)}</span>
                 </div>
 
-                <h3 className="pr-10 text-[14px] font-medium leading-[1.35] tracking-[-0.012em] text-paper">
+                <h3 className="pe-10 text-[14px] font-medium leading-[1.35] tracking-[-0.012em] text-paper">
                   {item.title}
                 </h3>
                 {item.body ? (
@@ -254,10 +263,10 @@ export function VaultModule(): JSX.Element {
 
                 <div className="mt-auto flex items-center justify-between pt-4">
                   <span className="text-[11.5px] text-ash transition-colors group-hover:text-mist">
-                    Open in {meta.label.toLowerCase()}s →
+                    {t(`vlt.open.${item.type}`)}
                   </span>
                   <IconButton
-                    label="Remove from vault"
+                    label={t('vlt.remove')}
                     className="h-6 w-6 text-accent"
                     onClick={(e) => {
                       e.stopPropagation();

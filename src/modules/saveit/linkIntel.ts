@@ -1,5 +1,6 @@
 import type { LinkKind, SavedLink } from '@/lib/types';
 import { nowISO, uid } from '@/lib/utils';
+import { translate } from '@/state/languageStore';
 
 /**
  * Link intelligence for SaveIt: understands a URL the instant it's pasted
@@ -192,7 +193,7 @@ export function draftLink(url: string, collection = 'Inbox'): SavedLink {
         slug && !generic && !/^\d+$/.test(slug) && slug.length > 3
           ? slug.charAt(0).toUpperCase() + slug.slice(1)
           : d.kind === 'video' && d.siteName
-            ? `${d.siteName} video`
+            ? translate('si.siteVideo', { site: d.siteName })
             : d.siteName || domain;
     } catch {
       fallbackTitle = domain;
@@ -276,21 +277,57 @@ export async function enrich(link: SavedLink): Promise<Partial<SavedLink>> {
       7000,
     );
     if (o?.title) patch.title = o.title.slice(0, 300);
-    if (o?.author_name && !patch.description) patch.description = `by ${o.author_name}`;
+    if (o?.author_name && !patch.description) patch.description = translate('si.byAuthor', { author: o.author_name });
     if (!link.image && o?.thumbnail_url?.startsWith('https://')) patch.image = o.thumbnail_url;
   }
   return patch;
 }
 
-export const KIND_META: Record<LinkKind, { label: string; plural: string; color: string }> = {
-  video: { label: 'Video', plural: 'Videos', color: '#f25f5c' },
-  article: { label: 'Article', plural: 'Articles', color: '#7c83ff' },
-  repo: { label: 'Repo', plural: 'Repos', color: '#2dd4a0' },
-  social: { label: 'Post', plural: 'Social', color: '#38bdf8' },
-  audio: { label: 'Audio', plural: 'Audio', color: '#f5a524' },
-  pdf: { label: 'PDF', plural: 'PDFs', color: '#f472b6' },
-  image: { label: 'Image', plural: 'Images', color: '#b784ff' },
-  website: { label: 'Website', plural: 'Websites', color: '#9aa4b2' },
+/** Kind labels are read through getters so they follow the current language. */
+function kindMeta(kind: LinkKind, color: string): { readonly label: string; readonly plural: string; color: string } {
+  return {
+    get label() {
+      return translate(`si.kind.${kind}`);
+    },
+    get plural() {
+      return translate(`si.kinds.${kind}`);
+    },
+    color,
+  };
+}
+
+export const KIND_META: Record<LinkKind, { readonly label: string; readonly plural: string; color: string }> = {
+  video: kindMeta('video', '#f25f5c'),
+  article: kindMeta('article', '#7c83ff'),
+  repo: kindMeta('repo', '#2dd4a0'),
+  social: kindMeta('social', '#38bdf8'),
+  audio: kindMeta('audio', '#f5a524'),
+  pdf: kindMeta('pdf', '#f472b6'),
+  image: kindMeta('image', '#b784ff'),
+  website: kindMeta('website', '#9aa4b2'),
 };
+
+/** "5m ago" / "قبل 5 د" — falls back to a short date after a month. */
+export function relativeTimeT(iso: string | null | undefined, locale: string): string {
+  if (!iso) return '—';
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return '—';
+  const mins = Math.round((Date.now() - t) / 60_000);
+  if (mins < 1) return translate('si.time.now');
+  if (mins < 60) return translate('si.time.min', { count: mins });
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return translate('si.time.hour', { count: hours });
+  const days = Math.round(hours / 24);
+  if (days < 30) return translate('si.time.day', { count: days });
+  return new Date(iso).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+/** Date + time in the current UI locale (same shape as formatDateTime). */
+export function formatDateTimeT(iso: string | null | undefined, locale: string): string {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleString(locale, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
 
 export const KIND_ORDER: LinkKind[] = ['video', 'article', 'repo', 'social', 'audio', 'pdf', 'image', 'website'];

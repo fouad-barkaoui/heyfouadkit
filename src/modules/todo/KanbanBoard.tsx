@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { StatusDot } from '@/components/ui/BadgeChip';
 import type { TaskStatus, Todo } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 import { TaskCard } from './TaskCard';
 import { KANBAN_COLUMNS, PRIORITY_WEIGHT, STATUS_LABEL, STATUS_TONE } from './taskMeta';
 
@@ -24,6 +25,7 @@ export function KanbanBoard({
   onDelete: (id: string) => void;
   onToggleStar: (id: string) => void;
 }): JSX.Element {
+  const { t } = useLanguage();
   const root = useRef<HTMLDivElement>(null);
   const [dropTarget, setDropTarget] = useState<TaskStatus | null>(null);
   const signature = todos.map((t) => `${t.id}:${t.status}`).join('|');
@@ -78,7 +80,7 @@ export function KanbanBoard({
             <header className="mb-2.5 flex items-center gap-2 px-1">
               <StatusDot tone={STATUS_TONE[status]} />
               <h3 className="text-[12.5px] font-medium tracking-[-0.011em] text-mist">{STATUS_LABEL[status]}</h3>
-              <span className="mono num ml-auto rounded-[4px] bg-[rgb(var(--tint-rgb)/0.05)] px-1.5 py-[1px] text-[10.5px] text-ash">
+              <span className="mono num ms-auto rounded-[4px] bg-[rgb(var(--tint-rgb)/0.05)] px-1.5 py-[1px] text-[10.5px] text-ash">
                 {column.length}
               </span>
             </header>
@@ -98,7 +100,7 @@ export function KanbanBoard({
                 </div>
               ))}
               {column.length === 0 ? (
-                <p className="px-1 py-5 text-center text-[11.5px] text-ash/70">Drop a card here</p>
+                <p className="px-1 py-5 text-center text-[11.5px] text-ash/70">{t('task.board.drop')}</p>
               ) : null}
             </div>
           </section>

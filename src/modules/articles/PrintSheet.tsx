@@ -2,7 +2,9 @@ import { Printer } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import type { Article } from '@/lib/types';
-import { formatDate, sanitizeHtml, wordCount } from '@/lib/utils';
+import { sanitizeHtml, wordCount } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
+import { localDate } from './localDates';
 
 /**
  * A4 print engine. The preview shows the real print stylesheet's geometry
@@ -18,20 +20,21 @@ export function PrintSheet({
   onOpenChange: (open: boolean) => void;
   article: Article | null;
 }): JSX.Element | null {
+  const { t } = useLanguage();
   if (!article) return null;
 
   return (
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Print preview"
-      description="A4 · portrait · 18mm top-bottom, 16mm side margins"
+      title={t('art.print.title')}
+      description={t('art.print.desc')}
       width="lg"
       footer={
         <>
-          <Button onClick={() => onOpenChange(false)}>Close</Button>
+          <Button onClick={() => onOpenChange(false)}>{t('art.print.close')}</Button>
           <Button variant="primary" icon={<Printer size={14} strokeWidth={1.9} />} onClick={() => window.print()}>
-            Print
+            {t('art.print')}
           </Button>
         </>
       }
@@ -43,14 +46,14 @@ export function PrintSheet({
           style={{ aspectRatio: '210 / 297', overflow: 'hidden' }}
         >
           <p className="print-meta text-[10px] uppercase tracking-[0.12em] text-[#666]">
-            {article.kind === 'written' ? 'Article' : article.kind === 'pdf' ? 'PDF record' : 'Image record'}
+            {article.kind === 'written' ? t('art.print.article') : article.kind === 'pdf' ? t('art.print.pdf') : t('art.print.image')}
           </p>
           <h1 className="mt-2 text-[21px] font-semibold leading-[1.2] tracking-[-0.02em] text-black">
             {article.title}
           </h1>
           <div className="print-rule mt-3 border-t border-[#ddd] pt-2">
             <p className="print-meta text-[10.5px] text-[#555]">
-              {formatDate(article.createdAt)} · {wordCount(article.content)} words
+              {localDate(article.createdAt)} · {t('art.print.words', { count: wordCount(article.content) })}
               {article.fileName ? ` · ${article.fileName}` : ''}
             </p>
           </div>
@@ -78,7 +81,7 @@ export function PrintSheet({
             dangerouslySetInnerHTML={{
               __html:
                 sanitizeHtml(article.content) ||
-                '<p style="color:#888">No written content on this record.</p>',
+                `<p style="color:#888">${t('art.print.noContent')}</p>`,
             }}
           />
         </div>

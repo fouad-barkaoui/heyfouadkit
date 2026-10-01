@@ -1,5 +1,6 @@
 import type { ModuleId, Workspace } from '@/lib/types';
 import { addDays, dayKey, isScheduled, stepDone } from '@/modules/habits/habitMath';
+import { localeTag, translate } from '@/state/languageStore';
 
 /**
  * The notification bell's brain: looks across the workspace for things the
@@ -36,26 +37,32 @@ const daysBetween = (from: Date, to: Date): number => Math.round((startOfDay(to)
 
 function ago(from: Date, now: Date): string {
   const mins = Math.max(0, Math.round((now.getTime() - from.getTime()) / 60_000));
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return translate('core.time.justNow');
+  if (mins < 60) return translate('core.time.minutesAgo', { n: mins });
   const hours = Math.round(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.round(hours / 24)}d ago`;
+  if (hours < 24) return translate('core.time.hoursAgo', { n: hours });
+  return translate('core.time.daysAgo', { n: Math.round(hours / 24) });
 }
 
 function until(to: Date, now: Date): string {
   const mins = Math.max(0, Math.round((to.getTime() - now.getTime()) / 60_000));
-  if (mins < 60) return `in ${Math.max(1, mins)}m`;
-  return `in ${Math.round(mins / 60)}h`;
+  if (mins < 60) return translate('core.time.inMinutes', { n: Math.max(1, mins) });
+  return translate('core.time.inHours', { n: Math.round(mins / 60) });
+}
+
+/** Clock time in the reader's language (English keeps the device's own format). */
+function clock(d: Date): string {
+  const tag = localeTag();
+  return d.toLocaleTimeString(tag === 'en-US' ? undefined : tag, { hour: 'numeric', minute: '2-digit' });
 }
 
 function overdueLabel(due: Date, now: Date): string {
   const days = daysBetween(due, now);
   if (days <= 0) {
-    return `Was due today at ${due.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}`;
+    return translate('core.reminder.wasDueTodayAt', { time: clock(due) });
   }
-  if (days === 1) return 'Was due yesterday';
-  return `${days} days overdue`;
+  if (days === 1) return translate('core.reminder.wasDueYesterday');
+  return translate('core.reminder.daysOverdue', { n: days });
 }
 
 export function collectReminders(ws: Pick<Workspace, 'todos' | 'habits' | 'goals'>, now: Date = new Date()): Reminder[] {
@@ -72,7 +79,7 @@ export function collectReminders(ws: Pick<Workspace, 'todos' | 'habits' | 'goals
       out.push({
         key: `task:${t.id}:${t.dueDate}`,
         kind: 'task-overdue',
-        title: t.title || 'Untitled task',
+        title: t.title || translate('core.reminder.untitledTask'),
         detail: overdueLabel(due, now),
         module: 'todo',
         recordId: t.id,
@@ -84,8 +91,8 @@ export function collectReminders(ws: Pick<Workspace, 'todos' | 'habits' | 'goals
       out.push({
         key: `task-today:${t.id}:${t.dueDate}`,
         kind: 'task-today',
-        title: t.title || 'Untitled task',
-        detail: `Due today at ${due.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}`,
+        title: t.title || translate('core.reminder.untitledTask'),
+        detail: translate('core.reminder.dueTodayAt', { time: clock(due) }),
         module: 'todo',
         recordId: t.id,
         at: new Date(startOfDay(now)).toISOString(),
@@ -107,13 +114,13 @@ export function collectReminders(ws: Pick<Workspace, 'todos' | 'habits' | 'goals
       out.push({
         key: `habit:${h.id}:${yKey}`,
         kind: 'habit-missed',
-        title: `${h.emoji ? `${h.emoji} ` : ''}${h.name || 'Habit'}`,
-        detail: 'Missed yesterday — your streak needs today',
+        title: `${h.emoji ? `${h.emoji} ` : ''}${h.name || translate('core.reminder.habit')}`,
+        detail: translate('core.reminder.habitMissed'),
         module: 'habits',
         recordId: h.id,
         at: new Date(startOfDay(now)).toISOString(),
         missed: true,
-        when: 'Yesterday',
+        when: translate('core.time.yesterday'),
       });
     }
     if (now.getHours() >= HABIT_NUDGE_HOUR && isScheduled(h, now) && !done.has(today)) {
@@ -122,13 +129,13 @@ export function collectReminders(ws: Pick<Workspace, 'todos' | 'habits' | 'goals
       out.push({
         key: `habit-today:${h.id}:${today}`,
         kind: 'habit-today',
-        title: `${h.emoji ? `${h.emoji} ` : ''}${h.name || 'Habit'}`,
-        detail: 'Not checked in yet today',
+        title: `${h.emoji ? `${h.emoji} ` : ''}${h.name || translate('core.reminder.habit')}`,
+        detail: translate('core.reminder.habitToday'),
         module: 'habits',
         recordId: h.id,
         at: nudgeAt.toISOString(),
         missed: false,
-        when: 'Today',
+        when: translate('core.time.today'),
       });
     }
   }
@@ -142,8 +149,8 @@ export function collectReminders(ws: Pick<Workspace, 'todos' | 'habits' | 'goals
         out.push({
           key: `goal:${g.id}:${g.dueDate}`,
           kind: 'goal-overdue',
-          title: `${g.emoji ? `${g.emoji} ` : ''}${g.title || 'Goal'}`,
-          detail: `Goal deadline passed · ${overdueLabel(due, now).toLowerCase()}`,
+          title: `${g.emoji ? `${g.emoji} ` : ''}${g.title || translate('core.reminder.goal')}`,
+          detail: translate('core.reminder.goalPassed', { label: overdueLabel(due, now).toLowerCase() }),
           module: 'habits',
           recordId: g.id,
           at: due.toISOString(),
@@ -161,8 +168,11 @@ export function collectReminders(ws: Pick<Workspace, 'todos' | 'habits' | 'goals
       out.push({
         key: `step:${g.id}:${s.id}:${s.dueDate}`,
         kind: 'step-overdue',
-        title: s.title || 'Goal step',
-        detail: `Step of “${g.title || 'goal'}” · ${overdueLabel(due, now).toLowerCase()}`,
+        title: s.title || translate('core.reminder.goalStep'),
+        detail: translate('core.reminder.stepOf', {
+          goal: g.title || translate('core.reminder.goalLower'),
+          label: overdueLabel(due, now).toLowerCase(),
+        }),
         module: 'habits',
         recordId: g.id,
         at: due.toISOString(),

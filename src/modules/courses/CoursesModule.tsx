@@ -8,14 +8,17 @@ import { ConfirmDelete } from '@/components/ui/ConfirmDelete';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ProgressBar } from '@/components/ui/ProgressRing';
 import type { Badge, Course } from '@/lib/types';
-import { cn, domainOf, nowISO, relativeTime } from '@/lib/utils';
+import { cn, domainOf, nowISO } from '@/lib/utils';
+import { localRelativeTime } from '@/modules/articles/localDates';
 import { BadgeEditor } from '@/modules/badges/BadgeEditor';
+import { useLanguage } from '@/state/languageStore';
 import { useUI } from '@/state/uiStore';
 import { useRequireAuth } from '@/state/useRequireAuth';
 import { useWorkspace } from '@/state/workspaceStore';
 import { CourseEditor } from './CourseEditor';
 
 export function CoursesModule(): JSX.Element {
+  const { t } = useLanguage();
   const { workspace, createRecord, updateRecord, toggleInteresting } = useWorkspace();
   const { focusRequest, clearFocus } = useUI();
   const requireAuth = useRequireAuth();
@@ -98,13 +101,13 @@ export function CoursesModule(): JSX.Element {
     <div>
       <div className="mb-3">
         <div className="mb-2 flex items-center justify-between px-1">
-          <p className="text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash/70">Badge filters</p>
-          <IconButton label="New badge" onClick={startNewBadge}>
+          <p className="text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash/70">{t('crs.badgeFilters')}</p>
+          <IconButton label={t('crs.newBadge')} onClick={startNewBadge}>
             <Plus size={13.5} strokeWidth={1.9} />
           </IconButton>
         </div>
         {badges.length === 0 ? (
-          <p className="px-1 py-2 text-[12px] text-ash">No course badges yet.</p>
+          <p className="px-1 py-2 text-[12px] text-ash">{t('crs.noBadges')}</p>
         ) : (
           <div className="flex flex-wrap gap-1.5 px-1">
             {badges.map((badge) => (
@@ -118,9 +121,9 @@ export function CoursesModule(): JSX.Element {
                 />
                 <button
                   type="button"
-                  aria-label={`Edit badge ${badge.name}`}
+                  aria-label={t('crs.editBadge', { name: badge.name })}
                   onClick={() => setBadgeEditor({ open: true, badge })}
-                  className="absolute -right-1 -top-1 hidden h-[15px] w-[15px] items-center justify-center rounded-full bg-obsidian text-ash shadow-[0_0_0_1px_var(--color-graphite)] group-hover:flex hover:text-paper"
+                  className="absolute -end-1 -top-1 hidden h-[15px] w-[15px] items-center justify-center rounded-full bg-obsidian text-ash shadow-[0_0_0_1px_var(--color-graphite)] group-hover:flex hover:text-paper"
                 >
                   <Pencil size={8.5} strokeWidth={2.2} />
                 </button>
@@ -134,21 +137,21 @@ export function CoursesModule(): JSX.Element {
             onClick={() => setActiveBadges([])}
             className="mt-2 px-1 text-[11.5px] text-ash transition-colors hover:text-mist"
           >
-            Clear {activeBadges.length} filter{activeBadges.length === 1 ? '' : 's'}
+            {activeBadges.length === 1 ? t('crs.clearFilterOne') : t('crs.clearFilterMany', { count: activeBadges.length })}
           </button>
         ) : null}
       </div>
 
       <div className="border-t border-graphite pt-3">
         <p className="mb-1.5 px-1 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash/70">
-          Library
+          {t('crs.library')}
         </p>
         {filtered.map((course) => (
           <button
             key={course.id}
             type="button"
             onClick={() => setCourseEditor({ open: true, course })}
-            className="mb-[3px] block w-full rounded-[6px] px-2.5 py-2 text-left transition-colors duration-120 hover:bg-[rgb(var(--tint-rgb)/0.035)]"
+            className="mb-[3px] block w-full rounded-[6px] px-2.5 py-2 text-start transition-colors duration-120 hover:bg-[rgb(var(--tint-rgb)/0.035)]"
           >
             <p className="truncate text-[12.5px] text-mist">{course.title}</p>
             <div className="mt-1.5">
@@ -163,33 +166,33 @@ export function CoursesModule(): JSX.Element {
   return (
     <>
       <ModuleLayout
-        panelTitle="Course Hub"
+        panelTitle={t('nav.courses')}
         panelCount={courses.length}
         panelActions={
-          <IconButton label="New course" onClick={startNewCourse}>
+          <IconButton label={t('crs.newCourse')} onClick={startNewCourse}>
             <Plus size={15} strokeWidth={1.9} />
           </IconButton>
         }
-        panelSearch={{ value: query, onChange: setQuery, placeholder: 'Search courses…' }}
+        panelSearch={{ value: query, onChange: setQuery, placeholder: t('crs.search') }}
         panel={panel}
-        title="Course Hub"
+        title={t('nav.courses')}
         subtitle={
           <span className="num">
-            {filtered.length} of {courses.length} courses
-            {activeBadges.length > 0 ? ` · ${activeBadges.length} badge filter active` : ''}
+            {t('crs.shownOfTotal', { shown: filtered.length, total: courses.length })}
+            {activeBadges.length > 0 ? t('crs.badgeFilterActive', { count: activeBadges.length }) : ''}
           </span>
         }
         actions={
           <>
             <Button icon={<TagIcon size={13} strokeWidth={1.9} />} onClick={startNewBadge}>
-              Badge
+              {t('crs.badge')}
             </Button>
             <Button
               variant="primary"
               icon={<Plus size={14} strokeWidth={2} />}
               onClick={startNewCourse}
             >
-              New course
+              {t('crs.newCourse')}
             </Button>
           </>
         }
@@ -198,15 +201,15 @@ export function CoursesModule(): JSX.Element {
         {filtered.length === 0 ? (
           <EmptyState
             icon={<GraduationCap size={18} strokeWidth={1.6} />}
-            title={query || activeBadges.length > 0 ? 'Nothing matches this filter' : 'No courses saved'}
-            hint="Bookmark a course, tag it with a badge, and track how far through it you are."
+            title={query || activeBadges.length > 0 ? t('crs.empty.filtered') : t('crs.empty.none')}
+            hint={t('crs.empty.hint')}
             action={
               <Button
                 variant="primary"
                 icon={<Plus size={14} strokeWidth={2} />}
                 onClick={startNewCourse}
               >
-                New course
+                {t('crs.newCourse')}
               </Button>
             }
           />
@@ -228,14 +231,14 @@ export function CoursesModule(): JSX.Element {
                     {badge ? <BadgeChip badge={badge} size="sm" /> : <span className="h-[19px]" />}
                     <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-within:opacity-100">
                       <IconButton
-                        label={course.isInteresting ? 'Remove from vault' : 'Add to vault'}
+                        label={course.isInteresting ? t('crs.vault.remove') : t('crs.vault.add')}
                         className={cn('h-6 w-6', course.isInteresting && 'text-accent opacity-100')}
                         onClick={() => toggleInteresting('courses', course.id)}
                       >
                         <Star size={12.5} strokeWidth={1.9} fill={course.isInteresting ? 'currentColor' : 'none'} />
                       </IconButton>
                       <IconButton
-                        label="Edit course"
+                        label={t('crs.edit')}
                         className="h-6 w-6"
                         onClick={() => setCourseEditor({ open: true, course })}
                       >
@@ -243,7 +246,7 @@ export function CoursesModule(): JSX.Element {
                       </IconButton>
                       <ConfirmDelete
                         onConfirm={() => updateRecord('courses', course.id, { isDeleted: true, deletedAt: nowISO() })}
-                        label="Delete course"
+                        label={t('crs.delete')}
                         size={12.5}
                       />
                     </div>
@@ -258,23 +261,23 @@ export function CoursesModule(): JSX.Element {
 
                   <div className="mt-auto pt-4">
                     <div className="mb-1.5 flex items-center justify-between text-[11.5px]">
-                      <span className="text-ash">Progress</span>
+                      <span className="text-ash">{t('crs.progress')}</span>
                       <span className="num text-mist">{course.progress}%</span>
                     </div>
                     <ProgressBar value={course.progress} />
 
                     <div className="mt-3 flex items-center justify-between gap-2">
                       <span className="mono truncate text-[11px] text-ash">
-                        {course.url ? domainOf(course.url) : 'no link'}
+                        {course.url ? domainOf(course.url) : t('crs.noLink')}
                       </span>
                       <span className="flex items-center gap-2">
-                        <span className="text-[11px] text-ash/70">{relativeTime(course.updatedAt)}</span>
+                        <span className="text-[11px] text-ash/70">{localRelativeTime(course.updatedAt)}</span>
                         {course.url ? (
                           <a
                             href={course.url}
                             target="_blank"
                             rel="noreferrer noopener"
-                            aria-label={`Open ${course.title}`}
+                            aria-label={t('crs.open', { title: course.title })}
                             className="btn-icon h-6 w-6"
                           >
                             <ExternalLink size={12.5} strokeWidth={1.9} />

@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState, type PointerEvent, type ReactNode }
 import { MARK_SRC } from '@/components/ui/BrandMark';
 import { KanzWordmark } from '@/components/ui/KanzWordmark';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 
 export type ConsentTone = 'green' | 'gold';
 
@@ -25,7 +26,7 @@ export function ConsentSheet({
   box,
   details,
   acceptLabel,
-  cancelLabel = 'Cancel',
+  cancelLabel,
   onAccept,
   onCancel,
   zIndex = 70,
@@ -46,6 +47,7 @@ export function ConsentSheet({
   onCancel: () => void;
   zIndex?: number;
 }): JSX.Element {
+  const { t } = useLanguage();
   const [expanded, setExpanded] = useState(false);
   const [phase, setPhase] = useState<'idle' | 'working' | 'done'>('idle');
   const artRef = useRef<HTMLDivElement>(null);
@@ -141,7 +143,7 @@ export function ConsentSheet({
             <Dialog.Close asChild>
               <button
                 type="button"
-                aria-label="Close"
+                aria-label={t('ob.close')}
                 disabled={phase !== 'idle'}
                 className="consent-close absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full text-white"
               >
@@ -173,7 +175,7 @@ export function ConsentSheet({
                   className="consent-more mt-2"
                   aria-expanded={expanded}
                 >
-                  {expanded ? 'Hide details' : 'Read the details'}
+                  {expanded ? t('ob.hideDetails') : t('ob.readDetails')}
                   <ChevronDown size={13} strokeWidth={2} className={cn('transition-transform duration-300', expanded && 'rotate-180')} />
                 </button>
               ) : null}
@@ -193,11 +195,11 @@ export function ConsentSheet({
                 ) : (
                   <CheckCircle2 size={16} strokeWidth={1.9} aria-hidden />
                 )}
-                {phase === 'done' ? 'All set' : acceptLabel}
+                {phase === 'done' ? t('ob.allSet') : acceptLabel}
               </span>
             </button>
             <button type="button" onClick={onCancel} disabled={phase !== 'idle'} className="consent-cancel mt-2">
-              {cancelLabel}
+              {cancelLabel ?? t('ob.cancel')}
             </button>
           </div>
         </Dialog.Content>

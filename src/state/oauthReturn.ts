@@ -1,3 +1,5 @@
+import { translate } from './languageStore';
+
 /**
  * Bookkeeping for the Google (OAuth) round-trip.
  *
@@ -25,28 +27,30 @@ export function friendlyOAuthError(code: string, description: string): string {
   const c = code.toLowerCase();
   const d = description.toLowerCase();
   if (c === 'access_denied' || d.includes('denied') || d.includes('cancel')) {
-    return 'Google sign-in was cancelled. Try again whenever you are ready.';
+    return translate('core.oauth.cancelled');
   }
   if (d.includes('not enabled') || d.includes('unsupported provider')) {
-    return 'Google sign-in is not switched on for this app yet. Use your email and password for now.';
+    return translate('core.auth.googleOff');
   }
   if (d.includes('database error')) {
-    return 'Google approved the sign-in, but your account could not be set up. Try again in a moment.';
+    return translate('core.oauth.setupFailed');
   }
   if (c.includes('flow_state') || d.includes('expired') || d.includes('flow state')) {
-    return 'That sign-in attempt expired. Press Continue with Google to start again.';
+    return translate('core.oauth.expired');
   }
   if (d.includes('signups not allowed') || d.includes('signup is disabled')) {
-    return 'New accounts are closed right now. If you already have one, sign in with your email.';
+    return translate('core.oauth.signupsClosed');
   }
-  return description ? `Google sign-in did not finish: ${description}` : 'Google sign-in did not finish. Try again.';
+  return description ? translate('core.oauth.failedWith', { description }) : translate('core.oauth.failed');
 }
 
 /**
  * If `href` is a failed OAuth return, the message to show and the same URL
  * with the error parameters removed. `null` for any other URL.
  */
-export function parseOAuthRedirectError(href: string): { message: string; cleanedUrl: string } | null {
+export function parseOAuthRedirectError(
+  href: string,
+): { message: string; code: string; description: string; cleanedUrl: string } | null {
   let u: URL;
   try {
     u = new URL(href);
@@ -69,6 +73,8 @@ export function parseOAuthRedirectError(href: string): { message: string; cleane
   const rest = hash.toString();
   return {
     message: friendlyOAuthError(code, description),
+    code,
+    description,
     cleanedUrl: `${u.pathname}${search ? `?${search}` : ''}${rest ? `#${rest}` : ''}`,
   };
 }

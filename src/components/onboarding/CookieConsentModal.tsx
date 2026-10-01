@@ -1,6 +1,7 @@
 import { Cookie } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/state/authStore';
+import { useLanguage } from '@/state/languageStore';
 import {
   consentDecision,
   consentMetaPatch,
@@ -18,6 +19,7 @@ import { ConsentSheet } from './ConsentSheet';
  */
 export function CookieConsentModal(): JSX.Element {
   const { user, ready, updateMeta } = useAuth();
+  const { t } = useLanguage();
   const [answered, setAnswered] = useState(false);
 
   const decided =
@@ -41,26 +43,25 @@ export function CookieConsentModal(): JSX.Element {
     <ConsentSheet
       open={open}
       tone="gold"
-      partner="THIS DEVICE"
+      partner={t('ob.cookie.partner')}
       zIndex={85}
-      title="Keep Your Workspace"
-      body={<p>Kanz saves your work in this browser, so everything is exactly how you left it next time.</p>}
+      title={t('ob.cookie.title')}
+      body={<p>{t('ob.cookie.body')}</p>}
       boxIcon={Cookie}
       box={(link) => (
         <p>
-          By continuing, you accept that Kanz {link('stores your data locally')} in this browser and reuses it on your
-          next visit.
+          {t('ob.cookie.boxBefore')}
+          {link(t('ob.cookie.boxLink'))}
+          {t('ob.cookie.boxAfter')}
         </p>
       )}
       details={
         <p className="text-[#6b6a66]">
-          Notes, tasks, docs and preferences live in this browser’s local storage — and, if you sign in, in your own private
-          cloud copy. Nothing is used for tracking or ads. Declining only hides this notice; the app still needs local
-          storage to remember your work.
+          {t('ob.cookie.details')}
         </p>
       }
-      acceptLabel="Accept and Continue"
-      cancelLabel="Decline"
+      acceptLabel={t('ob.cookie.accept')}
+      cancelLabel={t('ob.decline')}
       onAccept={() => choose('accepted')}
       onCancel={() => choose('declined')}
     />

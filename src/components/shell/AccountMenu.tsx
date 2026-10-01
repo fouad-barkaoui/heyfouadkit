@@ -20,38 +20,42 @@ import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { MAX_TOTAL_CLOUD_BYTES, totalCloudBytes } from '@/data/attachments';
 import { accountTier, isProUser, type AccountTier } from '@/lib/access';
-import { cn, formatBytes } from '@/lib/utils';
+import { fmtBytes, rich, useI18n } from '@/components/ui/useI18n';
+import { cn } from '@/lib/utils';
 import { getDisplayName, useAuth } from '@/state/authStore';
 import { useLanguage, type Language } from '@/state/languageStore';
 import { originOf, useTheme, type ThemePreference } from '@/state/themeStore';
 import { useUI } from '@/state/uiStore';
 import { useWorkspace } from '@/state/workspaceStore';
 
+/** `label` is a translation key. */
 const TIER_LOOK: Record<AccountTier, { label: string; icon: LucideIcon } | null> = {
-  admin: { label: 'Admin · Founder', icon: Crown },
-  pro: { label: 'Pro member', icon: Zap },
+  admin: { label: 'sh.tier.admin', icon: Crown },
+  pro: { label: 'sh.tier.pro', icon: Zap },
   beta: null,
 };
 
+/** `label` is a translation key. */
 const THEMES: { id: ThemePreference; label: string; icon: LucideIcon }[] = [
-  { id: 'light', label: 'Light', icon: Sun },
-  { id: 'dark', label: 'Dark', icon: Moon },
-  { id: 'system', label: 'Match device', icon: Monitor },
+  { id: 'light', label: 'theme.light', icon: Sun },
+  { id: 'dark', label: 'theme.dark', icon: Moon },
+  { id: 'system', label: 'sh.theme.system', icon: Monitor },
 ];
 
 /** Light / dark / match-device, as one pill of three icons. */
 function ThemeSwitch(): JSX.Element {
   const { preference, setPreference } = useTheme();
+  const { t } = useI18n();
   return (
-    <div className="am-theme" role="radiogroup" aria-label="Theme">
+    <div className="am-theme" role="radiogroup" aria-label={t('settings.theme')}>
       {THEMES.map(({ id, label, icon: Icon }) => (
         <button
           key={id}
           type="button"
           role="radio"
           aria-checked={preference === id}
-          aria-label={label}
-          title={label}
+          aria-label={t(label)}
+          title={t(label)}
           data-active={preference === id || undefined}
           onClick={(e) => setPreference(id, originOf(e.currentTarget))}
         >
@@ -69,9 +73,9 @@ const LANGUAGES: { id: Language; label: string; short: string }[] = [
 
 /** English / Arabic, same pill as the theme switch. */
 function LanguageSwitch(): JSX.Element {
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   return (
-    <div className="am-theme am-lang" role="radiogroup" aria-label="Language">
+    <div className="am-theme am-lang" role="radiogroup" aria-label={t('settings.language')}>
       {LANGUAGES.map(({ id, label, short }) => (
         <button
           key={id}
@@ -147,10 +151,11 @@ export function AccountMenu({
   const { workspace } = useWorkspace();
   const { setAccountOpen, setMobileNavOpen } = useUI();
   const [pictureOpen, setPictureOpen] = useState(false);
+  const { t } = useI18n();
 
   const tier = accountTier(user);
   const look = user ? TIER_LOOK[tier] : null;
-  const name = user ? getDisplayName(user) : 'Guest';
+  const name = user ? getDisplayName(user) : t('sh.guest');
   const used = totalCloudBytes(workspace.attachments);
   const pct = Math.min(100, Math.round((used / MAX_TOTAL_CLOUD_BYTES) * 100));
   const go = (fn: () => void) => () => {
@@ -175,24 +180,24 @@ export function AccountMenu({
               {look ? (
                 <div className="am-banner">
                   <look.icon size={12} strokeWidth={2.2} aria-hidden />
-                  {look.label}
+                  {t(look.label)}
                 </div>
               ) : null}
               {user ? null : (
                 <div className="am-status">
                   <span className="am-status-dot" aria-hidden />
-                  {configured ? 'Not signed in' : 'Local only'}
+                  {configured ? t('sh.am.notSignedIn') : t('shell.localOnly')}
                 </div>
               )}
               <div className="am-who">
                 <div className="min-w-0 flex-1">
                   <p className="am-name">{name}</p>
-                  <p className="am-email">{user?.email ?? 'Saved on this device only'}</p>
+                  <p className="am-email">{user?.email ?? t('sh.am.deviceOnly')}</p>
                 </div>
                 <button
                   type="button"
                   className="am-avatar"
-                  aria-label="Change profile picture"
+                  aria-label={t('sh.am.changePicture')}
                   onClick={go(() => setPictureOpen(true))}
                 >
                   <Avatar src={avatarUrl} name={name} size={44} />
@@ -208,11 +213,13 @@ export function AccountMenu({
                 <UsageRing pct={pct} />
                 <div className="min-w-0">
                   <p className="am-usage-line">
-                    <span className="num">{used ? formatBytes(used) : '0 MB'}</span> used of{' '}
-                    <span className="num">{formatBytes(MAX_TOTAL_CLOUD_BYTES)}</span>
+                    {rich(t('sh.am.usage'), {
+                      used: <span className="num">{used ? fmtBytes(used, t) : t('sh.unit.bytes', { n: 0, unit: t('sh.unit.MB') })}</span>,
+                      total: <span className="num">{fmtBytes(MAX_TOTAL_CLOUD_BYTES, t)}</span>,
+                    })}
                   </p>
                   <p className="am-usage-note">
-                    {tier === 'admin' ? 'Admin account' : tier === 'pro' ? 'Pro plan' : 'Beta · free while in beta'}
+                    {tier === 'admin' ? t('sh.am.adminAccount') : tier === 'pro' ? t('sh.am.proPlan') : t('sh.am.beta')}
                   </p>
                 </div>
               </div>
@@ -222,17 +229,17 @@ export function AccountMenu({
 
             {user ? (
               <Item icon={UserRound} onSelect={go(() => setAccountOpen(true))}>
-                Profile &amp; account
+                {t('sh.am.profileAccount')}
               </Item>
             ) : null}
             <div className="am-row">
               <Languages size={16} strokeWidth={1.7} aria-hidden />
-              <span className="flex-1">Language</span>
+              <span className="flex-1">{t('settings.language')}</span>
               <LanguageSwitch />
             </div>
             <div className="am-row">
               <Palette size={16} strokeWidth={1.7} aria-hidden />
-              <span className="flex-1">Theme</span>
+              <span className="flex-1">{t('settings.theme')}</span>
               <ThemeSwitch />
             </div>
 
@@ -240,11 +247,11 @@ export function AccountMenu({
 
             {user ? (
               <Item icon={LogOut} tone="danger" onSelect={go(() => void signOut())}>
-                Sign out
+                {t('sh.signOut')}
               </Item>
             ) : configured ? (
               <Item icon={LogIn} tone="accent" onSelect={go(() => setAccountOpen(true))}>
-                Sign in or create account
+                {t('sh.am.signInOrCreate')}
               </Item>
             ) : null}
           </DropdownMenu.Content>
@@ -254,13 +261,9 @@ export function AccountMenu({
       <Modal
         open={pictureOpen}
         onOpenChange={setPictureOpen}
-        title="Profile picture"
-        description={
-          user
-            ? 'Shown on your profile, next to your name, and to your team on every device.'
-            : 'Saved on this device. When you create an account or sign in, it moves to your account automatically.'
-        }
-        footer={<Button onClick={() => setPictureOpen(false)}>Done</Button>}
+        title={t('sh.am.pictureTitle')}
+        description={user ? t('sh.am.pictureHintUser') : t('sh.am.pictureHintGuest')}
+        footer={<Button onClick={() => setPictureOpen(false)}>{t('sh.done')}</Button>}
       >
         <AvatarEditor name={name} pro={isProUser(user)} />
       </Modal>

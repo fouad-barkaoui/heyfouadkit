@@ -5,6 +5,7 @@ import { dominantColor } from '@/data/avatar';
 import { isAdminUser } from '@/lib/access';
 import { cn } from '@/lib/utils';
 import { getDisplayName, useAuth } from '@/state/authStore';
+import { useLanguage } from '@/state/languageStore';
 import { useUI } from '@/state/uiStore';
 import { useWorkspace } from '@/state/workspaceStore';
 import type { MedallionTilt } from '@/three/GoldMedallion';
@@ -14,17 +15,17 @@ const GoldMedallionCanvas = lazy(async () => ({
 }));
 
 type Tab = 'overview' | 'activity' | 'perks';
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'activity', label: 'Activity' },
-  { id: 'perks', label: 'Perks' },
+const TABS: { id: Tab; labelKey: string }[] = [
+  { id: 'overview', labelKey: 'prof.tab.overview' },
+  { id: 'activity', labelKey: 'prof.tab.activity' },
+  { id: 'perks', labelKey: 'prof.tab.perks' },
 ];
 
-const PERKS: { icon: typeof Pill; title: string; body: string }[] = [
-  { icon: Pill, title: 'Medications Catalog', body: 'Doses, schedules and treatment plans — unlocked.' },
-  { icon: Cloud, title: '250 MB private cloud', body: 'Files up to 50 MB each, synced to every device.' },
-  { icon: Users, title: 'Live team workspaces', body: 'Invite people and edit together in real time.' },
-  { icon: Gem, title: 'Gold profile', body: 'This badge, and a gold ring wherever you appear.' },
+const PERKS: { icon: typeof Pill; key: string }[] = [
+  { icon: Pill, key: 'meds' },
+  { icon: Cloud, key: 'cloud' },
+  { icon: Users, key: 'team' },
+  { icon: Gem, key: 'gold' },
 ];
 
 function webglAvailable(): boolean {
@@ -73,7 +74,8 @@ export function ProSpotlight({ className, compact = false }: { className?: strin
   const { user, avatarUrl } = useAuth();
   const { workspace, recordCount } = useWorkspace();
   const { setAccountOpen } = useUI();
-  const name = getDisplayName(user) || 'You';
+  const { t, locale } = useLanguage();
+  const name = getDisplayName(user) || t('prof.you');
   const [tab, setTab] = useState<Tab>('overview');
   const [flipKey, setFlipKey] = useState(0);
   const [shared, setShared] = useState<'idle' | 'copied' | 'shared'>('idle');
@@ -136,7 +138,7 @@ export function ProSpotlight({ className, compact = false }: { className?: strin
   const share = async (): Promise<void> => {
     setFlipKey((k) => k + 1);
     const url = window.location.origin;
-    const text = `${name} is a Kanz Pro member.`;
+    const text = t('prof.shareText', { name });
     try {
       if (navigator.share) {
         await navigator.share({ title: 'Kanz Pro', text, url });
@@ -155,17 +157,17 @@ export function ProSpotlight({ className, compact = false }: { className?: strin
   const stats = useMemo(() => {
     const done = workspace.todos.filter((t) => t.status === 'completed').length;
     return [
-      { label: 'Tasks done', value: done },
-      { label: 'Notes', value: workspace.notes.length },
-      { label: 'Docs', value: workspace.docs.length },
-      { label: 'Records', value: recordCount },
+      { label: t('prof.stat.tasksDone'), value: done },
+      { label: t('prof.stat.notes'), value: workspace.notes.length },
+      { label: t('prof.stat.docs'), value: workspace.docs.length },
+      { label: t('prof.stat.records'), value: recordCount },
     ];
-  }, [workspace, recordCount]);
+  }, [workspace, recordCount, t]);
 
   const since = user?.created_at
-    ? new Date(user.created_at).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+    ? new Date(user.created_at).toLocaleDateString(locale, { month: 'long', year: 'numeric' })
     : null;
-  const month = new Date().toLocaleDateString(undefined, { month: 'long' });
+  const month = new Date().toLocaleDateString(locale, { month: 'long' });
 
   const MEDAL = compact ? 188 : 216;
   const persp = Math.round(MEDAL * 1.87);
@@ -173,7 +175,7 @@ export function ProSpotlight({ className, compact = false }: { className?: strin
   return (
     <section
       ref={cardRef}
-      aria-label="Pro member spotlight"
+      aria-label={t('prof.spotlightLabel')}
       className={cn('pro-card relative overflow-hidden', compact ? 'p-4' : 'p-5', className)}
       style={aura ? { ['--aura' as string]: aura } : undefined}
       onPointerMove={onPointerMove}
@@ -185,22 +187,22 @@ export function ProSpotlight({ className, compact = false }: { className?: strin
         <span className="pro-star flex h-8 w-8 items-center justify-center" aria-hidden>
           <Star size={19} strokeWidth={1.8} />
         </span>
-        <h2 className="min-w-0 flex-1 truncate text-[16px] font-semibold tracking-[-0.018em] pro-ink">{isAdminUser(user) ? 'Admin Spotlight' : 'Pro Spotlight'}</h2>
+        <h2 className="min-w-0 flex-1 truncate text-[16px] font-semibold tracking-[-0.018em] pro-ink">{isAdminUser(user) ? t('prof.adminSpotlight') : t('prof.proSpotlight')}</h2>
         <button type="button" onClick={() => void share()} className="pro-share">
           {shared === 'idle' ? (
             <>
-              <Share2 size={13} strokeWidth={1.9} aria-hidden /> Share
+              <Share2 size={13} strokeWidth={1.9} aria-hidden /> {t('prof.share')}
             </>
           ) : (
             <>
               {shared === 'copied' ? <Link2 size={13} strokeWidth={2} aria-hidden /> : <Check size={13} strokeWidth={2.2} aria-hidden />}
-              {shared === 'copied' ? 'Copied' : 'Shared'}
+              {shared === 'copied' ? t('prof.copied') : t('prof.shared')}
             </>
           )}
         </button>
       </header>
 
-      <div ref={tabsRef} role="tablist" aria-label="Spotlight" className="pro-tabs relative mt-4 grid grid-cols-3 p-1">
+      <div ref={tabsRef} role="tablist" aria-label={t('prof.tabs')} className="pro-tabs relative mt-4 grid grid-cols-3 p-1">
         <span
           className="pro-tab-pill absolute bottom-1 top-1"
           aria-hidden
@@ -211,18 +213,18 @@ export function ProSpotlight({ className, compact = false }: { className?: strin
             transitionDuration: pill.ready ? undefined : '0ms',
           }}
         />
-        {TABS.map((t) => (
+        {TABS.map((tb) => (
           <button
-            key={t.id}
+            key={tb.id}
             type="button"
             role="tab"
-            data-tab={t.id}
-            data-active={tab === t.id}
-            aria-selected={tab === t.id}
-            onClick={() => setTab(t.id)}
+            data-tab={tb.id}
+            data-active={tab === tb.id}
+            aria-selected={tab === tb.id}
+            onClick={() => setTab(tb.id)}
             className="pro-tab relative z-[1]"
           >
-            {t.label}
+            {t(tb.labelKey)}
           </button>
         ))}
       </div>
@@ -231,7 +233,7 @@ export function ProSpotlight({ className, compact = false }: { className?: strin
         <p className="truncate text-[22px] font-semibold leading-tight tracking-[-0.024em] pro-ink">{name}</p>
         <p className="mt-1 flex items-center justify-center gap-1.5 text-[12.5px] pro-sub">
           <Crown size={12.5} strokeWidth={2} className="pro-crown" aria-hidden />
-          {isAdminUser(user) ? 'Admin · ' : ''}Kanz Pro{since ? ` · since ${since}` : ''}
+          {isAdminUser(user) ? t('prof.adminPrefix') : ''}Kanz Pro{since ? t('prof.since', { date: since }) : ''}
         </p>
       </div>
 
@@ -269,10 +271,10 @@ export function ProSpotlight({ className, compact = false }: { className?: strin
                           onClick={() => setAccountOpen(true)}
                           className="pro-medal-add pointer-events-auto flex flex-col items-center justify-center gap-1 rounded-full"
                           style={{ width: Math.round(MEDAL * 0.36), height: Math.round(MEDAL * 0.36) }}
-                          aria-label="Add your profile picture"
+                          aria-label={t('prof.addPictureLabel')}
                         >
                           <Camera size={Math.round(MEDAL * 0.09)} strokeWidth={1.8} aria-hidden />
-                          <span className="text-[10.5px] font-medium leading-none">Add photo</span>
+                          <span className="text-[10.5px] font-medium leading-none">{t('prof.addPhoto')}</span>
                         </button>
                       )}
                     </span>
@@ -281,7 +283,7 @@ export function ProSpotlight({ className, compact = false }: { className?: strin
               </div>
             </div>
             <p className="mt-2 text-center text-[13px] pro-sub">
-              Top-tier member of {month} <Sparkles size={12} className="inline -mt-0.5 pro-crown" aria-hidden />
+              {t('prof.topTier', { month })} <Sparkles size={12} className="inline -mt-0.5 pro-crown" aria-hidden />
             </p>
           </>
         ) : tab === 'activity' ? (
@@ -295,14 +297,14 @@ export function ProSpotlight({ className, compact = false }: { className?: strin
           </div>
         ) : (
           <ul className="mt-5 space-y-2">
-            {PERKS.map(({ icon: Icon, title, body }, i) => (
-              <li key={title} className="pro-stat anim-rise flex items-start gap-3 p-3 text-start" style={{ animationDelay: `${i * 50}ms` }}>
+            {PERKS.map(({ icon: Icon, key }, i) => (
+              <li key={key} className="pro-stat anim-rise flex items-start gap-3 p-3 text-start" style={{ animationDelay: `${i * 50}ms` }}>
                 <span className="pro-perk-icon flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px]">
                   <Icon size={15} strokeWidth={1.9} aria-hidden />
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-[13px] font-medium pro-ink">{title}</span>
-                  <span className="mt-0.5 block text-[11.5px] leading-[1.45] pro-sub">{body}</span>
+                  <span className="block text-[13px] font-medium pro-ink">{t(`prof.perk.${key}.title`)}</span>
+                  <span className="mt-0.5 block text-[11.5px] leading-[1.45] pro-sub">{t(`prof.perk.${key}.body`)}</span>
                 </span>
               </li>
             ))}

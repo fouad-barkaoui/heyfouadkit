@@ -1,6 +1,7 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { ArrowUp, Check, ChevronDown } from 'lucide-react';
 import { forwardRef, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useI18n } from '@/components/ui/useI18n';
 import { cn } from '@/lib/utils';
 
 interface Heading {
@@ -37,6 +38,7 @@ export function ScrollIndex(): JSX.Element {
   const [headings, setHeadings] = useState<Heading[]>([]);
   const [active, setActive] = useState(-1);
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
   const frame = useRef(0);
   const headingsRef = useRef<Heading[]>([]);
 
@@ -129,7 +131,7 @@ export function ScrollIndex(): JSX.Element {
       data-visible={visible || open}
       data-done={done}
       role="navigation"
-      aria-label="Reading progress"
+      aria-label={t('sh.index.progress')}
     >
       <svg className="scroll-index-ring" viewBox="0 0 22 22" width={22} height={22} aria-hidden>
         <circle cx="11" cy="11" r={RING_R} className="scroll-index-ring-track" />
@@ -146,14 +148,14 @@ export function ScrollIndex(): JSX.Element {
 
       <DropdownMenu.Root open={open} onOpenChange={setOpen}>
         <DropdownMenu.Trigger asChild>
-          <IndexTrigger open={open}>
+          <IndexTrigger open={open} label={t('sh.index.page')}>
             <span className="scroll-index-label">
               {active >= 0 && headings[active] ? (
                 <span key={active} className="scroll-index-current">
                   {headings[active].text}
                 </span>
               ) : (
-                'Index'
+                t('sh.index.title')
               )}
             </span>
           </IndexTrigger>
@@ -166,13 +168,13 @@ export function ScrollIndex(): JSX.Element {
             onCloseAutoFocus={(e) => e.preventDefault()}
             className="scroll-index-menu z-[60]"
           >
-            <p className="px-2.5 pb-1.5 pt-1 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">Index</p>
+            <p className="px-2.5 pb-1.5 pt-1 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('sh.index.title')}</p>
             <DropdownMenu.Item className="scroll-index-item" onSelect={() => jump(0)}>
               <ArrowUp size={13} strokeWidth={2} className="shrink-0 text-ash" aria-hidden />
-              <span className="min-w-0 flex-1 truncate">Back to top</span>
+              <span className="min-w-0 flex-1 truncate">{t('sh.index.top')}</span>
             </DropdownMenu.Item>
             {headings.length === 0 ? (
-              <p className="px-2.5 py-2 text-[12px] text-ash">No sections on this page yet.</p>
+              <p className="px-2.5 py-2 text-[12px] text-ash">{t('sh.index.empty')}</p>
             ) : (
               <div className="scroll-index-list">
                 {headings.map((h, i) => (
@@ -210,12 +212,12 @@ export function ScrollIndex(): JSX.Element {
   );
 }
 
-const IndexTrigger = forwardRef<HTMLButtonElement, { open: boolean; children: ReactNode }>(function IndexTrigger(
-  { open, children, ...rest },
+const IndexTrigger = forwardRef<HTMLButtonElement, { open: boolean; label: string; children: ReactNode }>(function IndexTrigger(
+  { open, label, children, ...rest },
   ref,
 ) {
   return (
-    <button ref={ref} type="button" className="scroll-index-trigger" aria-label="Page index" {...rest}>
+    <button ref={ref} type="button" className="scroll-index-trigger" aria-label={label} {...rest}>
       {children}
       <ChevronDown
         size={14}

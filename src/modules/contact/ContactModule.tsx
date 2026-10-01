@@ -11,6 +11,7 @@ import {
 } from '@/data/contact';
 import { cn } from '@/lib/utils';
 import { getDisplayName, useAuth } from '@/state/authStore';
+import { useLanguage } from '@/state/languageStore';
 import { Note, Rule } from '@/modules/portfolio/ProfileExtras';
 import { TOPICS } from './topics';
 
@@ -36,42 +37,43 @@ function StampedLetter({
   topic: string;
   onAnother: () => void;
 }): JSX.Element {
+  const { t, locale } = useLanguage();
   const sentAt = useMemo(
-    () => new Date().toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }),
-    [],
+    () => new Date().toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' }),
+    [locale],
   );
 
   return (
     <div className="stamp-scene" role="status">
       <p className="sr-only">
-        Message sent and stamped private and confidential. I will reply to {draft.email}.
+        {t('cf.sentSr', { email: draft.email })}
       </p>
 
       <article className="stamp-letter" aria-hidden>
         <header className="stamp-letter-head">
-          <span className="stamp-letter-kicker">Kanz · Private message</span>
+          <span className="stamp-letter-kicker">{t('cf.kicker')}</span>
           <span className="stamp-letter-date">{sentAt}</span>
         </header>
         <dl className="stamp-letter-meta">
           <div>
-            <dt>To</dt>
+            <dt>{t('cf.to')}</dt>
             <dd>Fouad Barkaoui</dd>
           </div>
           <div>
-            <dt>From</dt>
+            <dt>{t('cf.from')}</dt>
             <dd>
               {draft.name} &lt;{draft.email}&gt;
             </dd>
           </div>
           <div>
-            <dt>Re</dt>
+            <dt>{t('cf.re')}</dt>
             <dd>
               {draft.subject} <span className="stamp-letter-topic">{topic}</span>
             </dd>
           </div>
         </dl>
         <p className="stamp-letter-body">{draft.message}</p>
-        <footer className="stamp-letter-sign">— sent from the Contact page</footer>
+        <footer className="stamp-letter-sign">{t('cf.sentFrom')}</footer>
         <img
           className="stamp-mark"
           src="/stamp-confidential.svg"
@@ -87,12 +89,14 @@ function StampedLetter({
           <Check size={20} strokeWidth={2.6} />
         </span>
         <div className="min-w-0 flex-1">
-          <h3 className="stamp-done-title">Sealed &amp; delivered — thank you!</h3>
+          <h3 className="stamp-done-title">{t('cf.doneTitle')}</h3>
           <p className="stamp-done-text">
-            It went straight to my private inbox. I'll reply to <span>{draft.email}</span> as soon as I can.
+            {t('cf.doneBefore')}
+            <span>{draft.email}</span>
+            {t('cf.doneAfter')}
           </p>
         </div>
-        <Button onClick={onAnother}>Send another message</Button>
+        <Button onClick={onAnother}>{t('cf.another')}</Button>
       </div>
     </div>
   );
@@ -102,6 +106,7 @@ function StampedLetter({
 
 function ContactForm(): JSX.Element {
   const { user } = useAuth();
+  const { t, locale } = useLanguage();
   const initial = useMemo(() => loadDraft(), []);
   const [draft, setDraft] = useState<ContactDraft>(() => ({
     name: initial.name ?? (user ? getDisplayName(user) : ''),
@@ -135,7 +140,7 @@ function ContactForm(): JSX.Element {
     setError(null);
   };
   const show = (key: keyof ContactDraft): string | undefined => (touched[key] ? errors[key] : undefined);
-  const topic = TOPICS.find((t) => t.id === draft.topic) ?? TOPICS[0]!;
+  const topic = TOPICS.find((tp) => tp.id === draft.topic) ?? TOPICS[0]!;
 
   const submit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
@@ -158,7 +163,7 @@ function ContactForm(): JSX.Element {
       }
     } catch (err) {
       setState('idle');
-      setError(err instanceof Error ? err.message : 'The message could not be sent.');
+      setError(err instanceof Error ? err.message : t('cf.sendFailed'));
     }
   };
 
@@ -179,22 +184,22 @@ function ContactForm(): JSX.Element {
   return (
     <form className="contact-form" onSubmit={(e) => void submit(e)} noValidate>
       <fieldset className="contact-topics">
-        <legend className="contact-label">What is it about?</legend>
+        <legend className="contact-label">{t('cf.about')}</legend>
         <div className="contact-topic-row">
-          {TOPICS.map((t) => {
-            const Icon = t.icon;
+          {TOPICS.map((tp) => {
+            const Icon = tp.icon;
             return (
-              <label key={t.id} className="contact-topic" data-active={draft.topic === t.id}>
+              <label key={tp.id} className="contact-topic" data-active={draft.topic === tp.id}>
                 <input
                   type="radio"
                   name="topic"
-                  value={t.id}
-                  checked={draft.topic === t.id}
-                  onChange={() => set('topic', t.id)}
+                  value={tp.id}
+                  checked={draft.topic === tp.id}
+                  onChange={() => set('topic', tp.id)}
                   className="sr-only"
                 />
                 <Icon size={14} strokeWidth={1.8} aria-hidden />
-                {t.label}
+                {tp.label}
               </label>
             );
           })}
@@ -204,7 +209,7 @@ function ContactForm(): JSX.Element {
       <div className="contact-grid">
         <div>
           <label className="contact-label" htmlFor="contact-name">
-            Your name
+            {t('cf.name')}
           </label>
           <input
             id="contact-name"
@@ -213,10 +218,10 @@ function ContactForm(): JSX.Element {
             value={draft.name}
             maxLength={CONTACT_LIMITS.name}
             onChange={(e) => set('name', e.target.value)}
-            onBlur={() => setTouched((t) => ({ ...t, name: true }))}
+            onBlur={() => setTouched((x) => ({ ...x, name: true }))}
             aria-invalid={Boolean(show('name'))}
             aria-describedby={show('name') ? 'contact-name-err' : undefined}
-            placeholder="Jane Doe"
+            placeholder={t('cf.namePlaceholder')}
           />
           {show('name') ? (
             <p id="contact-name-err" className="contact-err">
@@ -226,7 +231,7 @@ function ContactForm(): JSX.Element {
         </div>
         <div>
           <label className="contact-label" htmlFor="contact-email">
-            Email for my reply
+            {t('cf.email')}
           </label>
           <input
             id="contact-email"
@@ -237,7 +242,7 @@ function ContactForm(): JSX.Element {
             value={draft.email}
             maxLength={CONTACT_LIMITS.email}
             onChange={(e) => set('email', e.target.value)}
-            onBlur={() => setTouched((t) => ({ ...t, email: true }))}
+            onBlur={() => setTouched((x) => ({ ...x, email: true }))}
             aria-invalid={Boolean(show('email'))}
             aria-describedby={show('email') ? 'contact-email-err' : undefined}
             placeholder="you@example.com"
@@ -252,7 +257,7 @@ function ContactForm(): JSX.Element {
 
       <div>
         <label className="contact-label" htmlFor="contact-subject">
-          Subject
+          {t('cf.subject')}
         </label>
         <input
           id="contact-subject"
@@ -260,7 +265,7 @@ function ContactForm(): JSX.Element {
           value={draft.subject}
           maxLength={CONTACT_LIMITS.subject}
           onChange={(e) => set('subject', e.target.value)}
-          onBlur={() => setTouched((t) => ({ ...t, subject: true }))}
+          onBlur={() => setTouched((x) => ({ ...x, subject: true }))}
           aria-invalid={Boolean(show('subject'))}
           aria-describedby={show('subject') ? 'contact-subject-err' : undefined}
           placeholder={`${topic.label}: …`}
@@ -275,7 +280,7 @@ function ContactForm(): JSX.Element {
       <div>
         <div className="flex items-baseline justify-between gap-2">
           <label className="contact-label" htmlFor="contact-message">
-            Message
+            {t('cf.message')}
           </label>
           <span
             className={cn(
@@ -283,7 +288,7 @@ function ContactForm(): JSX.Element {
               draft.message.length > CONTACT_LIMITS.message * 0.9 ? 'text-coral' : 'text-ash',
             )}
           >
-            {draft.message.length.toLocaleString()} / {CONTACT_LIMITS.message.toLocaleString()}
+            {draft.message.length.toLocaleString(locale)} / {CONTACT_LIMITS.message.toLocaleString(locale)}
           </span>
         </div>
         <textarea
@@ -293,7 +298,7 @@ function ContactForm(): JSX.Element {
           value={draft.message}
           maxLength={CONTACT_LIMITS.message}
           onChange={(e) => set('message', e.target.value)}
-          onBlur={() => setTouched((t) => ({ ...t, message: true }))}
+          onBlur={() => setTouched((x) => ({ ...x, message: true }))}
           aria-invalid={Boolean(show('message'))}
           aria-describedby={show('message') ? 'contact-message-err' : 'contact-message-hint'}
           placeholder={topic.hint}
@@ -304,7 +309,7 @@ function ContactForm(): JSX.Element {
           </p>
         ) : (
           <p id="contact-message-hint" className="contact-hint">
-            Your draft is saved on this device while you write.
+            {t('cf.draftHint')}
           </p>
         )}
       </div>
@@ -325,14 +330,14 @@ function ContactForm(): JSX.Element {
         <p className="contact-alert" role="alert">
           {error}{' '}
           <a href="https://www.instagram.com/heyfouad/" target="_blank" rel="noopener noreferrer">
-            Or message me on Instagram ↗
+            {t('cf.instagram')}
           </a>
         </p>
       ) : null}
 
       <div className="contact-submit-row">
         <p className="contact-hint m-0">
-          {cloudConfigured ? 'Goes straight to my private inbox — never shared.' : 'This copy of the app is offline-only.'}
+          {cloudConfigured ? t('cf.private') : t('cf.offline')}
         </p>
         <Button variant="primary" type="submit" disabled={state === 'sending' || !cloudConfigured}>
           {state === 'sending' ? (
@@ -340,7 +345,7 @@ function ContactForm(): JSX.Element {
           ) : (
             <Send size={14} strokeWidth={2} aria-hidden />
           )}
-          {state === 'sending' ? 'Sending…' : 'Send message'}
+          {state === 'sending' ? t('cf.sending') : t('cf.send')}
         </Button>
       </div>
     </form>
@@ -350,15 +355,16 @@ function ContactForm(): JSX.Element {
 /* ── Page ─────────────────────────────────────────────────────────────── */
 
 export function ContactModule(): JSX.Element {
+  const { t } = useLanguage();
   return (
     <div className="flex h-full min-h-0 w-full min-w-0 flex-col bg-void/78 backdrop-blur-2xl">
       <header className="flex items-center gap-3 border-b border-graphite px-4 py-3.5 md:px-7 md:py-4">
         <MenuButton className="md:hidden" />
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-[19px] font-medium leading-tight tracking-[-0.016em] text-paper md:text-[21px]">
-            Contact
+            {t('cf.title')}
           </h1>
-          <p className="mt-1 truncate text-[12.5px] text-ash">Send a message straight to my inbox — I read every one.</p>
+          <p className="mt-1 truncate text-[12.5px] text-ash">{t('cf.subtitle')}</p>
         </div>
       </header>
 
@@ -367,7 +373,7 @@ export function ContactModule(): JSX.Element {
           <Rule />
           <div className="cp-frame">
             <div className="cp-lower">
-              <Note>say hello</Note>
+              <Note>{t('cf.sayHello')}</Note>
               <section id="contact-form-card" aria-labelledby="form-title" className="surface-card contact-form-card">
                 <div className="contact-form-head">
                   <span className="contact-form-icon" aria-hidden>
@@ -375,9 +381,9 @@ export function ContactModule(): JSX.Element {
                   </span>
                   <div>
                     <h2 id="form-title" className="text-[15px] font-medium text-paper">
-                      Send a message
+                      {t('cf.formTitle')}
                     </h2>
-                    <p className="text-[12px] text-ash">I read every message personally.</p>
+                    <p className="text-[12px] text-ash">{t('cf.formHint')}</p>
                   </div>
                 </div>
                 <ContactForm />

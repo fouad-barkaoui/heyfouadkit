@@ -3,7 +3,7 @@ import { Bell, BellRing, CheckCheck, Flame, ListChecks, Mail, Target, X } from '
 import { useState, type ReactNode } from 'react';
 import type { Reminder, ReminderKind } from '@/lib/reminders';
 import { cn } from '@/lib/utils';
-import { useLanguage } from '@/state/languageStore';
+import { useI18n } from '@/components/ui/useI18n';
 import { useNotifications } from '@/state/notificationsStore';
 import { useUI } from '@/state/uiStore';
 
@@ -76,7 +76,7 @@ export function NotificationBell({
   expanded?: boolean;
   className?: string;
 }): JSX.Element {
-  const { t } = useLanguage();
+  const { t } = useI18n();
   const { setModule } = useUI();
   const { items, unread, isRead, markAllRead, dismiss, dismissAll, alertsOn, alertSupport, setAlertsOn } =
     useNotifications();

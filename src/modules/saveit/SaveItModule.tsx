@@ -19,6 +19,7 @@ import { useStagger } from '@/components/motion/ViewTransition';
 import { ModuleLayout } from '@/components/shell/ModuleLayout';
 import type { LinkKind, SavedLink } from '@/lib/types';
 import { cn, nowISO } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 import { useUI } from '@/state/uiStore';
 import { useRequireAuth } from '@/state/useRequireAuth';
 import { useWorkspace } from '@/state/workspaceStore';
@@ -61,6 +62,7 @@ export function SaveItModule(): JSX.Element {
   const { workspace, createRecord, updateRecord } = useWorkspace();
   const { focusRequest, clearFocus } = useUI();
   const requireAuth = useRequireAuth();
+  const { t, locale } = useLanguage();
 
   const links = useMemo(() => workspace.links.filter((l) => !l.isDeleted), [workspace.links]);
 
@@ -126,7 +128,7 @@ export function SaveItModule(): JSX.Element {
         const existing = links.find((l) => l.url === url);
         if (existing) {
           lastId = existing.id;
-          toast({ text: 'Already in your SaveIt — here it is.', tone: 'info' });
+          toast({ text: t('si.toast.already'), tone: 'info' });
           continue;
         }
         const record = draftLink(url, target);
@@ -150,17 +152,17 @@ export function SaveItModule(): JSX.Element {
         setSmart('all');
         setKind('all');
         setQuery('');
-        toast({ text: added === 1 ? 'Saved' : `Saved ${added} links`, tone: 'ok' });
+        toast({ text: added === 1 ? t('si.toast.saved') : t('si.toast.savedMany', { count: added }), tone: 'ok' });
       }
       if (lastId) flash(lastId);
     },
-    [collection, createRecord, flash, links, requireAuth, toast, updateRecord],
+    [collection, createRecord, flash, links, requireAuth, t, toast, updateRecord],
   );
 
   const submitDraft = (): void => {
     const urls = extractUrls(draft);
     if (urls.length === 0) {
-      toast({ text: "That doesn't look like a link. Try pasting a full URL.", tone: 'info' });
+      toast({ text: t('si.toast.notLink'), tone: 'info' });
       return;
     }
     saveUrls(urls);
@@ -224,9 +226,9 @@ export function SaveItModule(): JSX.Element {
     updateRecord('links', l.id, { isDeleted: true, deletedAt: nowISO() });
     if (previewId === l.id) setPreviewId(null);
     toast({
-      text: 'Moved to trash',
+      text: t('si.toast.trashed'),
       tone: 'info',
-      action: { label: 'Undo', run: () => updateRecord('links', l.id, { isDeleted: false, deletedAt: null }) },
+      action: { label: t('si.undo'), run: () => updateRecord('links', l.id, { isDeleted: false, deletedAt: null }) },
     });
   };
   const star = (l: SavedLink): void => updateRecord('links', l.id, { isInteresting: !l.isInteresting });
@@ -325,19 +327,19 @@ export function SaveItModule(): JSX.Element {
 
   /* ── Panel ─────────────────────────────────────────────────────────── */
   const smartRows: { id: Smart; label: string; icon: typeof Inbox; count: number }[] = [
-    { id: 'all', label: 'Everything', icon: Sparkles, count: stats.total },
-    { id: 'unread', label: 'Unread', icon: Inbox, count: stats.unread },
-    { id: 'favorites', label: 'Favorites', icon: Star, count: stats.favorites },
-    { id: 'recent', label: 'This week', icon: Clock3, count: links.filter((l) => Date.now() - new Date(l.openedAt ?? l.createdAt).getTime() < 7 * 864e5).length },
+    { id: 'all', label: t('si.smart.all'), icon: Sparkles, count: stats.total },
+    { id: 'unread', label: t('si.smart.unread'), icon: Inbox, count: stats.unread },
+    { id: 'favorites', label: t('si.smart.favorites'), icon: Star, count: stats.favorites },
+    { id: 'recent', label: t('si.smart.recent'), icon: Clock3, count: links.filter((l) => Date.now() - new Date(l.openedAt ?? l.createdAt).getTime() < 7 * 864e5).length },
   ];
 
   const panel = (
     <div className="space-y-5 pb-2 pt-1.5">
       <div className="save-stats grid grid-cols-3 gap-1.5">
         {[
-          { label: 'Saved', value: stats.total },
-          { label: 'Unread', value: stats.unread },
-          { label: 'Videos', value: stats.videos },
+          { label: t('si.stat.saved'), value: stats.total },
+          { label: t('si.stat.unread'), value: stats.unread },
+          { label: t('si.stat.videos'), value: stats.videos },
         ].map((s) => (
           <div key={s.label} className="rounded-[10px] bg-[rgb(var(--tint-rgb)/0.03)] px-2.5 py-2 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
             <p className="num text-[17px] font-medium leading-none text-paper">{s.value}</p>
@@ -346,7 +348,7 @@ export function SaveItModule(): JSX.Element {
         ))}
       </div>
 
-      <nav aria-label="Smart views" className="space-y-[2px]">
+      <nav aria-label={t('si.smartViews')} className="space-y-[2px]">
         {smartRows.map(({ id, label, icon: Icon, count }) => (
           <button key={id} type="button" data-active={smart === id} onClick={() => setSmart(id)} className="save-side-row">
             <Icon size={14} strokeWidth={1.8} aria-hidden />
@@ -357,11 +359,11 @@ export function SaveItModule(): JSX.Element {
       </nav>
 
       <div>
-        <p className="mb-1.5 px-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">Types</p>
+        <p className="mb-1.5 px-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('si.types')}</p>
         <div className="space-y-[2px]">
           <button type="button" data-active={kind === 'all'} onClick={() => setKind('all')} className="save-side-row">
             <span className="save-dot" style={{ background: 'conic-gradient(#f25f5c, #f5a524, #2dd4a0, #38bdf8, #7c83ff, #b784ff, #f25f5c)' }} />
-            <span className="flex-1 text-start">All types</span>
+            <span className="flex-1 text-start">{t('si.allTypes')}</span>
           </button>
           {KIND_ORDER.filter((k) => kindCounts.get(k)).map((k) => {
             const Icon = KIND_ICON[k];
@@ -377,37 +379,37 @@ export function SaveItModule(): JSX.Element {
       </div>
 
       <div>
-        <p className="mb-1.5 px-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">Collections</p>
+        <p className="mb-1.5 px-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('si.collections')}</p>
         <div className="space-y-[2px]">
           <button type="button" data-active={collection === 'all'} onClick={() => setCollection('all')} className="save-side-row">
             <FolderOpen size={14} strokeWidth={1.8} aria-hidden />
-            <span className="flex-1 text-start">All collections</span>
+            <span className="flex-1 text-start">{t('si.allCollections')}</span>
           </button>
           {collections.map(([name, count]) => (
             <button key={name} type="button" data-active={collection === name} onClick={() => setCollection(name)} className="save-side-row">
               <span className="save-dot" style={{ background: name === 'Inbox' ? 'var(--color-accent)' : `hsl(${[...name].reduce((h, c) => h + c.charCodeAt(0) * 17, 0) % 360} 70% 62%)` }} />
-              <span className="flex-1 truncate text-start">{name}</span>
+              <span className="flex-1 truncate text-start">{name === 'Inbox' ? t('si.inbox') : name}</span>
               <span className="mono num text-[11px] text-ash">{count}</span>
             </button>
           ))}
         </div>
         <p className="mt-2 px-2 text-[11px] leading-[1.5] text-ash">
-          New links go to the selected collection. Rename or move a link from its preview.
+          {t('si.collectionsHint')}
         </p>
       </div>
 
       <div className="save-bookmarklet hidden rounded-[12px] p-3 md:block">
-        <p className="text-[12px] font-medium text-paper">Save from any page</p>
-        <p className="mt-1 text-[11px] leading-[1.5] text-ash">Drag this button to your bookmarks bar, then click it on any website.</p>
+        <p className="text-[12px] font-medium text-paper">{t('si.bm.title')}</p>
+        <p className="mt-1 text-[11px] leading-[1.5] text-ash">{t('si.bm.hint')}</p>
         <a
           ref={bookmarkletRef}
           href="#/saveit"
           onClick={(e) => e.preventDefault()}
           draggable
           className="save-bookmarklet-btn mt-2.5 inline-flex items-center gap-1.5 rounded-[9px] px-3 py-1.5 text-[12px] font-medium"
-          title="Drag me to your bookmarks bar"
+          title={t('si.bm.dragTip')}
         >
-          <BookmarkPlus size={13} strokeWidth={2} aria-hidden /> Save to SaveIt
+          <BookmarkPlus size={13} strokeWidth={2} aria-hidden /> {t('si.bm.button')}
         </a>
       </div>
     </div>
@@ -439,8 +441,8 @@ export function SaveItModule(): JSX.Element {
               saveUrls(urls);
             }
           }}
-          placeholder="Paste a link — a video, an article, a repo, anything…"
-          aria-label="Link to save"
+          placeholder={t('si.capture.placeholder')}
+          aria-label={t('si.capture.aria')}
           inputMode="url"
           autoComplete="off"
           spellCheck={false}
@@ -448,17 +450,17 @@ export function SaveItModule(): JSX.Element {
         />
         {detected ? <KindBadge kind={detected.kind} className="save-detected hidden sm:inline-flex" /> : null}
         <button type="submit" className="save-capture-btn inline-flex shrink-0 items-center gap-1.5 rounded-[11px] px-4 py-2.5 text-[13.5px] font-medium">
-          <BookmarkPlus size={15} strokeWidth={2} aria-hidden /> Save
+          <BookmarkPlus size={15} strokeWidth={2} aria-hidden /> {t('si.save')}
         </button>
       </form>
       <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 px-1 text-[11.5px] text-ash">
         <span className="hidden sm:inline">
-          Tip: press <kbd className="rail-kbd">Ctrl V</kbd> anywhere on this page to save what's on your clipboard
+          {t('si.tip.press')} <kbd className="rail-kbd">Ctrl V</kbd> {t('si.tip.pressAfter')}
         </span>
-        <span className="sm:hidden">Tip: share a link to Kanz from any app to save it here</span>
-        <span className="hidden md:inline">· or drag a link in from another tab</span>
+        <span className="sm:hidden">{t('si.tip.share')}</span>
+        <span className="hidden md:inline">{t('si.tip.drag')}</span>
         <span className="hidden md:inline">
-          · <kbd className="rail-kbd">/</kbd> to type
+          · <kbd className="rail-kbd">/</kbd> {t('si.tip.type')}
         </span>
       </p>
     </div>
@@ -481,19 +483,18 @@ export function SaveItModule(): JSX.Element {
             <BookmarkPlus size={22} strokeWidth={1.8} />
           </span>
         </div>
-        <h2 className="text-[20px] font-medium tracking-[-0.018em] text-paper">Your internet, kept.</h2>
+        <h2 className="text-[20px] font-medium tracking-[-0.018em] text-paper">{t('si.empty.title')}</h2>
         <p className="mt-2 max-w-[420px] text-[13px] leading-[1.6] text-ash">
-          Save the videos, articles, repos and sites worth coming back to. Each one becomes a rich card — videos play
-          right here, articles show how long they take to read.
+          {t('si.empty.body')}
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-2">
           {[
-            { label: 'A YouTube video', url: 'https://www.youtube.com/watch?v=aircAruvnKk' },
-            { label: 'A GitHub repo', url: 'https://github.com/mrdoob/three.js' },
-            { label: 'An article', url: 'https://en.wikipedia.org/wiki/Zettelkasten' },
+            { label: t('si.sample.video'), url: 'https://www.youtube.com/watch?v=aircAruvnKk' },
+            { label: t('si.sample.repo'), url: 'https://github.com/mrdoob/three.js' },
+            { label: t('si.sample.article'), url: 'https://en.wikipedia.org/wiki/Zettelkasten' },
           ].map((s) => (
             <button key={s.url} type="button" className="pill" onClick={() => saveUrls([s.url])}>
-              <Wand2 size={12} strokeWidth={2} aria-hidden /> Try: {s.label}
+              <Wand2 size={12} strokeWidth={2} aria-hidden /> {t('si.empty.try', { label: s.label })}
             </button>
           ))}
         </div>
@@ -516,8 +517,8 @@ export function SaveItModule(): JSX.Element {
   } else if (visible.length === 0) {
     body = (
       <div className="anim-rise py-14 text-center">
-        <p className="text-[14px] text-mist">Nothing matches</p>
-        <p className="mt-1 text-[12.5px] text-ash">Try another type, collection, or search.</p>
+        <p className="text-[14px] text-mist">{t('si.none.title')}</p>
+        <p className="mt-1 text-[12.5px] text-ash">{t('si.none.hint')}</p>
         <button
           type="button"
           className="btn btn-ghost mt-4"
@@ -528,7 +529,7 @@ export function SaveItModule(): JSX.Element {
             setQuery('');
           }}
         >
-          Clear filters
+          {t('si.clearFilters')}
         </button>
       </div>
     );
@@ -553,14 +554,14 @@ export function SaveItModule(): JSX.Element {
   return (
     <div className="relative flex h-full min-h-0 w-full" onDragOver={onDragOver} onDragLeave={(e) => e.currentTarget === e.target && setDropping(false)} onDrop={onDrop}>
       <ModuleLayout
-        panelTitle="SaveIt"
+        panelTitle={t('nav.saveit')}
         panelCount={links.length}
         detailOpenOnMobile
-        panelSearch={{ value: query, onChange: setQuery, placeholder: 'Search your links…' }}
+        panelSearch={{ value: query, onChange: setQuery, placeholder: t('si.searchPlaceholder') }}
         panel={panel}
         title={
           <span className="flex items-center gap-2">
-            SaveIt
+            {t('nav.saveit')}
             <span className="save-title-spark" aria-hidden>
               <Sparkles size={14} strokeWidth={2} />
             </span>
@@ -568,17 +569,17 @@ export function SaveItModule(): JSX.Element {
         }
         subtitle={
           links.length
-            ? `${stats.total} saved · ${stats.unread} unread${filtersActive ? ` · showing ${visible.length}` : ''}`
-            : 'Videos, articles, repos and sites worth keeping'
+            ? `${t('si.subtitle', { total: stats.total, unread: stats.unread })}${filtersActive ? t('si.subtitle.showing', { count: visible.length }) : ''}`
+            : t('si.subtitle.empty')
         }
         actions={
           links.length ? (
-            <div role="radiogroup" aria-label="View" className="save-views flex rounded-[10px] p-[3px]">
+            <div role="radiogroup" aria-label={t('si.view')} className="save-views flex rounded-[10px] p-[3px]">
               {(
                 [
-                  { id: 'grid', icon: LayoutGrid, label: 'Grid' },
-                  { id: 'list', icon: List, label: 'List' },
-                  { id: 'space', icon: Orbit, label: 'Constellation' },
+                  { id: 'grid', icon: LayoutGrid, label: t('si.view.grid') },
+                  { id: 'list', icon: List, label: t('si.view.list') },
+                  { id: 'space', icon: Orbit, label: t('si.view.space') },
                 ] as const
               ).map(({ id, icon: Icon, label }) => (
                 <button
@@ -604,8 +605,8 @@ export function SaveItModule(): JSX.Element {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search…"
-                aria-label="Search your links"
+                placeholder={t('si.searchShort')}
+                aria-label={t('si.searchPlaceholder')}
                 className="field w-[130px] shrink-0 py-1 text-[12.5px] md:hidden"
               />
               <div className="flex gap-1.5">
@@ -618,21 +619,21 @@ export function SaveItModule(): JSX.Element {
                     onClick={() => setKind(k as LinkKind | 'all')}
                     style={k !== 'all' ? ({ ['--k' as string]: KIND_META[k as LinkKind].color } as CSSProperties) : undefined}
                   >
-                    {k === 'all' ? 'All' : KIND_META[k as LinkKind].plural}
+                    {k === 'all' ? t('si.all') : KIND_META[k as LinkKind].plural}
                   </button>
                 ))}
               </div>
               <label className="ms-auto flex shrink-0 items-center gap-1.5 text-[12px] text-ash">
-                Sort
+                {t('si.sort')}
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value as Sort)}
                   className="rounded-[6px] bg-[rgb(var(--tint-rgb)/0.04)] px-2 py-1 text-[12px] text-mist outline-none"
                 >
-                  <option value="newest">Newest</option>
-                  <option value="oldest">Oldest</option>
-                  <option value="unread">Unread first</option>
-                  <option value="az">A → Z</option>
+                  <option value="newest">{t('si.sort.newest')}</option>
+                  <option value="oldest">{t('si.sort.oldest')}</option>
+                  <option value="unread">{t('si.sort.unread')}</option>
+                  <option value="az">{t('si.sort.az')}</option>
                 </select>
               </label>
             </div>
@@ -642,26 +643,26 @@ export function SaveItModule(): JSX.Element {
         {capture}
 
         {rediscover && view !== 'space' && !filtersActive ? (
-          <section aria-label="Rediscover" className="save-rediscover anim-rise mb-6 overflow-hidden rounded-[16px]">
+          <section aria-label={t('si.rediscover')} className="save-rediscover anim-rise mb-6 overflow-hidden rounded-[16px]">
             <button type="button" className="flex w-full items-stretch text-start" onClick={() => open(rediscover)}>
               <LinkMedia link={rediscover} ratio="16 / 10" className="w-[38%] max-w-[260px] shrink-0" />
               <span className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-4">
                 <span className="flex items-center gap-1.5 text-[10.5px] font-medium uppercase tracking-[0.1em] text-accent">
-                  <Sparkles size={12} strokeWidth={2} aria-hidden /> Rediscover
+                  <Sparkles size={12} strokeWidth={2} aria-hidden /> {t('si.rediscover')}
                 </span>
                 <span className="line-clamp-2 text-[15px] font-medium leading-[1.35] text-paper">{rediscover.title}</span>
                 <span className="truncate text-[12px] text-ash">
-                  {rediscover.domain} · you saved this {new Date(rediscover.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                  {rediscover.domain} · {t('si.rediscover.saved', { date: new Date(rediscover.createdAt).toLocaleDateString(locale, { month: 'short', day: 'numeric' }) })}
                 </span>
                 <span className="mt-1 inline-flex items-center gap-1 text-[12px] text-mist">
-                  Open it <ArrowRight size={12} strokeWidth={2} aria-hidden />
+                  {t('si.rediscover.open')} <ArrowRight size={12} strokeWidth={2} className="rtl:-scale-x-100" aria-hidden />
                 </span>
               </span>
             </button>
             <button
               type="button"
-              className="save-shuffle btn-icon absolute right-2.5 top-2.5"
-              aria-label="Show another"
+              className="save-shuffle btn-icon absolute end-2.5 top-2.5"
+              aria-label={t('si.rediscover.another')}
               onClick={() => setRediscoverSeed((s) => s + 1)}
             >
               <Shuffle size={14} strokeWidth={2} />
@@ -676,7 +677,7 @@ export function SaveItModule(): JSX.Element {
         <div className="save-drop pointer-events-none fixed inset-0 z-40 flex items-center justify-center" aria-hidden>
           <div className="save-drop-card flex flex-col items-center gap-3 rounded-[22px] px-10 py-8">
             <BookmarkPlus size={30} strokeWidth={1.6} />
-            <p className="text-[16px] font-medium">Drop to save</p>
+            <p className="text-[16px] font-medium">{t('si.dropToSave')}</p>
           </div>
         </div>
       ) : null}

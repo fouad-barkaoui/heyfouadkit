@@ -6,6 +6,7 @@ import { DynamicIcon, ICON_NAMES } from '@/components/ui/Icon';
 import { Modal } from '@/components/ui/Modal';
 import type { Badge, BadgeScope } from '@/lib/types';
 import { cn, nowISO, tint, uid } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 
 const SWATCHES = [
   '#e4f222',
@@ -38,6 +39,7 @@ export function BadgeEditor({
   badge: Badge | null;
   onSave: (badge: Badge) => void;
 }): JSX.Element {
+  const { t } = useLanguage();
   const [name, setName] = useState('');
   const [color, setColor] = useState('#6366f1');
   const [icon, setIcon] = useState('tag');
@@ -56,7 +58,7 @@ export function BadgeEditor({
 
   const preview: Badge = {
     id: badge?.id ?? 'preview',
-    name: name.trim() || 'Badge name',
+    name: name.trim() || t('badge.previewName'),
     colorHex: validColor ? color : '#6366f1',
     iconName: icon,
     category: scope,
@@ -81,13 +83,19 @@ export function BadgeEditor({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title={badge ? 'Edit badge' : 'New badge'}
-      description={`Scoped to ${scope === 'doc' ? 'Docs Storage' : scope === 'course' ? 'Course Hub' : 'the whole workspace'}.`}
+      title={badge ? t('badge.editTitle') : t('badge.newTitle')}
+      description={
+        scope === 'doc'
+          ? t('badge.scope.doc')
+          : scope === 'course'
+            ? t('badge.scope.course')
+            : t('badge.scope.workspace')
+      }
       footer={
         <>
-          <Button onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={() => onOpenChange(false)}>{t('badge.cancel')}</Button>
           <Button variant="primary" onClick={submit}>
-            {badge ? 'Save badge' : 'Create badge'}
+            {badge ? t('badge.save') : t('badge.create')}
           </Button>
         </>
       }
@@ -97,28 +105,28 @@ export function BadgeEditor({
       </div>
 
       <FieldRow>
-        <Label htmlFor="badge-name">Name</Label>
+        <Label htmlFor="badge-name">{t('badge.nameLabel')}</Label>
         <TextInput
           id="badge-name"
           autoFocus
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Threat Intel"
+          placeholder={t('badge.namePlaceholder')}
           onKeyDown={(e) => {
             if (e.key === 'Enter') submit();
           }}
         />
-        {touched && !validName ? <p className="mt-1.5 text-[12px] text-coral">A name is required.</p> : null}
+        {touched && !validName ? <p className="mt-1.5 text-[12px] text-coral">{t('badge.nameRequired')}</p> : null}
       </FieldRow>
 
       <FieldRow>
-        <Label>Colour</Label>
+        <Label>{t('badge.colourLabel')}</Label>
         <div className="flex flex-wrap items-center gap-2">
           {SWATCHES.map((swatch) => (
             <button
               key={swatch}
               type="button"
-              aria-label={`Use ${swatch}`}
+              aria-label={t('badge.useColour', { colour: swatch })}
               onClick={() => setColor(swatch)}
               className={cn(
                 'h-7 w-7 rounded-[6px] transition-transform duration-150 hover:scale-105',
@@ -132,26 +140,26 @@ export function BadgeEditor({
             />
           ))}
           <TextInput
-            aria-label="Custom hex colour"
+            aria-label={t('badge.customHex')}
             value={color}
             onChange={(e) => setColor(e.target.value)}
-            className="ml-1 w-[104px] font-mono text-[12.5px] uppercase"
+            className="ms-1 w-[104px] font-mono text-[12.5px] uppercase"
             placeholder="#6366f1"
           />
         </div>
         {touched && !validColor ? (
-          <p className="mt-1.5 text-[12px] text-coral">Use a 6-digit hex value, e.g. #6366f1.</p>
+          <p className="mt-1.5 text-[12px] text-coral">{t('badge.hexInvalid')}</p>
         ) : null}
       </FieldRow>
 
       <FieldRow>
-        <Label>Icon</Label>
+        <Label>{t('badge.iconLabel')}</Label>
         <div className="grid grid-cols-9 gap-1.5 rounded-[6px] bg-[rgb(var(--tint-rgb)/0.02)] p-2 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
           {ICON_NAMES.map((n) => (
             <button
               key={n}
               type="button"
-              aria-label={n}
+              aria-label={t('badge.iconOption', { name: n })}
               title={n}
               onClick={() => setIcon(n)}
               className={cn(

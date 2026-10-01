@@ -6,13 +6,18 @@ import { FieldRow, Label, TextInput } from '@/components/ui/Field';
 import { Modal } from '@/components/ui/Modal';
 import type { DoseUnit, DurationUnit, Medicine, MedicineType } from '@/lib/types';
 import { cn, nowISO, uid } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 import {
   addDuration,
   DOSE_UNITS,
+  doseUnitLabel,
   DURATION_UNITS,
+  durationUnitLabel,
   EVERY_DAY,
   EVERY_OTHER_DAY,
-  WEEKDAY_LETTERS,
+  weekdayLetter,
+  weekdayName,
+  WEEKDAYS,
 } from './medsMeta';
 
 interface MedDraft {
@@ -59,7 +64,8 @@ const to12 = (value: string): string => {
   return `${h}:${mStr} ${ap}`;
 };
 
-const STEPS = ['Name & dose', 'Schedule', 'Duration'] as const;
+/** Wizard steps — labels are looked up as `med.step.<id>`. */
+const STEPS = ['nameDose', 'schedule', 'duration'] as const;
 
 export function MedicineEditor({
   open,
@@ -79,6 +85,7 @@ export function MedicineEditor({
   onDelete?: (id: string) => void;
   onComplete?: (id: string) => void;
 }): JSX.Element {
+  const { t } = useLanguage();
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<MedDraft>(blank);
   const [touched, setTouched] = useState(false);
@@ -167,36 +174,36 @@ export function MedicineEditor({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title={medicine ? 'Edit medicine' : 'New medicine'}
-      description={STEPS[step]}
+      title={medicine ? t('med.editor.editTitle') : t('med.editor.newTitle')}
+      description={t(`med.step.${STEPS[step]}`)}
       width="lg"
       footer={
         <div className="flex w-full items-center justify-between gap-2">
           <div className="flex items-center gap-1">
             {medicine && onDelete ? (
-              <ConfirmDelete onConfirm={() => onDelete(medicine.id)} label="Delete medicine" />
+              <ConfirmDelete onConfirm={() => onDelete(medicine.id)} label={t('med.editor.delete')} />
             ) : null}
             {medicine && onComplete && !medicine.completed ? (
-              <Button onClick={() => onComplete(medicine.id)}>Mark complete</Button>
+              <Button onClick={() => onComplete(medicine.id)}>{t('med.editor.markComplete')}</Button>
             ) : null}
           </div>
           <div className="flex items-center gap-2">
             {step > 0 ? (
-              <IconButton label="Previous step" onClick={() => setStep((s) => s - 1)}>
-                <ChevronLeft size={15} strokeWidth={1.9} />
+              <IconButton label={t('med.editor.previousStep')} onClick={() => setStep((s) => s - 1)}>
+                <ChevronLeft size={15} strokeWidth={1.9} className="rtl:-scale-x-100" />
               </IconButton>
             ) : null}
             {step < STEPS.length - 1 ? (
               <Button
                 variant="primary"
-                icon={<ChevronRight size={14} strokeWidth={2} />}
+                icon={<ChevronRight size={14} strokeWidth={2} className="rtl:-scale-x-100" />}
                 onClick={() => canAdvance && setStep((s) => s + 1)}
               >
-                Next
+                {t('med.editor.next')}
               </Button>
             ) : (
               <Button variant="primary" onClick={submit}>
-                {medicine ? 'Save changes' : 'Create medicine'}
+                {medicine ? t('med.common.saveChanges') : t('med.editor.create')}
               </Button>
             )}
           </div>
@@ -205,8 +212,8 @@ export function MedicineEditor({
     >
       {/* Step indicator */}
       <div className="mb-4 flex items-center gap-1.5">
-        {STEPS.map((label, i) => (
-          <div key={label} className="flex flex-1 items-center gap-1.5">
+        {STEPS.map((id, i) => (
+          <div key={id} className="flex flex-1 items-center gap-1.5">
             <span
               className={cn(
                 'flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10.5px]',
@@ -219,7 +226,7 @@ export function MedicineEditor({
             >
               {i + 1}
             </span>
-            <span className={cn('text-[11px]', i === step ? 'text-mist' : 'text-ash')}>{label}</span>
+            <span className={cn('text-[11px]', i === step ? 'text-mist' : 'text-ash')}>{t(`med.step.${id}`)}</span>
             {i < STEPS.length - 1 ? <span className="h-px flex-1 bg-graphite" aria-hidden /> : null}
           </div>
         ))}
@@ -228,19 +235,19 @@ export function MedicineEditor({
       {step === 0 ? (
         <div className="space-y-4">
           <FieldRow>
-            <Label htmlFor="med-name">Medicine name</Label>
+            <Label htmlFor="med-name">{t('med.editor.nameLabel')}</Label>
             <TextInput
               id="med-name"
               autoFocus
               value={draft.name}
               onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-              placeholder="Enter medicine name"
+              placeholder={t('med.editor.namePlaceholder')}
             />
-            {touched && !nameValid ? <p className="mt-1.5 text-[12px] text-coral">Please name the medicine.</p> : null}
+            {touched && !nameValid ? <p className="mt-1.5 text-[12px] text-coral">{t('med.editor.nameRequired')}</p> : null}
           </FieldRow>
 
           <FieldRow>
-            <Label>Dosage</Label>
+            <Label>{t('med.editor.dosageLabel')}</Label>
             <div className="flex items-center gap-2">
               <TextInput
                 inputMode="decimal"
@@ -258,18 +265,18 @@ export function MedicineEditor({
                     data-active={draft.unit === u}
                     onClick={() => setDraft({ ...draft, unit: u })}
                   >
-                    {u}
+                    {doseUnitLabel(u)}
                   </button>
                 ))}
               </div>
             </div>
             {touched && !dosageValid ? (
-              <p className="mt-1.5 text-[12px] text-coral">Please provide the amount.</p>
+              <p className="mt-1.5 text-[12px] text-coral">{t('med.editor.dosageRequired')}</p>
             ) : null}
           </FieldRow>
 
           <FieldRow>
-            <Label>Type</Label>
+            <Label>{t('med.editor.typeLabel')}</Label>
             <div className="flex gap-1.5">
               <button
                 type="button"
@@ -277,7 +284,7 @@ export function MedicineEditor({
                 data-active={draft.type === 'scheduled'}
                 onClick={() => setDraft({ ...draft, type: 'scheduled' })}
               >
-                Scheduled
+                {t('med.type.scheduled')}
               </button>
               <button
                 type="button"
@@ -285,7 +292,7 @@ export function MedicineEditor({
                 data-active={draft.type === 'as_needed'}
                 onClick={() => setDraft({ ...draft, type: 'as_needed' })}
               >
-                As needed
+                {t('med.type.asNeeded')}
               </button>
             </div>
           </FieldRow>
@@ -296,31 +303,33 @@ export function MedicineEditor({
         <div className="space-y-4">
           {draft.type === 'as_needed' ? (
             <p className="rounded-[8px] bg-[rgb(var(--tint-rgb)/0.03)] p-3 text-[12.5px] text-ash">
-              "As needed" medicines don't carry a fixed schedule — log a dose whenever it's taken.
+              {t('med.editor.asNeededNote')}
             </p>
           ) : (
             <>
               <FieldRow>
-                <Label>Days</Label>
+                <Label>{t('med.editor.daysLabel')}</Label>
                 <div className="mb-2 flex gap-1.5">
                   <button type="button" className="pill" onClick={() => setDraft({ ...draft, days: [...EVERY_DAY] })}>
-                    Every day
+                    {t('med.days.everyDay')}
                   </button>
                   <button
                     type="button"
                     className="pill"
                     onClick={() => setDraft({ ...draft, days: [...EVERY_OTHER_DAY] })}
                   >
-                    Every other
+                    {t('med.days.everyOther')}
                   </button>
                 </div>
                 <div className="flex gap-1.5">
-                  {WEEKDAY_LETTERS.map((letter, i) => (
+                  {WEEKDAYS.map((i) => (
                     <button
                       key={i}
                       type="button"
                       onClick={() => toggleDay(i)}
                       aria-pressed={draft.days.includes(i)}
+                      aria-label={weekdayName(i)}
+                      title={weekdayName(i)}
                       className={cn(
                         'flex h-8 w-8 items-center justify-center rounded-full text-[12px] transition-colors duration-150',
                         draft.days.includes(i)
@@ -328,24 +337,24 @@ export function MedicineEditor({
                           : 'bg-[rgb(var(--tint-rgb)/0.05)] text-ash hover:text-mist',
                       )}
                     >
-                      {letter}
+                      {weekdayLetter(i)}
                     </button>
                   ))}
                 </div>
               </FieldRow>
 
               <FieldRow>
-                <Label>Times</Label>
+                <Label>{t('med.editor.timesLabel')}</Label>
                 <div className="mb-2 flex gap-1.5">
                   <button
                     type="button"
                     className="pill"
                     onClick={() => setDraft({ ...draft, times: ['00:00', '08:00', '16:00'] })}
                   >
-                    Every 8h
+                    {t('med.editor.every8h')}
                   </button>
                   <button type="button" className="pill" onClick={() => setDraft({ ...draft, times: ['08:00', '20:00'] })}>
-                    Every 12h
+                    {t('med.editor.every12h')}
                   </button>
                 </div>
                 <div className="space-y-2">
@@ -356,10 +365,10 @@ export function MedicineEditor({
                         value={t}
                         onChange={(e) => setTime(i, e.target.value)}
                         className="field max-w-[160px]"
-                        aria-label={`Time ${i + 1}`}
+                        aria-label={t('med.editor.timeN', { n: i + 1 })}
                       />
                       {draft.times.length > 1 ? (
-                        <IconButton label="Remove time" onClick={() => removeTime(i)}>
+                        <IconButton label={t('med.editor.removeTime')} onClick={() => removeTime(i)}>
                           <X size={13} strokeWidth={1.9} />
                         </IconButton>
                       ) : null}
@@ -367,7 +376,7 @@ export function MedicineEditor({
                   ))}
                 </div>
                 <Button className="mt-2" icon={<Plus size={13} strokeWidth={2} />} onClick={addTime}>
-                  Add a time
+                  {t('med.editor.addTime')}
                 </Button>
               </FieldRow>
             </>
@@ -378,18 +387,18 @@ export function MedicineEditor({
       {step === 2 ? (
         <div className="space-y-4">
           <FieldRow>
-            <Label>Duration</Label>
+            <Label>{t('med.editor.durationLabel')}</Label>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5 rounded-[7px] bg-[rgb(var(--tint-rgb)/0.03)] p-1 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
                 <IconButton
-                  label="Decrease"
+                  label={t('med.editor.decrease')}
                   onClick={() => setDraft((c) => ({ ...c, durationValue: Math.max(1, c.durationValue - 1) }))}
                 >
                   <Minus size={13} strokeWidth={2} />
                 </IconButton>
                 <span className="num w-8 text-center text-[13.5px] text-paper">{draft.durationValue}</span>
                 <IconButton
-                  label="Increase"
+                  label={t('med.editor.increase')}
                   onClick={() => setDraft((c) => ({ ...c, durationValue: c.durationValue + 1 }))}
                 >
                   <Plus size={13} strokeWidth={2} />
@@ -404,7 +413,7 @@ export function MedicineEditor({
                     data-active={draft.durationUnit === u}
                     onClick={() => setDraft({ ...draft, durationUnit: u })}
                   >
-                    {u}
+                    {durationUnitLabel(u)}
                   </button>
                 ))}
               </div>
@@ -419,14 +428,19 @@ export function MedicineEditor({
                 onChange={(e) => setDraft({ ...draft, ongoing: e.target.checked })}
                 className="h-4 w-4 accent-[var(--color-acid)]"
               />
-              Ongoing — no end date (∞)
+              {t('med.editor.ongoing')}
             </label>
           </FieldRow>
 
           <p className="rounded-[8px] bg-[rgb(var(--tint-rgb)/0.03)] p-3 text-[12.5px] text-ash">
             {draft.ongoing
-              ? 'This medicine continues indefinitely once started.'
-              : `Runs for ${draft.durationValue} ${draft.durationUnit.toLowerCase()} from the start date.`}
+              ? t('med.editor.ongoingNote')
+              : t('med.editor.runsFor', {
+                  count: draft.durationValue,
+                  unit: t(
+                    `med.durationUnitLower.${draft.durationUnit}.${draft.durationValue === 1 ? 'one' : draft.durationValue === 2 ? 'two' : draft.durationValue <= 10 ? 'few' : 'many'}`,
+                  ),
+                })}
           </p>
         </div>
       ) : null}

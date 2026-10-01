@@ -1,4 +1,5 @@
 import { getSupabase } from './supabaseClient';
+import { translate } from '@/state/languageStore';
 
 /**
  * Contact page inbox (table `contact_messages`, see
@@ -32,27 +33,27 @@ const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 /** Field-level problems, keyed by field — empty object means it's sendable. */
 export function validateContact(d: ContactDraft): Partial<Record<keyof ContactDraft, string>> {
   const errors: Partial<Record<keyof ContactDraft, string>> = {};
-  if (!d.name.trim()) errors.name = 'Tell me your name';
-  else if (d.name.length > CONTACT_LIMITS.name) errors.name = 'That name is too long';
-  if (!EMAIL_RE.test(d.email.trim())) errors.email = 'Enter a valid email so I can reply';
-  if (!d.subject.trim()) errors.subject = 'Add a short subject';
-  else if (d.subject.length > CONTACT_LIMITS.subject) errors.subject = 'Keep the subject under 160 characters';
-  if (d.message.trim().length < 10) errors.message = 'Write at least a sentence (10+ characters)';
-  else if (d.message.length > CONTACT_LIMITS.message) errors.message = 'Messages are capped at 5,000 characters';
+  if (!d.name.trim()) errors.name = translate('core.contact.nameRequired');
+  else if (d.name.length > CONTACT_LIMITS.name) errors.name = translate('core.contact.nameTooLong');
+  if (!EMAIL_RE.test(d.email.trim())) errors.email = translate('core.contact.emailInvalid');
+  if (!d.subject.trim()) errors.subject = translate('core.contact.subjectRequired');
+  else if (d.subject.length > CONTACT_LIMITS.subject) errors.subject = translate('core.contact.subjectTooLong');
+  if (d.message.trim().length < 10) errors.message = translate('core.contact.messageShort');
+  else if (d.message.length > CONTACT_LIMITS.message) errors.message = translate('core.contact.messageTooLong');
   return errors;
 }
 
 function friendly(message: string): string {
-  if (/too many messages/i.test(message)) return 'You sent a few messages just now — please wait a few minutes.';
-  if (/failed to fetch|network|load failed/i.test(message)) return "You're offline — your message is kept here, send it when you're back online.";
-  return 'The message could not be sent. Please try again in a moment.';
+  if (/too many messages/i.test(message)) return translate('core.contact.rateLimited');
+  if (/failed to fetch|network|load failed/i.test(message)) return translate('core.contact.offline');
+  return translate('core.contact.sendFailed');
 }
 
 export async function sendContactMessage(d: ContactDraft): Promise<void> {
   const sb = getSupabase();
-  if (!sb) throw new Error('This copy of the app is not connected to the cloud, so it cannot send messages.');
+  if (!sb) throw new Error(translate('core.contact.notConfigured'));
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-    throw new Error("You're offline — your message is kept here, send it when you're back online.");
+    throw new Error(translate('core.contact.offline'));
   }
   const { data } = await sb.auth.getSession();
   // No `.select()` after insert: senders can't read the table back (RLS),

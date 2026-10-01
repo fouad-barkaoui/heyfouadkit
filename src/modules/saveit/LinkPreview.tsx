@@ -3,8 +3,9 @@ import { Check, Clock, Copy, ExternalLink, FolderOpen, Star, Trash2, X } from 'l
 import { useEffect, useState } from 'react';
 import { TagInput } from '@/components/ui/TagInput';
 import type { SavedLink } from '@/lib/types';
-import { cn, formatDateTime } from '@/lib/utils';
-import { KIND_META } from './linkIntel';
+import { cn } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
+import { formatDateTimeT, KIND_META } from './linkIntel';
 import { KindBadge, LinkMedia, SiteIcon } from './LinkVisuals';
 
 /**
@@ -27,6 +28,9 @@ export function LinkPreview({
   onDelete: (link: SavedLink) => void;
   onVisit: (link: SavedLink) => void;
 }): JSX.Element {
+  const { t, locale } = useLanguage();
+  /* "Inbox" is stored in English; show it in the UI language. */
+  const showColl = (c: string): string => (c === 'Inbox' ? t('si.inbox') : c);
   const [title, setTitle] = useState('');
   const [note, setNote] = useState('');
   const [collection, setCollection] = useState('');
@@ -37,7 +41,7 @@ export function LinkPreview({
     if (!link) return;
     setTitle(link.title);
     setNote(link.note);
-    setCollection(link.collection);
+    setCollection(showColl(link.collection));
     setPlaying(Boolean(link.embedUrl));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [link?.id]);
@@ -77,7 +81,7 @@ export function LinkPreview({
                     type="button"
                     className="block w-full"
                     onClick={() => (link.embedUrl ? setPlaying(true) : onVisit(link))}
-                    aria-label={link.embedUrl ? 'Play here' : 'Open website'}
+                    aria-label={link.embedUrl ? t('si.playHere') : t('si.openWebsite')}
                   >
                     <LinkMedia link={link} ratio="16 / 9" />
                   </button>
@@ -92,7 +96,7 @@ export function LinkPreview({
                     <span className="truncate">{link.siteName || link.domain}</span>
                     <KindBadge kind={link.kind} />
                   </div>
-                  <Dialog.Close className="btn-icon shrink-0" aria-label="Close">
+                  <Dialog.Close className="btn-icon shrink-0" aria-label={t('si.close')}>
                     <X size={16} strokeWidth={1.8} />
                   </Dialog.Close>
                 </div>
@@ -104,7 +108,7 @@ export function LinkPreview({
                     rows={2}
                     onChange={(e) => setTitle(e.target.value)}
                     onBlur={() => title.trim() && title !== link.title && commit({ title: title.trim().slice(0, 300) })}
-                    aria-label="Title"
+                    aria-label={t('si.title')}
                     className="save-title-input w-full resize-none bg-transparent text-[19px] font-medium leading-[1.3] tracking-[-0.018em] text-paper outline-none"
                   />
                   {link.description ? <p className="mt-1 text-[13px] leading-[1.6] text-fog">{link.description}</p> : null}
@@ -121,7 +125,7 @@ export function LinkPreview({
 
                 <div className="flex flex-wrap gap-2">
                   <button type="button" className="btn btn-primary" onClick={() => onVisit(link)}>
-                    <ExternalLink size={13} strokeWidth={2} /> Open site
+                    <ExternalLink size={13} strokeWidth={2} /> {t('si.openSite')}
                   </button>
                   <button
                     type="button"
@@ -130,7 +134,7 @@ export function LinkPreview({
                     aria-pressed={link.isInteresting}
                   >
                     <Star size={13} strokeWidth={2} fill={link.isInteresting ? 'currentColor' : 'none'} />
-                    {link.isInteresting ? 'Favorite' : 'Add to favorites'}
+                    {link.isInteresting ? t('si.favorite') : t('si.addFavorite')}
                   </button>
                   <button
                     type="button"
@@ -143,27 +147,27 @@ export function LinkPreview({
                     }}
                   >
                     {copied ? <Check size={13} strokeWidth={2.4} /> : <Copy size={13} strokeWidth={2} />}
-                    {copied ? 'Copied' : 'Copy'}
+                    {copied ? t('si.copied') : t('si.copy')}
                   </button>
                   <button
                     type="button"
                     className="btn btn-ghost"
                     onClick={() => commit({ status: link.status === 'read' ? 'unread' : 'read' })}
                   >
-                    {link.status === 'read' ? 'Mark unread' : 'Mark read'}
+                    {link.status === 'read' ? t('si.markUnread') : t('si.markRead')}
                   </button>
                 </div>
 
                 <div>
                   <label htmlFor="save-note" className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.06em] text-ash">
-                    Your note
+                    {t('si.note')}
                   </label>
                   <textarea
                     id="save-note"
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     onBlur={() => note !== link.note && commit({ note: note.slice(0, 10000) })}
-                    placeholder="Why did you save this? What's the takeaway?"
+                    placeholder={t('si.notePlaceholder')}
                     rows={4}
                     className="field resize-y text-[13px] leading-[1.6]"
                   />
@@ -172,7 +176,7 @@ export function LinkPreview({
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label htmlFor="save-coll" className="mb-1.5 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-ash">
-                      <FolderOpen size={12} strokeWidth={2} aria-hidden /> Collection
+                      <FolderOpen size={12} strokeWidth={2} aria-hidden /> {t('si.collection')}
                     </label>
                     <input
                       id="save-coll"
@@ -180,8 +184,9 @@ export function LinkPreview({
                       value={collection}
                       onChange={(e) => setCollection(e.target.value)}
                       onBlur={() => {
-                        const v = collection.trim().slice(0, 80) || 'Inbox';
-                        setCollection(v);
+                        const typed = collection.trim().slice(0, 80);
+                        const v = !typed || typed === t('si.inbox') ? 'Inbox' : typed;
+                        setCollection(showColl(v));
                         if (v !== link.collection) commit({ collection: v });
                       }}
                       onKeyDown={(e) => {
@@ -191,22 +196,22 @@ export function LinkPreview({
                     />
                     <datalist id="save-collections">
                       {collections.map((c) => (
-                        <option key={c} value={c} />
+                        <option key={c} value={showColl(c)} />
                       ))}
                     </datalist>
                   </div>
                   <div>
-                    <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.06em] text-ash">Tags</span>
-                    <TagInput tags={link.tags} onChange={(tags) => commit({ tags })} placeholder="Add a tag…" />
+                    <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.06em] text-ash">{t('si.tags')}</span>
+                    <TagInput tags={link.tags} onChange={(tags) => commit({ tags })} placeholder={t('si.addTag')} />
                   </div>
                 </div>
 
                 <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-graphite pt-3 text-[11.5px] text-ash">
-                  <span>Saved {formatDateTime(link.createdAt)}</span>
-                  {link.openedAt ? <span>Last opened {formatDateTime(link.openedAt)}</span> : null}
+                  <span>{t('si.savedAt', { date: formatDateTimeT(link.createdAt, locale) })}</span>
+                  {link.openedAt ? <span>{t('si.openedAt', { date: formatDateTimeT(link.openedAt, locale) })}</span> : null}
                   {link.readingMinutes ? (
                     <span className="inline-flex items-center gap-1">
-                      <Clock size={11} strokeWidth={2} aria-hidden /> {link.readingMinutes} min read
+                      <Clock size={11} strokeWidth={2} aria-hidden /> {t('si.minRead', { count: link.readingMinutes })}
                     </span>
                   ) : null}
                   <button
@@ -214,7 +219,7 @@ export function LinkPreview({
                     className="ms-auto inline-flex items-center gap-1.5 rounded-[6px] px-2 py-1 text-coral hover:bg-coral/10"
                     onClick={() => onDelete(link)}
                   >
-                    <Trash2 size={12.5} strokeWidth={2} /> Move to trash
+                    <Trash2 size={12.5} strokeWidth={2} /> {t('si.moveToTrash')}
                   </button>
                 </div>
               </div>

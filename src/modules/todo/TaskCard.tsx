@@ -5,6 +5,7 @@ import { ConfirmDelete } from '@/components/ui/ConfirmDelete';
 import { IconButton } from '@/components/ui/Button';
 import type { Todo } from '@/lib/types';
 import { cn, refCode } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 import { completionBurst } from './burst';
 import { dueInfo, PRIORITY_LABEL, PRIORITY_TONE } from './taskMeta';
 
@@ -17,6 +18,7 @@ export function TaskCheckbox({
   onToggle: () => void;
   size?: number;
 }): JSX.Element {
+  const { t } = useLanguage();
   const ref = useRef<HTMLButtonElement>(null);
   return (
     <button
@@ -24,7 +26,7 @@ export function TaskCheckbox({
       type="button"
       role="checkbox"
       aria-checked={done}
-      aria-label={done ? 'Mark as not done' : 'Mark as done'}
+      aria-label={done ? t('task.markNotDone') : t('task.markDone')}
       onClick={(e) => {
         e.stopPropagation();
         if (!done && ref.current) completionBurst(ref.current);
@@ -60,6 +62,7 @@ export function TaskCard({
   draggable?: boolean;
   compact?: boolean;
 }): JSX.Element {
+  const { t } = useLanguage();
   const due = dueInfo(todo);
   const done = todo.status === 'completed';
 
@@ -101,26 +104,26 @@ export function TaskCard({
             {todo.recurrence !== 'none' ? (
               <span className="inline-flex items-center gap-1 rounded-[4px] bg-[rgb(var(--tint-rgb)/0.05)] px-1.5 py-[2px] text-[11px] text-fog">
                 <Repeat size={10} strokeWidth={1.9} aria-hidden />
-                {todo.recurrence}
+                {t(`task.repeats.${todo.recurrence}`)}
               </span>
             ) : null}
-            <span className="mono ml-auto text-[10.5px] text-ash/70">{refCode('TSK', todo.id)}</span>
+            <span className="mono ms-auto text-[10.5px] text-ash/70">{refCode('TSK', todo.id)}</span>
           </div>
         </div>
       </div>
 
-      <div className="absolute right-2 top-2 flex items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-within:opacity-100">
+      <div className="absolute end-2 top-2 flex items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-within:opacity-100">
         <IconButton
-          label={todo.isInteresting ? 'Remove from vault' : 'Add to vault'}
+          label={todo.isInteresting ? t('task.vault.remove') : t('task.vault.add')}
           className={cn('h-6 w-6', todo.isInteresting && 'text-accent opacity-100')}
           onClick={onToggleStar}
         >
           <Star size={12.5} strokeWidth={1.9} fill={todo.isInteresting ? 'currentColor' : 'none'} />
         </IconButton>
-        <IconButton label="Edit task" className="h-6 w-6" onClick={onEdit}>
+        <IconButton label={t('task.edit')} className="h-6 w-6" onClick={onEdit}>
           <Pencil size={12.5} strokeWidth={1.9} />
         </IconButton>
-        <ConfirmDelete onConfirm={onDelete} label="Delete task" size={12.5} />
+        <ConfirmDelete onConfirm={onDelete} label={t('task.delete')} size={12.5} />
       </div>
     </article>
   );

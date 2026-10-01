@@ -1,6 +1,7 @@
 import type { Attachment, ItemType } from '@/lib/types';
 import { nowISO, uid } from '@/lib/utils';
 import { getSupabase, STORAGE_BUCKET } from './supabaseClient';
+import { translate } from '@/state/languageStore';
 
 /** localStorage is the offline store; anything bigger needs a signed-in session. */
 export const MAX_LOCAL_BYTES = 3 * 1024 * 1024;
@@ -28,7 +29,7 @@ function readAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error('The file could not be read.'));
+    reader.onerror = () => reject(new Error(translate('core.file.readFailed')));
     reader.readAsDataURL(file);
   });
 }
@@ -55,12 +56,12 @@ export async function uploadAttachment(
 
   if (teamId && client) {
     if (file.size > MAX_CLOUD_BYTES) {
-      return { ok: false, error: `${file.name} is larger than the ${humanLimit(MAX_CLOUD_BYTES)} upload limit.` };
+      return { ok: false, error: translate('core.file.overCloudLimit', { name: file.name, limit: humanLimit(MAX_CLOUD_BYTES) }) };
     }
     if (usedCloudBytes + file.size > MAX_TOTAL_CLOUD_BYTES) {
       return {
         ok: false,
-        error: `Your cloud storage is full (${humanLimit(MAX_TOTAL_CLOUD_BYTES)} limit). Remove a file to make room for ${file.name}.`,
+        error: translate('core.file.storageFull', { limit: humanLimit(MAX_TOTAL_CLOUD_BYTES), name: file.name }),
       };
     }
     const path = `${teamId}/${ownerType}/${id}-${safeName(file.name)}`;
@@ -68,7 +69,7 @@ export async function uploadAttachment(
       upsert: false,
       contentType: file.type || 'application/octet-stream',
     });
-    if (error) return { ok: false, error: `${file.name} could not be uploaded — ${error.message}` };
+    if (error) return { ok: false, error: translate('core.file.uploadFailed', { name: file.name, error: error.message }) };
     return {
       ok: true,
       attachment: {
@@ -88,7 +89,11 @@ export async function uploadAttachment(
   if (file.size > MAX_LOCAL_BYTES) {
     return {
       ok: false,
-      error: `${file.name} is over the ${humanLimit(MAX_LOCAL_BYTES)} offline limit. Sign in to store files up to ${humanLimit(MAX_CLOUD_BYTES)}.`,
+      error: translate('core.file.overOfflineLimit', {
+        name: file.name,
+        limit: humanLimit(MAX_LOCAL_BYTES),
+        cloudLimit: humanLimit(MAX_CLOUD_BYTES),
+      }),
     };
   }
 
@@ -109,7 +114,7 @@ export async function uploadAttachment(
       },
     };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : 'The file could not be read.' };
+    return { ok: false, error: e instanceof Error ? e.message : translate('core.file.readFailed') };
   }
 }
 

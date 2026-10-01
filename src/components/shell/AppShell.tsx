@@ -4,6 +4,7 @@ import { CircularLoader } from '@/components/motion/CircularLoader';
 import { ViewTransition } from '@/components/motion/ViewTransition';
 import { CookieConsentModal } from '@/components/onboarding/CookieConsentModal';
 import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow';
+import { rich, useI18n } from '@/components/ui/useI18n';
 import { hasMedicationsAccess } from '@/lib/access';
 import { useAuth } from '@/state/authStore';
 import { prefetchLikelyModules } from '@/modules/prefetch';
@@ -87,6 +88,7 @@ export function AppShell(): JSX.Element {
     accountOpen,
     setAccountOpen,
   } = useUI();
+  const { t } = useI18n();
 
   // Wide screens dock the labelled sidebar beside the content; laptops and
   // tablets keep the icon rail and float the sidebar over the content when
@@ -244,16 +246,15 @@ export function AppShell(): JSX.Element {
       <main className="relative z-10 flex h-full min-w-0 flex-1 flex-col">
         {!ready ? (
           <div className="flex h-full items-center justify-center">
-            <CircularLoader title="Loading your workspace" subtitle="This won't take long" />
+            <CircularLoader title={t('sh.app.loading')} subtitle={t('sh.app.loadingHint')} />
           </div>
         ) : error ? (
           <div className="flex h-full items-center justify-center p-6">
             <div className="surface-card max-w-[420px] p-5">
-              <h1 className="text-[15px] font-medium text-paper">The workspace could not be loaded</h1>
+              <h1 className="text-[15px] font-medium text-paper">{t('sh.app.loadFailed')}</h1>
               <p className="mt-2 text-[13px] leading-[1.6] text-ash">{error}</p>
               <p className="mt-3 text-[12.5px] leading-[1.6] text-ash/80">
-                With Supabase configured, check that the tables in <span className="mono">supabase/schema.sql</span>{' '}
-                exist and that row-level security allows the signed-in user to read them.
+                {rich(t('sh.app.loadFailedHint'), { file: <span className="mono">supabase/schema.sql</span> })}
               </p>
             </div>
           </div>

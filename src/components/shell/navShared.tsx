@@ -8,6 +8,7 @@ import { useAuth } from '@/state/authStore';
 import { useTeam } from '@/state/teamStore';
 import { useUI } from '@/state/uiStore';
 import type { SyncState } from '@/state/workspaceStore';
+import { useI18n } from '@/components/ui/useI18n';
 
 /** Module id → translation key. 'docs' is special-cased since the module's
  * own label ("Docs Storage") differs from the group header ("Docs"). */
@@ -44,14 +45,16 @@ export const SYNC_LOOK_KEY: Record<SyncState, { icon: typeof Cloud; color: strin
 
 export type RowFlag = 'soon' | 'locked';
 
+/** `label` is a translation key. */
 export const FLAG_LOOK: Record<RowFlag, { color: string; label: string; icon?: typeof Lock }> = {
-  soon: { color: '#eab308', label: 'Soon' },
-  locked: { color: '#8b5cf6', label: 'Pro', icon: Lock },
+  soon: { color: '#eab308', label: 'sh.flag.soon' },
+  locked: { color: '#8b5cf6', label: 'sh.flag.pro', icon: Lock },
 };
 
+/** Translation keys for each flag's tooltip. */
 export const FLAG_TOOLTIP: Record<RowFlag, string> = {
-  soon: 'Coming soon',
-  locked: 'Subscriber feature',
+  soon: 'sh.flag.soonTip',
+  locked: 'sh.flag.lockedTip',
 };
 
 /** Which status flag (if any) a module's nav entry carries. */
@@ -64,6 +67,7 @@ export function useRowFlag(): (id: ModuleId) => RowFlag | undefined {
 /** Small pill shown next to a label. */
 export function FlagPill({ flag, className }: { flag: RowFlag; className?: string }): JSX.Element {
   const look = FLAG_LOOK[flag];
+  const { t } = useI18n();
   return (
     <span
       className={cn(
@@ -77,7 +81,7 @@ export function FlagPill({ flag, className }: { flag: RowFlag; className?: strin
       }}
     >
       {look.icon ? <look.icon size={9} strokeWidth={2.2} aria-hidden /> : null}
-      {look.label}
+      {t(look.label)}
     </span>
   );
 }
@@ -111,15 +115,16 @@ export function Avatar({ name, size = 30 }: { name: string; size?: number }): JS
 export function TeamSwitcher({ expanded }: { expanded: boolean }): JSX.Element | null {
   const { teams, activeTeam, switchTeam, ready } = useTeam();
   const { setModule } = useUI();
+  const { t } = useI18n();
 
   if (!ready || teams.length === 0) return null;
 
   const trigger = (
     <button
       type="button"
-      aria-label={`Team: ${activeTeam?.name ?? 'Personal'}`}
+      aria-label={t('sh.team.aria', { name: activeTeam?.name ?? t('sh.team.personal') })}
       className={cn(
-        'flex items-center gap-2.5 rounded-[10px] bg-[rgb(var(--tint-rgb)/0.025)] text-left shadow-[inset_0_0_0_1px_var(--color-graphite)] transition-colors duration-150 hover:shadow-[inset_0_0_0_1px_var(--color-smoke)]',
+        'flex items-center gap-2.5 rounded-[10px] bg-[rgb(var(--tint-rgb)/0.025)] text-start shadow-[inset_0_0_0_1px_var(--color-graphite)] transition-colors duration-150 hover:shadow-[inset_0_0_0_1px_var(--color-smoke)]',
         expanded ? 'w-full px-2.5 py-2' : 'mx-auto h-[38px] w-[38px] justify-center p-0',
       )}
     >
@@ -127,8 +132,8 @@ export function TeamSwitcher({ expanded }: { expanded: boolean }): JSX.Element |
       {expanded ? (
         <>
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[12.5px] text-paper">{activeTeam?.name ?? 'Personal'}</span>
-            <span className="block truncate text-[10.5px] capitalize text-ash">{activeTeam?.role ?? ''}</span>
+            <span className="block truncate text-[12.5px] text-paper">{activeTeam?.name ?? t('sh.team.personal')}</span>
+            <span className="block truncate text-[10.5px] capitalize text-ash">{activeTeam?.role ? t(`sh.role.${activeTeam.role}`) : ''}</span>
           </span>
           <ChevronsUpDown size={13} strokeWidth={1.8} className="shrink-0 text-ash" aria-hidden />
         </>
@@ -147,16 +152,16 @@ export function TeamSwitcher({ expanded }: { expanded: boolean }): JSX.Element |
             sideOffset={8}
             className="z-[60] w-[220px] rounded-[12px] bg-carbon p-1.5 shadow-[inset_0_0_0_1px_var(--color-graphite),0_4px_24px_rgba(8,9,10,0.6)] data-[state=open]:animate-[nx-scale-in_160ms_var(--ease-out-quint)_both]"
           >
-            <p className="px-2 py-1.5 text-[10.5px] font-medium uppercase tracking-[0.07em] text-ash">Your teams</p>
-            {teams.map((t) => (
+            <p className="px-2 py-1.5 text-[10.5px] font-medium uppercase tracking-[0.07em] text-ash">{t('sh.team.yours')}</p>
+            {teams.map((team) => (
               <DropdownMenu.Item
-                key={t.id}
-                onSelect={() => switchTeam(t.id)}
+                key={team.id}
+                onSelect={() => switchTeam(team.id)}
                 className="flex cursor-pointer items-center gap-2 rounded-[7px] px-2 py-1.5 text-[12.5px] text-mist outline-none data-[highlighted]:bg-[rgb(var(--tint-rgb)/0.05)] data-[highlighted]:text-paper"
               >
-                <Avatar name={t.name} size={20} />
-                <span className="min-w-0 flex-1 truncate">{t.name}</span>
-                {t.id === activeTeam?.id ? <Check size={13} strokeWidth={2} className="text-acid" /> : null}
+                <Avatar name={team.name} size={20} />
+                <span className="min-w-0 flex-1 truncate">{team.name}</span>
+                {team.id === activeTeam?.id ? <Check size={13} strokeWidth={2} className="text-acid" /> : null}
               </DropdownMenu.Item>
             ))}
             <DropdownMenu.Separator className="my-1.5 h-px bg-graphite" />
@@ -165,7 +170,7 @@ export function TeamSwitcher({ expanded }: { expanded: boolean }): JSX.Element |
               className="flex cursor-pointer items-center gap-2 rounded-[7px] px-2 py-1.5 text-[12.5px] text-ash outline-none data-[highlighted]:bg-[rgb(var(--tint-rgb)/0.05)] data-[highlighted]:text-paper"
             >
               <Plus size={13} strokeWidth={1.9} />
-              Manage teams &amp; invites
+              {t('sh.team.manage')}
             </DropdownMenu.Item>
           </DropdownMenu.Content>
         </DropdownMenu.Portal>

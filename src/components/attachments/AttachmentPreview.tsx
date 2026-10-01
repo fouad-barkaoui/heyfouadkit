@@ -4,7 +4,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { attachmentKind } from '@/data/attachments';
 import type { Attachment } from '@/lib/types';
-import { formatBytes, formatDateTime } from '@/lib/utils';
+import { fmtBytes, fmtDateTime, useI18n } from '@/components/ui/useI18n';
 import { useAttachmentUrl } from './useAttachmentUrl';
 
 const PdfViewer = lazy(async () => ({
@@ -14,13 +14,14 @@ const PdfViewer = lazy(async () => ({
 function TextPreview({ url }: { url: string }): JSX.Element {
   const [text, setText] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const { t } = useI18n();
 
   useEffect(() => {
     let cancelled = false;
     void fetch(url)
       .then((r) => r.text())
-      .then((t) => {
-        if (!cancelled) setText(t.slice(0, 200_000));
+      .then((body) => {
+        if (!cancelled) setText(body.slice(0, 200_000));
       })
       .catch(() => {
         if (!cancelled) setFailed(true);
@@ -30,12 +31,12 @@ function TextPreview({ url }: { url: string }): JSX.Element {
     };
   }, [url]);
 
-  if (failed) return <p className="py-8 text-center text-[13px] text-ash">This file could not be read.</p>;
+  if (failed) return <p className="py-8 text-center text-[13px] text-ash">{t('sh.files.unreadable')}</p>;
   if (text === null) {
     return (
       <div className="flex items-center justify-center gap-2 py-10 text-[13px] text-ash">
         <Loader2 size={15} className="animate-spin" aria-hidden />
-        Reading…
+        {t('sh.files.reading')}
       </div>
     );
   }
@@ -55,6 +56,7 @@ export function AttachmentPreview({
   onOpenChange: (open: boolean) => void;
 }): JSX.Element | null {
   const { url, loading } = useAttachmentUrl(attachment);
+  const { t, locale } = useI18n();
   if (!attachment) return null;
 
   const kind = attachmentKind(attachment);
@@ -64,17 +66,18 @@ export function AttachmentPreview({
       open
       onOpenChange={onOpenChange}
       title={attachment.name}
-      description={`${formatBytes(attachment.size)} · added ${formatDateTime(attachment.createdAt)}${
-        attachment.storagePath ? ' · stored in the cloud' : ' · stored on this device'
-      }`}
+      description={t(attachment.storagePath ? 'sh.files.metaCloud' : 'sh.files.metaDevice', {
+        size: fmtBytes(attachment.size, t),
+        date: fmtDateTime(attachment.createdAt, locale),
+      })}
       width="xl"
       footer={
         <>
-          <Button onClick={() => onOpenChange(false)}>Close</Button>
+          <Button onClick={() => onOpenChange(false)}>{t('sh.close')}</Button>
           {url ? (
             <a href={url} download={attachment.name} className="btn btn-primary" target="_blank" rel="noreferrer">
               <Download size={13.5} strokeWidth={1.9} aria-hidden />
-              Download
+              {t('sh.files.download')}
             </a>
           ) : null}
         </>
@@ -83,11 +86,11 @@ export function AttachmentPreview({
       {loading ? (
         <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-ash">
           <Loader2 size={15} className="animate-spin" aria-hidden />
-          Loading file…
+          {t('sh.files.loading')}
         </div>
       ) : !url ? (
         <p className="py-16 text-center text-[13px] text-ash">
-          This file is stored in the cloud and is not reachable right now.
+          {t('sh.files.unreachable')}
         </p>
       ) : kind === 'image' ? (
         <img
@@ -100,7 +103,7 @@ export function AttachmentPreview({
           fallback={
             <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-ash">
               <Loader2 size={15} className="animate-spin" aria-hidden />
-              Opening viewer…
+              {t('sh.files.openingViewer')}
             </div>
           }
         >
@@ -111,8 +114,8 @@ export function AttachmentPreview({
       ) : (
         <div className="flex flex-col items-center gap-3 py-14 text-center">
           <FileText size={26} strokeWidth={1.5} className="text-ash" aria-hidden />
-          <p className="text-[13px] text-mist">No inline preview for this file type.</p>
-          <p className="text-[12px] text-ash">{attachment.mimeType || 'unknown type'}</p>
+          <p className="text-[13px] text-mist">{t('sh.files.noPreview')}</p>
+          <p className="text-[12px] text-ash">{attachment.mimeType || t('sh.files.unknownType')}</p>
         </div>
       )}
     </Modal>

@@ -6,21 +6,34 @@ import { StatusDot } from '@/components/ui/BadgeChip';
 import { Button, IconButton } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { NewsItem, NewsStage } from '@/lib/types';
-import { cn, groupByDay, nowISO } from '@/lib/utils';
+import { cn, nowISO } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 import { useUI } from '@/state/uiStore';
 import { useRequireAuth } from '@/state/useRequireAuth';
 import { useWorkspace } from '@/state/workspaceStore';
 import { NewsCard } from './NewsCard';
 import { NewsEditor } from './NewsEditor';
 import { NewsKanbanBoard } from './NewsKanbanBoard';
-import { NEWS_STAGES, STAGE_LABEL, STAGE_TONE } from './newsMeta';
+import { dayBucketT, NEWS_STAGES, STAGE_LABEL, STAGE_TONE } from './newsMeta';
 
 type ViewMode = 'board' | 'list';
+
+function groupByDayT(items: NewsItem[], locale: string): [string, NewsItem[]][] {
+  const map = new Map<string, NewsItem[]>();
+  for (const item of items) {
+    const key = dayBucketT(item.updatedAt, locale);
+    const bucket = map.get(key);
+    if (bucket) bucket.push(item);
+    else map.set(key, [item]);
+  }
+  return [...map.entries()];
+}
 
 export function NewsModule(): JSX.Element {
   const { workspace, createRecord, updateRecord, toggleInteresting } = useWorkspace();
   const { focusRequest, clearFocus } = useUI();
   const requireAuth = useRequireAuth();
+  const { t, locale } = useLanguage();
   const items = useMemo(() => workspace.news.filter((n) => !n.isDeleted), [workspace.news]);
 
   const [view, setView] = useState<ViewMode>('board');
@@ -80,11 +93,11 @@ export function NewsModule(): JSX.Element {
     content = (
       <EmptyState
         icon={<Newspaper size={18} strokeWidth={1.6} />}
-        title={query || stageFilter !== 'all' ? 'Nothing matches this filter' : 'No stories yet'}
-        hint="Every story moves left to right — Ideas, Research, Outline, Draft, In Review, Published."
+        title={query || stageFilter !== 'all' ? t('news.empty.filtered') : t('news.empty.title')}
+        hint={t('news.empty.hint')}
         action={
           <Button variant="primary" icon={<Plus size={14} strokeWidth={2} />} onClick={() => openNew()}>
-            New story
+            {t('news.newStory')}
           </Button>
         }
       />
@@ -102,7 +115,7 @@ export function NewsModule(): JSX.Element {
   } else {
     content = (
       <div className="mx-auto max-w-[900px]">
-        {groupByDay(visible, (i) => i.updatedAt).map(([bucket, group]) => (
+        {groupByDayT(visible, locale).map(([bucket, group]) => (
           <div key={bucket} className="mb-6 last:mb-0">
             <div className="mb-2.5 flex items-center gap-2.5">
               <h3 className="text-[12px] font-medium uppercase tracking-[0.07em] text-ash">{bucket}</h3>
@@ -138,9 +151,9 @@ export function NewsModule(): JSX.Element {
       <div className="mb-3 space-y-2 rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
         <p className="num text-[13px] text-paper">
           {stats.published}
-          <span className="text-ash"> / {stats.total} published</span>
+          <span className="text-ash">{t('news.ofPublished', { total: stats.total })}</span>
         </p>
-        <p className="text-[11.5px] text-ash">{stats.inFlight} still in the pipeline</p>
+        <p className="text-[11.5px] text-ash">{t('news.inPipeline', { count: stats.inFlight })}</p>
       </div>
 
       {visible.map((item) => (
@@ -170,14 +183,14 @@ export function NewsModule(): JSX.Element {
   return (
     <>
       <ModuleLayout
-        panelTitle="News"
+        panelTitle={t('nav.news')}
         panelCount={visible.length}
         panelActions={
-          <IconButton label="New story" onClick={() => openNew()}>
+          <IconButton label={t('news.newStory')} onClick={() => openNew()}>
             <Plus size={15} strokeWidth={1.9} />
           </IconButton>
         }
-        panelSearch={{ value: query, onChange: setQuery, placeholder: 'Search stories…' }}
+        panelSearch={{ value: query, onChange: setQuery, placeholder: t('news.searchPlaceholder') }}
         panelFilters={
           <div className="flex flex-wrap gap-1.5">
             <button
@@ -186,7 +199,7 @@ export function NewsModule(): JSX.Element {
               data-active={stageFilter === 'all'}
               onClick={() => setStageFilter('all')}
             >
-              All
+              {t('news.all')}
             </button>
             {NEWS_STAGES.map((s) => (
               <button
@@ -202,24 +215,24 @@ export function NewsModule(): JSX.Element {
           </div>
         }
         panel={panel}
-        title="News"
+        title={t('nav.news')}
         subtitle={
           <span className="flex flex-wrap items-center gap-2">
-            <span className="num">{visible.length} shown</span>
+            <span className="num">{t('news.shown', { count: visible.length })}</span>
             <span aria-hidden>·</span>
-            <span className="num">{stats.published} published</span>
+            <span className="num">{t('news.published', { count: stats.published })}</span>
           </span>
         }
         actions={
           <Button variant="primary" icon={<Plus size={14} strokeWidth={2} />} onClick={() => openNew()}>
-            New story
+            {t('news.newStory')}
           </Button>
         }
         toolbar={
           <div className="flex items-center gap-1 rounded-[7px] bg-[rgb(var(--tint-rgb)/0.03)] p-[3px] shadow-[inset_0_0_0_1px_var(--color-graphite)]">
             {[
-              { id: 'board' as const, label: 'Board', icon: Columns3 },
-              { id: 'list' as const, label: 'List', icon: Rows3 },
+              { id: 'board' as const, label: t('news.view.board'), icon: Columns3 },
+              { id: 'list' as const, label: t('news.view.list'), icon: Rows3 },
             ].map((v) => (
               <button
                 key={v.id}

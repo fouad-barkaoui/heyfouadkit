@@ -1,11 +1,12 @@
 import { X } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useI18n } from './useI18n';
 
 export function TagInput({
   tags,
   onChange,
-  placeholder = 'Add a tag…',
+  placeholder,
   className,
 }: {
   tags: string[];
@@ -14,6 +15,7 @@ export function TagInput({
   className?: string;
 }): JSX.Element {
   const [draft, setDraft] = useState('');
+  const { t } = useI18n();
 
   const commit = (): void => {
     const value = draft.trim().replace(/^#/, '').toLowerCase();
@@ -41,8 +43,8 @@ export function TagInput({
           {tag}
           <button
             type="button"
-            aria-label={`Remove tag ${tag}`}
-            onClick={() => onChange(tags.filter((t) => t !== tag))}
+            aria-label={t('sh.tag.remove', { tag })}
+            onClick={() => onChange(tags.filter((x) => x !== tag))}
             className="rounded-[3px] text-ash transition-colors hover:text-coral"
           >
             <X size={11} strokeWidth={2} aria-hidden />
@@ -61,8 +63,8 @@ export function TagInput({
             onChange(tags.slice(0, -1));
           }
         }}
-        placeholder={tags.length === 0 ? placeholder : ''}
-        aria-label="Add tag"
+        placeholder={tags.length === 0 ? (placeholder ?? t('sh.tag.placeholder')) : ''}
+        aria-label={t('sh.tag.add')}
         className="min-w-[90px] flex-1 bg-transparent text-[12.5px] text-mist outline-none placeholder:text-ash"
       />
     </div>

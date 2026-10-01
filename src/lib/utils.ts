@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { localeTag, translate } from '@/state/languageStore';
 
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
@@ -30,14 +31,14 @@ export function formatDate(iso: string | null | undefined): string {
   if (!iso) return '—';
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return d.toLocaleDateString(localeTag(), { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 export function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return '—';
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleString('en-US', {
+  return d.toLocaleString(localeTag(), {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -52,12 +53,12 @@ export function relativeTime(iso: string | null | undefined): string {
   if (Number.isNaN(t)) return '—';
   const diff = Date.now() - t;
   const mins = Math.round(diff / 60_000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return translate('core.time.justNow');
+  if (mins < 60) return translate('core.time.minutesAgo', { n: mins });
   const hours = Math.round(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return translate('core.time.hoursAgo', { n: hours });
   const days = Math.round(hours / 24);
-  if (days < 30) return `${days}d ago`;
+  if (days < 30) return translate('core.time.daysAgo', { n: days });
   return formatDate(iso);
 }
 
@@ -66,10 +67,10 @@ export function dayBucket(iso: string): string {
   const d = new Date(iso);
   const start = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
   const delta = Math.round((start(new Date()) - start(d)) / DAY);
-  if (delta <= 0) return 'Today';
-  if (delta === 1) return 'Yesterday';
-  if (delta < 7) return `${delta} days ago`;
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  if (delta <= 0) return translate('core.time.today');
+  if (delta === 1) return translate('core.time.yesterday');
+  if (delta < 7) return translate('core.time.daysAgoLong', { n: delta });
+  return d.toLocaleDateString(localeTag(), { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 export function groupByDay<T>(items: T[], getDate: (item: T) => string): [string, T[]][] {

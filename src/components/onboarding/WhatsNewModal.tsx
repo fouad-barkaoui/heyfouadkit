@@ -3,9 +3,11 @@ import { BookmarkPlus, Camera, Crown, Orbit, Play, Sparkles, Users, X, type Luci
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { MARK_SRC } from '@/components/ui/BrandMark';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 
 export type WhatsNewAction = 'saveit' | 'account' | null;
 
+/** `label`, `title`, `body` and `action.label` are translation keys. */
 interface Feature {
   id: string;
   label: string;
@@ -21,6 +23,7 @@ interface Feature {
 /* ── Hero art — small, looping, pure CSS ─────────────────────────────── */
 
 function SaveItArt(): JSX.Element {
+  const { t } = useLanguage();
   return (
     <div className="wn-art-saveit">
       <div className="wn-bar">
@@ -28,7 +31,7 @@ function SaveItArt(): JSX.Element {
           <BookmarkPlus size={13} strokeWidth={2} />
         </span>
         <span className="wn-typing">youtube.com/watch?v=aircAruvnKk</span>
-        <span className="wn-bar-btn">Save</span>
+        <span className="wn-bar-btn">{t('ob.wn.art.save')}</span>
       </div>
       <div className="wn-cards">
         <div className="wn-card wn-card-a">
@@ -88,6 +91,7 @@ function ConstellationArt(): JSX.Element {
 }
 
 function ProfileArt(): JSX.Element {
+  const { t } = useLanguage();
   return (
     <div className="wn-art-profile">
       <span className="wn-seal">
@@ -96,13 +100,14 @@ function ProfileArt(): JSX.Element {
         </span>
       </span>
       <span className="wn-chip">
-        <Crown size={10} strokeWidth={2.4} /> ADMIN
+        <Crown size={10} strokeWidth={2.4} /> {t('ob.wn.art.admin')}
       </span>
     </div>
   );
 }
 
 function TeamArt(): JSX.Element {
+  const { t } = useLanguage();
   return (
     <div className="wn-art-team">
       <div className="wn-avatars">
@@ -114,7 +119,7 @@ function TeamArt(): JSX.Element {
       <div className="wn-build">
         <span className="wn-build-bar" />
       </div>
-      <span className="wn-build-label">Building…</span>
+      <span className="wn-build-label">{t('ob.wn.art.building')}</span>
     </div>
   );
 }
@@ -122,44 +127,44 @@ function TeamArt(): JSX.Element {
 const FEATURES: Feature[] = [
   {
     id: 'saveit',
-    label: 'SaveIt',
+    label: 'ob.wn.saveit.label',
     icon: BookmarkPlus,
     status: 'new',
-    title: 'Save anything worth coming back to',
-    body: 'Paste a link — a video, an article, a repo, any website — and it becomes a rich card with its picture, title and reading time. Videos play right inside the app. Share links from your phone, or save any page with one click from your bookmarks bar.',
-    action: { label: 'Open SaveIt', to: 'saveit' },
+    title: 'ob.wn.saveit.title',
+    body: 'ob.wn.saveit.body',
+    action: { label: 'ob.wn.saveit.action', to: 'saveit' },
     hue: ['#6d28d9', '#f59e0b'],
     art: SaveItArt,
   },
   {
     id: 'constellation',
-    label: 'Constellation view',
+    label: 'ob.wn.constellation.label',
     icon: Orbit,
     status: 'new',
-    title: 'See your library as a galaxy',
-    body: 'Switch SaveIt to Constellation and every link becomes a star, grouped by type, with threads joining the ones that share a tag. Drag to orbit, scroll to zoom, click a star to open it.',
-    action: { label: 'Explore it', to: 'saveit' },
+    title: 'ob.wn.constellation.title',
+    body: 'ob.wn.constellation.body',
+    action: { label: 'ob.wn.constellation.action', to: 'saveit' },
     hue: ['#0b1030', '#3b82f6'],
     art: ConstellationArt,
   },
   {
     id: 'profile',
-    label: 'Profile pictures',
+    label: 'ob.wn.profile.label',
     icon: Camera,
     status: 'new',
-    title: 'Make your profile yours',
-    body: 'Add a profile picture — crop it right in the app — and it follows you everywhere: the sidebar, your home page and your team. Pro members get the gold spotlight badge.',
-    action: { label: 'Add my picture', to: 'account' },
+    title: 'ob.wn.profile.title',
+    body: 'ob.wn.profile.body',
+    action: { label: 'ob.wn.profile.action', to: 'account' },
     hue: ['#78350f', '#eab308'],
     art: ProfileArt,
   },
   {
     id: 'team',
-    label: 'Team',
+    label: 'ob.wn.team.label',
     icon: Users,
     status: 'dev',
-    title: 'Teams are on the way',
-    body: "Invite people, share a workspace and edit together live. We're still building this — it's marked “Soon” in the sidebar and will light up here as soon as it's ready.",
+    title: 'ob.wn.team.title',
+    body: 'ob.wn.team.body',
     hue: ['#134e4a', '#14b8a6'],
     art: TeamArt,
   },
@@ -176,6 +181,7 @@ export function WhatsNewModal({
   open: boolean;
   onClose: (action: WhatsNewAction) => void;
 }): JSX.Element {
+  const { t } = useLanguage();
   const [active, setActive] = useState(0);
   const feature = FEATURES[active]!;
   const listRef = useRef<HTMLDivElement>(null);
@@ -206,10 +212,10 @@ export function WhatsNewModal({
           {/* Feature list */}
           <div className="wn-side flex shrink-0 flex-col p-5 md:w-[264px] md:p-6">
             <span className="wn-kicker inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-[10.5px] font-medium uppercase tracking-[0.1em]">
-              <Sparkles size={11} strokeWidth={2.2} aria-hidden /> What's new
+              <Sparkles size={11} strokeWidth={2.2} aria-hidden /> {t('ob.wn.kicker')}
             </span>
             <Dialog.Title className="mt-3 text-[22px] font-semibold leading-[1.2] tracking-[-0.024em] text-paper md:text-[24px]">
-              Here's what we just added to Kanz
+              {t('ob.wn.title')}
             </Dialog.Title>
             <div
               ref={listRef}
@@ -239,11 +245,11 @@ export function WhatsNewModal({
                     className="wn-item flex shrink-0 items-center gap-2.5 rounded-[10px] px-3 py-2 text-start text-[13.5px]"
                   >
                     <Icon size={15} strokeWidth={1.8} aria-hidden />
-                    <span className="flex-1 whitespace-nowrap">{f.label}</span>
+                    <span className="flex-1 whitespace-nowrap">{t(f.label)}</span>
                     {f.status === 'dev' ? (
-                      <span className="wn-tag is-dev">Soon</span>
+                      <span className="wn-tag is-dev">{t('ob.wn.soon')}</span>
                     ) : (
-                      <span className="wn-tag">New</span>
+                      <span className="wn-tag">{t('ob.wn.new')}</span>
                     )}
                   </button>
                 );
@@ -268,7 +274,7 @@ export function WhatsNewModal({
               </div>
               <Dialog.Close
                 className="wn-close absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full"
-                aria-label="Close"
+                aria-label={t('ob.close')}
               >
                 <X size={16} strokeWidth={2} />
               </Dialog.Close>
@@ -276,10 +282,10 @@ export function WhatsNewModal({
 
             <div key={`${feature.id}-copy`} className="wn-copy scroll-y flex min-h-0 flex-1 flex-col p-5 md:p-6">
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-[16.5px] font-semibold tracking-[-0.014em] text-paper">{feature.title}</h3>
-                {feature.status === 'dev' ? <span className="wn-tag is-dev">In development</span> : null}
+                <h3 className="text-[16.5px] font-semibold tracking-[-0.014em] text-paper">{t(feature.title)}</h3>
+                {feature.status === 'dev' ? <span className="wn-tag is-dev">{t('ob.wn.inDev')}</span> : null}
               </div>
-              <p className="mt-2 text-[13.5px] leading-[1.65] text-fog">{feature.body}</p>
+              <p className="mt-2 text-[13.5px] leading-[1.65] text-fog">{t(feature.body)}</p>
 
               <div className="mt-auto flex items-center justify-between gap-3 pt-6">
                 <span className="mono text-[11px] text-ash">
@@ -288,16 +294,16 @@ export function WhatsNewModal({
                 <div className="flex gap-2">
                   {feature.action ? (
                     <button type="button" className="btn btn-ghost" onClick={() => onClose(feature.action!.to)}>
-                      {feature.action.label}
+                      {t(feature.action.label)}
                     </button>
                   ) : null}
                   {active < FEATURES.length - 1 ? (
                     <button type="button" className={cn('btn btn-primary')} onClick={() => setActive(active + 1)}>
-                      Next
+                      {t('ob.wn.next')}
                     </button>
                   ) : (
                     <button type="button" className="btn btn-primary" onClick={() => onClose(null)}>
-                      Got it
+                      {t('ob.wn.gotIt')}
                     </button>
                   )}
                 </div>

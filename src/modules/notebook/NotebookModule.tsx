@@ -13,15 +13,14 @@ import type { Note } from '@/lib/types';
 import {
   cn,
   excerpt,
-  groupByDay,
   isWideViewport,
   nowISO,
   refCode,
-  relativeTime,
   stripHtml,
   uid,
   wordCount,
 } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 import { useUI } from '@/state/uiStore';
 import { useRequireAuth } from '@/state/useRequireAuth';
 import { useWorkspace } from '@/state/workspaceStore';
@@ -38,6 +37,44 @@ const emptyDraft = (): Note => ({
   updatedAt: nowISO(),
 });
 
+type T = (key: string, vars?: Record<string, string | number>) => string;
+
+/** Same buckets as lib/utils relativeTime, in the current language. */
+function agoLabel(iso: string, t: T, locale: string): string {
+  const time = new Date(iso).getTime();
+  if (Number.isNaN(time)) return '—';
+  const mins = Math.round((Date.now() - time) / 60_000);
+  if (mins < 1) return t('trash.ago.now');
+  if (mins < 60) return t('trash.ago.minutes', { count: mins });
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return t('trash.ago.hours', { count: hours });
+  const days = Math.round(hours / 24);
+  if (days < 30) return t('trash.ago.days', { count: days });
+  return new Date(iso).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+/** Same buckets as lib/utils groupByDay (Today / Yesterday / N days ago / date), translated. */
+function groupNotesByDay(items: Note[], t: T, locale: string): [string, Note[]][] {
+  const start = (x: Date): number => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const map = new Map<string, Note[]>();
+  for (const item of items) {
+    const d = new Date(item.updatedAt);
+    const delta = Math.round((start(new Date()) - start(d)) / 86_400_000);
+    const key =
+      delta <= 0
+        ? t('nb.day.today')
+        : delta === 1
+          ? t('nb.day.yesterday')
+          : delta < 7
+            ? t('nb.day.daysAgo', { count: delta })
+            : d.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' });
+    const bucket = map.get(key);
+    if (bucket) bucket.push(item);
+    else map.set(key, [item]);
+  }
+  return [...map.entries()];
+}
+
 /** A draft is only worth a database row once it actually holds something. */
 const isMeaningful = (n: Note): boolean =>
   n.title.trim().length > 0 || stripHtml(n.content).length > 0 || n.tags.length > 0;
@@ -46,6 +83,7 @@ export function NotebookModule(): JSX.Element {
   const { workspace, createRecord, updateRecord, toggleInteresting } = useWorkspace();
   const { focusRequest, clearFocus } = useUI();
   const requireAuth = useRequireAuth();
+  const { t, locale } = useLanguage();
   const notes = useMemo(() => workspace.notes.filter((n) => !n.isDeleted), [workspace.notes]);
 
   const [query, setQuery] = useState('');
@@ -72,11 +110,11 @@ export function NotebookModule(): JSX.Element {
       (n) =>
         n.title.toLowerCase().includes(q) ||
         stripHtml(n.content).toLowerCase().includes(q) ||
-        n.tags.some((t) => t.includes(q)),
+        n.tags.some((tag) => tag.includes(q)),
     );
   }, [sorted, query]);
 
-  const grouped = useMemo(() => groupByDay(filtered, (n) => n.updatedAt), [filtered]);
+  const grouped = useMemo(() => groupNotesByDay(filtered, t, locale), [filtered, t, locale]);
   const panelRef = useStagger([query, notes.length]);
 
   const active: Note | null = draft ?? sorted.find((n) => n.id === selectedId) ?? null;
@@ -115,7 +153,7 @@ export function NotebookModule(): JSX.Element {
     createRecord('notes', {
       ...active,
       id,
-      title: active.title.trim() || 'Untitled note',
+      title: active.title.trim() || t('nb.untitled'),
       createdAt: nowISO(),
       updatedAt: nowISO(),
     });
@@ -133,7 +171,7 @@ export function NotebookModule(): JSX.Element {
   const panel = (
     <div ref={panelRef}>
       {filtered.length === 0 ? (
-        <p className="px-2.5 py-6 text-[12.5px] text-ash">{query ? 'No note matches that.' : 'No notes yet.'}</p>
+        <p className="px-2.5 py-6 text-[12.5px] text-ash">{query ? t('nb.noMatch') : t('nb.noNotes')}</p>
       ) : (
         grouped.map(([bucket, items]) => (
           <div key={bucket} className="mb-3">
@@ -144,7 +182,7 @@ export function NotebookModule(): JSX.Element {
               <PanelItem
                 key={note.id}
                 active={note.id === selectedId}
-                title={note.title || 'Untitled note'}
+                title={note.title || t('nb.untitled')}
                 starred={note.isInteresting}
                 onToggleStar={() => toggleInteresting('notes', note.id)}
                 onSelect={() => {
@@ -155,18 +193,18 @@ export function NotebookModule(): JSX.Element {
                   <>
                     <span className="mono text-[10.5px] text-ash/80">{refCode('NOTE', note.id)}</span>
                     <span aria-hidden>·</span>
-                    <span>{relativeTime(note.updatedAt)}</span>
+                    <span>{agoLabel(note.updatedAt, t, locale)}</span>
                   </>
                 }
                 footer={
                   note.tags.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
-                      {note.tags.slice(0, 3).map((t) => (
+                      {note.tags.slice(0, 3).map((tag) => (
                         <span
-                          key={t}
+                          key={tag}
                           className="rounded-[4px] bg-[rgb(var(--tint-rgb)/0.05)] px-1.5 py-[1px] text-[10.5px] text-fog"
                         >
-                          #{t}
+                          #{tag}
                         </span>
                       ))}
                     </div>
@@ -182,27 +220,27 @@ export function NotebookModule(): JSX.Element {
 
   return (
     <ModuleLayout
-      panelTitle="Notebook"
+      panelTitle={t('nb.title')}
       panelCount={notes.length}
       panelActions={
-        <IconButton label="New note" onClick={startDraft}>
+        <IconButton label={t('nb.newNote')} onClick={startDraft}>
           <Plus size={15} strokeWidth={1.9} />
         </IconButton>
       }
-      panelSearch={{ value: query, onChange: setQuery, placeholder: 'Search notes…' }}
+      panelSearch={{ value: query, onChange: setQuery, placeholder: t('nb.search') }}
       panel={panel}
-      title={active ? active.title || 'Untitled note' : 'Notebook'}
+      title={active ? active.title || t('nb.untitled') : t('nb.title')}
       subtitle={
         active ? (
           <span className="flex flex-wrap items-center gap-2">
             <span className="mono text-[11px]">{refCode('NOTE', active.id)}</span>
             <span aria-hidden>·</span>
-            <span className="num">{wordCount(active.content)} words</span>
+            <span className="num">{t('nb.words', { count: wordCount(active.content) })}</span>
             <span aria-hidden>·</span>
-            <span>Edited {relativeTime(active.updatedAt)}</span>
+            <span>{t('nb.edited', { when: agoLabel(active.updatedAt, t, locale) })}</span>
             {active.id === DRAFT_ID ? (
               <span className="rounded-[4px] bg-[rgb(var(--tint-rgb)/0.06)] px-1.5 py-[1px] text-[11px] text-ash">
-                Draft · saves as you type
+                {t('nb.draft')}
               </span>
             ) : null}
           </span>
@@ -220,10 +258,10 @@ export function NotebookModule(): JSX.Element {
                 setDraft(null);
               }}
             >
-              Save
+              {t('nb.save')}
             </Button>
             <IconButton
-              label={active.isInteresting ? 'Remove from vault' : 'Add to vault'}
+              label={active.isInteresting ? t('nb.removeVault') : t('nb.addVault')}
               className={cn(active.isInteresting && 'text-accent')}
               onClick={() => {
                 if (active.id !== DRAFT_ID) toggleInteresting('notes', active.id);
@@ -231,11 +269,11 @@ export function NotebookModule(): JSX.Element {
             >
               <Star size={15} strokeWidth={1.8} fill={active.isInteresting ? 'currentColor' : 'none'} />
             </IconButton>
-            {active.id !== DRAFT_ID ? <ConfirmDelete onConfirm={() => removeNote(active.id)} /> : null}
+            {active.id !== DRAFT_ID ? <ConfirmDelete label={t('nb.delete')} onConfirm={() => removeNote(active.id)} /> : null}
           </>
         ) : (
           <Button variant="primary" icon={<Plus size={14} strokeWidth={2} />} onClick={startDraft}>
-            New note
+            {t('nb.newNote')}
           </Button>
         )
       }
@@ -250,8 +288,8 @@ export function NotebookModule(): JSX.Element {
           <input
             value={active.title}
             onChange={(e) => patch({ title: e.target.value })}
-            placeholder="Untitled note"
-            aria-label="Note title"
+            placeholder={t('nb.untitled')}
+            aria-label={t('nb.noteTitle')}
             className="mb-3 w-full bg-transparent text-[26px] font-medium leading-[1.15] tracking-[-0.022em] text-paper outline-none placeholder:text-ash/50"
           />
           <TagInput tags={active.tags} onChange={(tags) => patch({ tags })} className="mb-4" />
@@ -259,7 +297,7 @@ export function NotebookModule(): JSX.Element {
             key={active.id}
             value={active.content}
             onChange={(content) => patch({ content })}
-            placeholder="Write the thinking down before it evaporates…"
+            placeholder={t('nb.placeholder')}
             className="min-h-0 flex-1"
             minHeight={280}
           />
@@ -269,15 +307,15 @@ export function NotebookModule(): JSX.Element {
       ) : (
         <EmptyState
           icon={<NotebookPen size={18} strokeWidth={1.6} />}
-          title="Nothing selected"
+          title={t('nb.nothingSelected')}
           hint={
             notes.length === 0
-              ? 'The notebook is empty. Start one and it saves itself as you type.'
-              : 'Pick a note from the list, or start a new one.'
+              ? t('nb.emptyHint')
+              : t('nb.pickHint')
           }
           action={
             <Button variant="primary" icon={<Plus size={14} strokeWidth={2} />} onClick={startDraft}>
-              New note
+              {t('nb.newNote')}
             </Button>
           }
         />

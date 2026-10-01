@@ -24,6 +24,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { ModuleId } from '@/lib/types';
+import { translate } from '@/state/languageStore';
 
 export interface ModuleMeta {
   id: ModuleId;
@@ -32,27 +33,41 @@ export interface ModuleMeta {
   icon: LucideIcon;
 }
 
+/** A module entry whose `label` / `short` are read in the current language. */
+function mod(id: ModuleId, icon: LucideIcon): ModuleMeta {
+  return {
+    id,
+    icon,
+    get label() {
+      return translate(`core.module.${id}`);
+    },
+    get short() {
+      return translate(`core.moduleShort.${id}`);
+    },
+  };
+}
+
 /** Every routable pane — order here is display order within its nav group. */
 export const MODULES: ModuleMeta[] = [
-  { id: 'home', label: 'Home', short: 'Home', icon: Sparkles },
-  { id: 'todo', label: 'Tasks', short: 'Tasks', icon: ListChecks },
-  { id: 'calendar', label: 'Calendar', short: 'Calendar', icon: CalendarDays },
-  { id: 'habits', label: 'Habits & Goals', short: 'Habits', icon: Flame },
-  { id: 'team', label: 'Team', short: 'Team', icon: Users },
-  { id: 'news', label: 'News', short: 'News', icon: Newspaper },
-  { id: 'saveit', label: 'SaveIt', short: 'SaveIt', icon: BookmarkPlus },
-  { id: 'medications', label: 'Medications Catalog', short: 'Medications', icon: Pill },
-  { id: 'notebook', label: 'Notebook', short: 'Notes', icon: NotebookPen },
-  { id: 'articles', label: 'Articles & Media', short: 'Articles', icon: FileText },
-  { id: 'courses', label: 'Course Hub', short: 'Courses', icon: GraduationCap },
-  { id: 'docs', label: 'Docs Storage', short: 'Docs', icon: FolderTree },
-  { id: 'vault', label: 'Vault', short: 'Vault', icon: BookMarked },
-  { id: 'reporting', label: 'Reporting', short: 'Reporting', icon: LayoutDashboard },
-  { id: 'analytics', label: 'Analytics', short: 'Analytics', icon: BarChart3 },
-  { id: 'trash', label: 'Trash', short: 'Trash', icon: Trash2 },
-  { id: 'portfolio', label: 'Meet the Founder', short: 'Founder', icon: IdCard },
-  { id: 'contact', label: 'Contact', short: 'Contact', icon: MessageSquareHeart },
-  { id: 'inbox', label: 'Inbox', short: 'Inbox', icon: Inbox },
+  mod('home', Sparkles),
+  mod('todo', ListChecks),
+  mod('calendar', CalendarDays),
+  mod('habits', Flame),
+  mod('team', Users),
+  mod('news', Newspaper),
+  mod('saveit', BookmarkPlus),
+  mod('medications', Pill),
+  mod('notebook', NotebookPen),
+  mod('articles', FileText),
+  mod('courses', GraduationCap),
+  mod('docs', FolderTree),
+  mod('vault', BookMarked),
+  mod('reporting', LayoutDashboard),
+  mod('analytics', BarChart3),
+  mod('trash', Trash2),
+  mod('portfolio', IdCard),
+  mod('contact', MessageSquareHeart),
+  mod('inbox', Inbox),
 ];
 
 export const MODULE_MAP: Record<ModuleId, ModuleMeta> = Object.fromEntries(

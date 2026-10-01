@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { RefreshCw } from 'lucide-react';
+import { translate } from '@/state/languageStore';
 
 interface State {
   error: Error | null;
@@ -28,10 +29,9 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
     return (
       <div className="flex h-full w-full items-center justify-center p-6">
         <div className="surface-card w-full max-w-[460px] p-6">
-          <h1 className="text-[17px] font-medium tracking-[-0.016em] text-paper">Something in this view failed</h1>
+          <h1 className="text-[17px] font-medium tracking-[-0.016em] text-paper">{translate('sh.error.title')}</h1>
           <p className="mt-2 text-[13px] leading-[1.6] text-ash">
-            The rest of the workspace is intact. Reloading usually clears it; your data is stored separately from
-            the view that broke.
+            {translate('sh.error.body')}
           </p>
           <pre className="mono mt-4 max-h-[140px] overflow-auto rounded-[6px] bg-void px-3 py-2.5 text-[11.5px] text-fog shadow-[inset_0_0_0_1px_var(--color-graphite)]">
             {error.message}
@@ -39,10 +39,10 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
           <div className="mt-5 flex gap-2">
             <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>
               <RefreshCw size={13} strokeWidth={1.9} aria-hidden />
-              Reload
+              {translate('sh.error.reload')}
             </button>
             <button type="button" className="btn btn-ghost" onClick={() => this.setState({ error: null })}>
-              Try again
+              {translate('sh.error.retry')}
             </button>
           </div>
         </div>

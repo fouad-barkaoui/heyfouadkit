@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { StatusDot } from '@/components/ui/BadgeChip';
 import type { NewsItem, NewsStage } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/state/languageStore';
 import { NewsCard } from './NewsCard';
 import { NEWS_STAGES, STAGE_LABEL, STAGE_TONE } from './newsMeta';
 
@@ -22,6 +23,7 @@ export function NewsKanbanBoard({
   onDelete: (id: string) => void;
   onToggleStar: (id: string) => void;
 }): JSX.Element {
+  const { t } = useLanguage();
   const root = useRef<HTMLDivElement>(null);
   const [dropTarget, setDropTarget] = useState<NewsStage | null>(null);
   const signature = items.map((i) => `${i.id}:${i.stage}`).join('|');
@@ -94,7 +96,7 @@ export function NewsKanbanBoard({
                 </div>
               ))}
               {column.length === 0 ? (
-                <p className="px-1 py-5 text-center text-[11.5px] text-ash/70">Drop a story here</p>
+                <p className="px-1 py-5 text-center text-[11.5px] text-ash/70">{t('news.dropHere')}</p>
               ) : null}
             </div>
           </section>

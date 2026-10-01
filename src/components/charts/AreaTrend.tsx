@@ -1,5 +1,6 @@
 import gsap from 'gsap';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useI18n } from '@/components/ui/useI18n';
 import { CHART_INK, MAGNITUDE_HUE } from './tokens';
 
 export interface TrendPoint {
@@ -19,6 +20,7 @@ export function AreaTrend({ data, unit = '' }: { data: TrendPoint[]; unit?: stri
   const [hover, setHover] = useState<number | null>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const areaRef = useRef<SVGPathElement>(null);
+  const { t } = useI18n();
 
   const max = Math.max(1, ...data.map((d) => d.value));
   const innerW = W - PAD.left - PAD.right;
@@ -66,7 +68,7 @@ export function AreaTrend({ data, unit = '' }: { data: TrendPoint[]; unit?: stri
         className="w-full"
         style={{ height: 180 }}
         role="img"
-        aria-label={`Trend over ${data.length} points, peak ${max}${unit ? ` ${unit}` : ''}`}
+        aria-label={t('sh.chart.trend', { count: data.length, peak: `${max}${unit ? ` ${unit}` : ''}` })}
         onMouseLeave={() => setHover(null)}
         onMouseMove={(event) => {
           const rect = event.currentTarget.getBoundingClientRect();

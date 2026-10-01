@@ -2,7 +2,7 @@ import { Inbox } from 'lucide-react';
 import { isAdminUser } from '@/lib/access';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/state/authStore';
-import { useLanguage } from '@/state/languageStore';
+import { useI18n } from '@/components/ui/useI18n';
 import { useNotifications } from '@/state/notificationsStore';
 import { useUI } from '@/state/uiStore';
 import { NotificationBell } from './NotificationBell';
@@ -12,9 +12,9 @@ function InboxButton({ className }: { className?: string }): JSX.Element | null 
   const { user } = useAuth();
   const { inboxNew } = useNotifications();
   const { module, setModule } = useUI();
-  const { t } = useLanguage();
+  const { t } = useI18n();
   if (!isAdminUser(user)) return null;
-  const label = inboxNew ? `${t('nav.inbox')} (${inboxNew} new)` : t('nav.inbox');
+  const label = inboxNew ? t('sh.withNew', { label: t('nav.inbox'), count: inboxNew }) : t('nav.inbox');
   return (
     <button
       type="button"
@@ -51,12 +51,13 @@ export function MenuButton({
   label?: string;
 }): JSX.Element {
   const { setMobileNavOpen, mobileNavOpen } = useUI();
+  const { t } = useI18n();
   const button = (
     <button
       type="button"
       className={cn('menu-btn', className)}
       data-open={open}
-      aria-label={label ?? (open ? 'Close navigation' : 'Open navigation')}
+      aria-label={label ?? (open ? t('sh.nav.close') : t('sh.nav.open'))}
       aria-expanded={onClick ? open : mobileNavOpen}
       aria-haspopup="dialog"
       onClick={onClick ?? (() => setMobileNavOpen(true))}

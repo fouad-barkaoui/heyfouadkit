@@ -16,8 +16,8 @@ import {
   watchContactInserts,
   type ContactMessage,
 } from '@/data/contact';
-import { TOPIC_LABEL } from '@/modules/contact/topics';
 import { useAuth } from './authStore';
+import { translate, useLanguage } from './languageStore';
 import { useWorkspace } from './workspaceStore';
 
 /**
@@ -59,11 +59,11 @@ function load(): Persisted {
 
 function relativeTime(iso: string, now: Date): string {
   const mins = Math.max(0, Math.round((now.getTime() - new Date(iso).getTime()) / 60_000));
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return translate('core.time.justNowCap');
+  if (mins < 60) return translate('core.time.minutesAgo', { n: mins });
   const hours = Math.round(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.round(hours / 24)}d ago`;
+  if (hours < 24) return translate('core.time.hoursAgo', { n: hours });
+  return translate('core.time.daysAgo', { n: Math.round(hours / 24) });
 }
 
 function save(p: Persisted): void {
@@ -128,6 +128,7 @@ const NotificationsContext = createContext<NotificationsValue | null>(null);
 
 export function NotificationsProvider({ children }: { children: ReactNode }): JSX.Element {
   const { workspace, ready } = useWorkspace();
+  const { language } = useLanguage();
   const [now, setNow] = useState(() => new Date());
   const [state, setState] = useState<Persisted>(() => (typeof window === 'undefined' ? EMPTY : load()));
   const [support, setSupport] = useState<AlertSupport>(() => alertSupport());
@@ -186,7 +187,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }): JS
     const messages: Reminder[] = inbox.map((m) => ({
       key: `msg:${m.id}`,
       kind: 'message-new',
-      title: `${m.name} · ${TOPIC_LABEL[m.topic]}`,
+      title: `${m.name} · ${translate(`core.topic.${m.topic}`)}`,
       detail: m.subject,
       module: 'inbox',
       recordId: m.id,
@@ -195,7 +196,9 @@ export function NotificationsProvider({ children }: { children: ReactNode }): JS
       when: relativeTime(m.createdAt, now),
     }));
     return [...messages, ...base];
-  }, [ready, workspace, now, inbox]);
+    // `language` re-words every reminder as soon as the language changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, workspace, now, inbox, language]);
 
   const update = useCallback((fn: (p: Persisted) => Persisted) => {
     setState((prev) => {
@@ -241,7 +244,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }): JS
     const run =
       allMessages && fresh.length > 1
         ? showSystemAlert(
-            `${fresh.length} new messages`,
+            translate('core.alert.newMessages', { count: fresh.length }),
             fresh
               .slice(0, 3)
               .map((r) => `• ${r.title}`)
@@ -252,11 +255,11 @@ export function NotificationsProvider({ children }: { children: ReactNode }): JS
         : fresh.length === 1
         ? showSystemAlert(first.title, first.detail, first.module, first.key)
         : showSystemAlert(
-            `You missed ${fresh.length} things`,
+            translate('core.alert.missed', { count: fresh.length }),
             fresh
               .slice(0, 3)
               .map((r) => `• ${r.title}`)
-              .join('\n') + (fresh.length > 3 ? `\n+${fresh.length - 3} more` : ''),
+              .join('\n') + (fresh.length > 3 ? `\n${translate('core.alert.more', { count: fresh.length - 3 })}` : ''),
             first.module,
             'kanz-missed-summary',
           );
@@ -300,7 +303,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }): JS
       setSupport(perm as AlertSupport);
       if (perm !== 'granted') return;
       update((p) => ({ ...p, alerts: true }));
-      void showSystemAlert('Reminders are on', "We'll alert you here when something is missed.", 'home', 'kanz-alerts-on');
+      void showSystemAlert(translate('core.alert.onTitle'), translate('core.alert.onBody'), 'home', 'kanz-alerts-on');
     },
     [update],
   );
