@@ -1,7 +1,7 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { AlertTriangle, Check, ChevronsUpDown, Cloud, CloudOff, Loader2, Lock, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { hasMedicationsAccess } from '@/lib/access';
+import { hasMedicationsAccess, isAdminUser } from '@/lib/access';
 import type { ModuleId } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/state/authStore';
@@ -21,6 +21,7 @@ export const NAV_KEY: Record<string, string> = {
   news: 'nav.news',
   saveit: 'nav.saveit',
   medications: 'nav.medications',
+  salary: 'nav.salary',
   notebook: 'nav.notebook',
   articles: 'nav.articles',
   courses: 'nav.courses',
@@ -43,25 +44,34 @@ export const SYNC_LOOK_KEY: Record<SyncState, { icon: typeof Cloud; color: strin
   error: { icon: AlertTriangle, color: '#eb5757', key: 'shell.syncFailed' },
 };
 
-export type RowFlag = 'soon' | 'locked';
+export type RowFlag = 'soon' | 'locked' | 'beta';
 
 /** `label` is a translation key. */
 export const FLAG_LOOK: Record<RowFlag, { color: string; label: string; icon?: typeof Lock }> = {
   soon: { color: '#eab308', label: 'sh.flag.soon' },
   locked: { color: '#8b5cf6', label: 'sh.flag.pro', icon: Lock },
+  beta: { color: '#22b8cf', label: 'sh.flag.beta' },
 };
 
 /** Translation keys for each flag's tooltip. */
 export const FLAG_TOOLTIP: Record<RowFlag, string> = {
   soon: 'sh.flag.soonTip',
   locked: 'sh.flag.lockedTip',
+  beta: 'sh.flag.betaTip',
 };
 
 /** Which status flag (if any) a module's nav entry carries. */
 export function useRowFlag(): (id: ModuleId) => RowFlag | undefined {
   const { user } = useAuth();
   const medicationsLocked = !hasMedicationsAccess(user);
-  return (id) => (id === 'team' ? 'soon' : id === 'medications' && medicationsLocked ? 'locked' : undefined);
+  return (id) =>
+    id === 'team' ? 'soon' : id === 'medications' && medicationsLocked ? 'locked' : id === 'salary' ? 'beta' : undefined;
+}
+
+/** True when the signed-in account is the admin — used to show private-beta modules. */
+export function useIsAdmin(): boolean {
+  const { user } = useAuth();
+  return isAdminUser(user);
 }
 
 /** Small pill shown next to a label. */

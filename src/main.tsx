@@ -13,6 +13,7 @@ import './styles/notifications.css';
 import './styles/contact.css';
 import './styles/account-menu.css';
 import './styles/news.css';
+import './styles/salary.css';
 import './styles/tour.css';
 import './styles/cookie.css';
 import './styles/controls.css';

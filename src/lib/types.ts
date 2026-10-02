@@ -8,6 +8,7 @@ export type ModuleId =
   | 'news'
   | 'saveit'
   | 'medications'
+  | 'salary'
   | 'articles'
   | 'courses'
   | 'docs'

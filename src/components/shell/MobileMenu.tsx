@@ -5,7 +5,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { isProUser } from '@/lib/access';
 import type { ModuleId } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { HOME_ID, MODULE_MAP, NAV_GROUPS } from '@/modules/registry';
+import { HOME_ID, MODULE_MAP, NAV_GROUPS, visibleChildren } from '@/modules/registry';
 import { getDisplayName, useAuth } from '@/state/authStore';
 import { useI18n } from '@/components/ui/useI18n';
 import { useUI } from '@/state/uiStore';
@@ -13,7 +13,7 @@ import { useWorkspace } from '@/state/workspaceStore';
 import { AccountMenu } from './AccountMenu';
 import { LiveStatus } from './LiveStatus';
 import { MenuButton } from './MenuButton';
-import { FLAG_TOOLTIP, FlagPill, NAV_KEY, SYNC_LOOK_KEY, TeamSwitcher, useRowFlag } from './navShared';
+import { FLAG_TOOLTIP, FlagPill, NAV_KEY, SYNC_LOOK_KEY, TeamSwitcher, useIsAdmin, useRowFlag } from './navShared';
 
 /** Where the last tap/click landed — the menu grows out of that point. */
 const lastTap = { x: 28, y: 28 };
@@ -44,6 +44,7 @@ export function MobileMenu(): JSX.Element {
   const pro = isProUser(user);
   const { t } = useI18n();
   const flagFor = useRowFlag();
+  const isAdmin = useIsAdmin();
 
   useEffect(listenForTaps, []);
 
@@ -152,7 +153,7 @@ export function MobileMenu(): JSX.Element {
             {NAV_GROUPS.map((g) => (
               <div key={g.id}>
                 <p className="menu-section-head">{t(g.labelKey)}</p>
-                <div className="menu-grid">{tiles(g.children)}</div>
+                <div className="menu-grid">{tiles(visibleChildren(g, isAdmin))}</div>
               </div>
             ))}
           </nav>

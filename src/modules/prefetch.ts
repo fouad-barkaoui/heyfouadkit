@@ -14,6 +14,7 @@ export const MODULE_LOADERS: Record<ModuleId, () => Promise<unknown>> = {
   team: () => import('@/modules/team/TeamModule'),
   news: () => import('@/modules/news/NewsModule'),
   medications: () => import('@/modules/medications/MedicationsModule'),
+  salary: () => import('@/modules/salary/SalaryModule'),
   notebook: () => import('@/modules/notebook/NotebookModule'),
   articles: () => import('@/modules/articles/ArticlesModule'),
   courses: () => import('@/modules/courses/CoursesModule'),

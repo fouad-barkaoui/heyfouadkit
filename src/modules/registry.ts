@@ -17,6 +17,7 @@ import {
   Newspaper,
   NotebookPen,
   Pill,
+  Wallet,
   Sparkles,
   Trash2,
   MessageSquareHeart,
@@ -57,6 +58,7 @@ export const MODULES: ModuleMeta[] = [
   mod('news', Newspaper),
   mod('saveit', BookmarkPlus),
   mod('medications', Pill),
+  mod('salary', Wallet),
   mod('notebook', NotebookPen),
   mod('articles', FileText),
   mod('courses', GraduationCap),
@@ -93,9 +95,17 @@ export const NAV_GROUPS: NavGroup[] = [
     icon: LibraryBig,
     children: ['saveit', 'notebook', 'articles', 'courses', 'docs', 'vault'],
   },
-  { id: 'workspace', labelKey: 'nav.group.workspace', icon: Briefcase, children: ['team', 'medications'] },
+  { id: 'workspace', labelKey: 'nav.group.workspace', icon: Briefcase, children: ['team', 'medications', 'salary'] },
   { id: 'insight', labelKey: 'nav.group.insight', icon: BarChart3, children: ['reporting', 'analytics', 'trash'] },
 ];
+
+/** Modules only the admin can see or open (features in private beta). */
+export const ADMIN_ONLY: ModuleId[] = ['salary'];
+
+/** A group's children with the admin-only ones removed for everyone else. */
+export function visibleChildren(group: NavGroup, isAdmin: boolean): ModuleId[] {
+  return isAdmin ? group.children : group.children.filter((id) => !ADMIN_ONLY.includes(id));
+}
 
 export function groupOf(id: ModuleId): NavGroup | undefined {
   return NAV_GROUPS.find((g) => g.children.includes(id));

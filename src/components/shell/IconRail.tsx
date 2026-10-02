@@ -1,12 +1,12 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { Check, ChevronDown, ChevronLeft, Search } from 'lucide-react';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent, type ReactNode } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { isAdminUser, isProUser } from '@/lib/access';
 import type { ModuleId } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { groupOf, HOME_ID, MODULE_MAP, NAV_GROUPS, type ModuleMeta, type NavGroup } from '@/modules/registry';
+import { groupOf, HOME_ID, MODULE_MAP, NAV_GROUPS, visibleChildren, type ModuleMeta, type NavGroup } from '@/modules/registry';
 import { prefetchModule } from '@/modules/prefetch';
 import { getDisplayName, useAuth } from '@/state/authStore';
 import { useI18n } from '@/components/ui/useI18n';
@@ -20,6 +20,7 @@ import {
   NAV_KEY,
   SYNC_LOOK_KEY,
   TeamSwitcher,
+  useIsAdmin,
   useRowFlag,
   type RowFlag,
 } from './navShared';
@@ -229,6 +230,8 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
   const pro = isProUser(user);
   const { t } = useI18n();
   const flagFor = useRowFlag();
+  const isAdmin = useIsAdmin();
+  const groups = useMemo(() => NAV_GROUPS.map((g) => ({ ...g, children: visibleChildren(g, isAdmin) })), [isAdmin]);
   const expanded = railExpanded;
   const listRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -488,7 +491,7 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
               <div className="rail-stack">{rows([HOME_ID, 'portfolio'])}</div>
             </section>
 
-            {NAV_GROUPS.map((g) => {
+            {groups.map((g) => {
               const label = t(g.labelKey);
               const GroupIcon = g.icon;
               const isOpen = openGroup === g.id;

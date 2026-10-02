@@ -5,7 +5,7 @@ import { ViewTransition } from '@/components/motion/ViewTransition';
 import { CookieConsentModal } from '@/components/onboarding/CookieConsentModal';
 import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow';
 import { rich, useI18n } from '@/components/ui/useI18n';
-import { hasMedicationsAccess } from '@/lib/access';
+import { hasMedicationsAccess, isAdminUser } from '@/lib/access';
 import { useAuth } from '@/state/authStore';
 import { prefetchLikelyModules } from '@/modules/prefetch';
 import { useUI } from '@/state/uiStore';
@@ -66,6 +66,9 @@ const NewsModule = lazy(async () => ({ default: (await import('@/modules/news/Ne
 const MedicationsModule = lazy(async () => ({
   default: (await import('@/modules/medications/MedicationsModule')).MedicationsModule,
 }));
+const SalaryModule = lazy(async () => ({
+  default: (await import('@/modules/salary/SalaryModule')).SalaryModule,
+}));
 const MedicationsPaywall = lazy(async () => ({
   default: (await import('@/modules/medications/MedicationsPaywall')).MedicationsPaywall,
 }));
@@ -107,6 +110,7 @@ export function AppShell(): JSX.Element {
   const { user, configured } = useAuth();
   const needsAuth = configured && !user;
   const canOpenMedications = hasMedicationsAccess(user);
+  const isAdmin = isAdminUser(user);
 
   // The WebGL field is the single heaviest chunk in the app (three.js) and
   // is purely decorative, so it shouldn't compete for bandwidth/CPU with
@@ -190,6 +194,9 @@ export function AppShell(): JSX.Element {
         return <HabitsModule />;
       case 'medications':
         return canOpenMedications ? <MedicationsModule /> : <MedicationsPaywall />;
+      case 'salary':
+        // Private beta: anyone else who lands on #/salary just sees Home.
+        return isAdmin ? <SalaryModule /> : <HomeModule />;
       case 'articles':
         return <ArticlesModule />;
       case 'courses':
@@ -216,7 +223,7 @@ export function AppShell(): JSX.Element {
       default:
         return <HomeModule />;
     }
-  }, [module, canOpenMedications]);
+  }, [module, canOpenMedications, isAdmin]);
 
   return (
     <div className="app-shell relative flex h-[100dvh] w-full overflow-hidden bg-void">

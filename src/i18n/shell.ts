@@ -43,6 +43,8 @@ export default defineDictionary({
     'sh.flag.pro': 'Pro',
     'sh.flag.soonTip': 'Coming soon',
     'sh.flag.lockedTip': 'Subscriber feature',
+    'sh.flag.beta': 'Beta',
+    'sh.flag.betaTip': 'Private beta — only you can see this',
 
     // Team switcher
     'sh.team.aria': 'Team: {name}',
@@ -278,6 +280,8 @@ export default defineDictionary({
     'sh.flag.pro': 'Pro',
     'sh.flag.soonTip': 'قريبًا',
     'sh.flag.lockedTip': 'ميزة للمشتركين',
+    'sh.flag.beta': 'تجريبي',
+    'sh.flag.betaTip': 'نسخة تجريبية خاصة — تظهر لك وحدك',
 
     // Team switcher
     'sh.team.aria': 'الفريق: {name}',
