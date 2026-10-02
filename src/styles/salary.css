@@ -1846,3 +1846,23 @@
     gap: 8px;
   }
 }
+
+/* Suggestion row: text gets the room, the button drops below when narrow. */
+.spv-foot > p {
+  flex: 1 1 260px;
+}
+.spv-foot-icon {
+  flex: none;
+}
+@media (max-width: 639px) {
+  .spv-foot {
+    align-items: flex-start;
+  }
+  .spv-foot > p {
+    flex-basis: calc(100% - 60px);
+  }
+  .spv-foot > .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
