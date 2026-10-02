@@ -13,7 +13,7 @@ export type ConsentKey = 'cookies' | 'terms';
 export type ConsentValue = 'accepted' | 'declined';
 
 /** Bump when there is something new to announce — everyone sees it once. */
-export const WHATS_NEW_RELEASE = '2026-09-saveit';
+export const WHATS_NEW_RELEASE = '2026-10-start-here';
 
 /** Kept for AuthOverlay, which still flags a fresh sign-in in this tab. */
 export const JUST_AUTHED_KEY = 'kanz.justAuthed.v1';
@@ -70,8 +70,12 @@ export function consentDecision(key: ConsentKey, user: User | null): ConsentValu
   return asValue(safeGet(localKey(key, user?.id ?? null)));
 }
 
+/** Fired after any consent is answered, so dependent prompts re-check. */
+export const CONSENT_EVENT = 'kanz:consent';
+
 export function rememberConsentLocally(key: ConsentKey, value: ConsentValue, user: User | null): void {
   safeSet(localKey(key, user?.id ?? null), value);
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(CONSENT_EVENT));
 }
 
 /** The metadata patch that records a decision on the account (merge with existing consents). */
@@ -99,4 +103,16 @@ export function hasSeenWhatsNew(user: User | null): boolean {
 
 export function rememberWhatsNewLocally(user: User): void {
   safeSet(whatsNewKey(user.id), WHATS_NEW_RELEASE);
+}
+
+/* ── "Start here" for visitors without an account (once per device) ───── */
+
+const GUEST_START_KEY = 'kanz.startHere.v1';
+
+export function guestHasSeenStartHere(): boolean {
+  return safeGet(GUEST_START_KEY) === WHATS_NEW_RELEASE;
+}
+
+export function rememberGuestStartHere(): void {
+  safeSet(GUEST_START_KEY, WHATS_NEW_RELEASE);
 }

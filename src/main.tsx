@@ -6,13 +6,13 @@ import App from './App';
 import './styles/index.css';
 import './styles/premium.css';
 import './styles/saveit.css';
-import './styles/whatsnew.css';
 import './styles/theme.css';
 import './styles/nav.css';
 import './styles/habits.css';
 import './styles/notifications.css';
 import './styles/contact.css';
 import './styles/account-menu.css';
+import './styles/news.css';
 import './styles/controls.css';
 
 /** Warm the connection to the cloud project as early as possible — a

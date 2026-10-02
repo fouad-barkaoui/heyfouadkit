@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/state/authStore';
 import {
+  CONSENT_EVENT,
   consentDecision,
   consentMetaPatch,
+  guestHasSeenStartHere,
   hasSeenWhatsNew,
+  rememberGuestStartHere,
   rememberConsentLocally,
   rememberWhatsNewLocally,
   unsyncedLocalConsents,
@@ -12,7 +15,7 @@ import {
 } from '@/state/onboarding';
 import { useUI } from '@/state/uiStore';
 import { CloudTermsModal } from './CloudTermsModal';
-import { WhatsNewModal, type WhatsNewAction } from './WhatsNewModal';
+import { StartHereModal } from './StartHereModal';
 
 /**
  * What a signed-in person sees, at most once each, for life:
@@ -24,7 +27,7 @@ import { WhatsNewModal, type WhatsNewAction } from './WhatsNewModal';
  */
 export function OnboardingFlow(): JSX.Element {
   const { user, ready, updateMeta } = useAuth();
-  const { setModule, setAccountOpen } = useUI();
+  const { setModule } = useUI();
   // Bumped after a local decision so the derived stage re-reads storage.
   const [tick, setTick] = useState(0);
 
@@ -36,14 +39,26 @@ export function OnboardingFlow(): JSX.Element {
     if (pending.terms) void updateMeta(consentMetaPatch(user, 'terms', pending.terms));
   }, [user, updateMeta]);
 
+  // A consent answered elsewhere (the cookie sheet) — re-check what's next.
+  useEffect(() => {
+    const bump = (): void => setTick((n) => n + 1);
+    window.addEventListener(CONSENT_EVENT, bump);
+    return () => window.removeEventListener(CONSENT_EVENT, bump);
+  }, []);
+
   void tick;
-  const stage: 'none' | 'terms' | 'whatsnew' =
-    !ready || !user
-      ? 'none'
+  // Signed in: cloud terms first, then "Start here" once per account.
+  // Visitors: "Start here" once per device, after the cookie question.
+  const stage: 'none' | 'terms' | 'start' = !ready
+    ? 'none'
+    : !user
+      ? consentDecision('cookies', null) !== null && !guestHasSeenStartHere()
+        ? 'start'
+        : 'none'
       : consentDecision('terms', user) === null
         ? 'terms'
         : !hasSeenWhatsNew(user)
-          ? 'whatsnew'
+          ? 'start'
           : 'none';
 
   const decideTerms = (value: ConsentValue): void => {
@@ -53,13 +68,15 @@ export function OnboardingFlow(): JSX.Element {
     void updateMeta(consentMetaPatch(user, 'terms', value));
   };
 
-  const closeWhatsNew = (action: WhatsNewAction): void => {
-    if (!user) return;
-    rememberWhatsNewLocally(user);
+  const closeStart = (openNews: boolean): void => {
+    if (user) {
+      rememberWhatsNewLocally(user);
+      void updateMeta({ whats_new_seen: WHATS_NEW_RELEASE });
+    } else {
+      rememberGuestStartHere();
+    }
     setTick((t) => t + 1);
-    void updateMeta({ whats_new_seen: WHATS_NEW_RELEASE });
-    if (action === 'saveit') setModule('saveit');
-    if (action === 'account') setAccountOpen(true);
+    if (openNews) setModule('news');
   };
 
   return (
@@ -69,7 +86,7 @@ export function OnboardingFlow(): JSX.Element {
         onAccept={() => decideTerms('accepted')}
         onCancel={() => decideTerms('declined')}
       />
-      <WhatsNewModal open={stage === 'whatsnew'} onClose={closeWhatsNew} />
+      <StartHereModal open={stage === 'start'} onOpen={() => closeStart(true)} onLater={() => closeStart(false)} />
     </>
   );
 }

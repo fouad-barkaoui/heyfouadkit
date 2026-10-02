@@ -93,7 +93,7 @@ export const NAV_GROUPS: NavGroup[] = [
     icon: LibraryBig,
     children: ['saveit', 'notebook', 'articles', 'courses', 'docs', 'vault'],
   },
-  { id: 'workspace', labelKey: 'nav.group.workspace', icon: Briefcase, children: ['team', 'news', 'medications'] },
+  { id: 'workspace', labelKey: 'nav.group.workspace', icon: Briefcase, children: ['team', 'medications'] },
   { id: 'insight', labelKey: 'nav.group.insight', icon: BarChart3, children: ['reporting', 'analytics', 'trash'] },
 ];
 

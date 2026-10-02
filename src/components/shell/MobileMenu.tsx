@@ -1,5 +1,5 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import { CloudOff, MessageSquareHeart, Search } from 'lucide-react';
+import { CloudOff, MessageSquareHeart, Newspaper, Search } from 'lucide-react';
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { isProUser } from '@/lib/access';
@@ -159,7 +159,16 @@ export function MobileMenu(): JSX.Element {
 
           <footer className="menu-foot relative px-4 pt-3 pb-[max(14px,env(safe-area-inset-bottom))]">
             <LiveStatus />
-            <div className="grid grid-cols-[auto_1fr] gap-2">
+            <div className="grid grid-cols-[auto_auto_1fr] gap-2">
+              <button
+                type="button"
+                onClick={() => setModule('news')}
+                aria-label={t('nav.news')}
+                data-active={module === 'news'}
+                className="menu-foot-btn aspect-square justify-center"
+              >
+                <Newspaper size={17} strokeWidth={1.6} aria-hidden />
+              </button>
               <button
                 type="button"
                 onClick={() => setModule('contact')}

@@ -536,6 +536,13 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
         </div>
 
         <div className="rail-foot">
+          <RailRow
+            meta={MODULE_MAP.news}
+            label={labelFor('news')}
+            active={module === 'news'}
+            expanded={expanded}
+            onSelect={() => go('news')}
+          />
           <LiveStatus expanded={expanded} />
           <RailRow
             meta={MODULE_MAP.contact}
