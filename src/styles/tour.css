@@ -1,0 +1,399 @@
+/* ── Start here tour (components/onboarding/StartHereModal.tsx) ───────── */
+
+.sh-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 75;
+  background: rgb(0 0 0 / 0.55);
+  backdrop-filter: blur(4px);
+  animation: nx-fade 200ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+.sh-dialog {
+  --sh-radius: 18px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 76;
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+  width: min(880px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow: hidden;
+  border-radius: var(--sh-radius);
+  color: var(--color-mist);
+  background: var(--color-obsidian);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.06),
+    0 30px 80px -20px rgb(0 0 0 / 0.7);
+  transform: translate(-50%, -50%);
+  animation: sh-in 260ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+@keyframes sh-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 10px)) scale(0.98);
+  }
+}
+
+/* Left: title + topic list. */
+.sh-side {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 26px 16px 20px 22px;
+  border-inline-end: 1px solid var(--color-graphite);
+}
+.sh-side-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--color-paper);
+  text-wrap: balance;
+}
+.sh-topics {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sh-topic {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 14.5px;
+  text-align: start;
+  color: var(--color-fog);
+  transition:
+    background-color 140ms cubic-bezier(0.2, 0, 0, 1),
+    color 140ms cubic-bezier(0.2, 0, 0, 1);
+}
+.sh-topic:hover {
+  color: var(--color-paper);
+  background: rgb(var(--tint-rgb) / 0.05);
+}
+.sh-topic[data-active] {
+  color: var(--color-paper);
+  background: color-mix(in oklab, var(--color-acid) 16%, transparent);
+  box-shadow: inset 2px 0 0 var(--color-acid);
+}
+:root[dir='rtl'] .sh-topic[data-active] {
+  box-shadow: inset -2px 0 0 var(--color-acid);
+}
+.sh-topic:focus-visible {
+  outline: 2px solid var(--color-acid);
+  outline-offset: 1px;
+}
+
+/* Right: coloured stage, copy, actions. */
+.sh-main {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+.sh-close {
+  position: absolute;
+  top: 12px;
+  inset-inline-end: 12px;
+  z-index: 2;
+  display: flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: rgb(255 255 255 / 0.85);
+  background: rgb(0 0 0 / 0.18);
+  transition: background-color 140ms cubic-bezier(0.2, 0, 0, 1);
+}
+.sh-close:hover {
+  background: rgb(0 0 0 / 0.32);
+}
+
+.sh-stage {
+  --sh-a: #c6dd1e;
+  --sh-b: #3ba55c;
+  position: relative;
+  display: flex;
+  height: 250px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 25% 20%, rgb(255 255 255 / 0.18), transparent 45%),
+    linear-gradient(135deg, var(--sh-a), var(--sh-b));
+  transition: background 300ms cubic-bezier(0.2, 0, 0, 1);
+}
+.sh-stage[data-topic='free'] {
+  --sh-a: #22c3a6;
+  --sh-b: #1479a8;
+}
+.sh-stage[data-topic='pro'] {
+  --sh-a: #8b6cff;
+  --sh-b: #5b2fd6;
+}
+.sh-stage[data-topic='soon'] {
+  --sh-a: #f7b733;
+  --sh-b: #e1702a;
+}
+.sh-stage[data-topic='idea'] {
+  --sh-a: #4ea8ff;
+  --sh-b: #3a55e6;
+}
+.sh-spark {
+  position: absolute;
+  fill: rgb(255 255 255 / 0.9);
+}
+.sh-spark.is-a {
+  top: 18px;
+  inset-inline-start: 34%;
+  width: 20px;
+  height: 20px;
+}
+.sh-spark.is-b {
+  bottom: 26px;
+  inset-inline-start: 10%;
+  width: 14px;
+  height: 14px;
+}
+.sh-spark.is-c {
+  top: 38%;
+  inset-inline-end: 8%;
+  width: 22px;
+  height: 22px;
+}
+.sh-spark.is-d {
+  bottom: 18px;
+  inset-inline-end: 30%;
+  width: 12px;
+  height: 12px;
+}
+
+/* The white "screen" on the stage — always light, like a product shot. */
+.sh-screen {
+  display: flex;
+  width: min(340px, 78%);
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 14px;
+  color: #17181c;
+  background: #ffffff;
+  box-shadow: 0 18px 40px -16px rgb(0 0 0 / 0.45);
+  animation: sh-screen-in 320ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+@keyframes sh-screen-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+.sh-art-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sh-art-mark {
+  border-radius: 10px;
+}
+.sh-art-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #17181c;
+}
+.sh-art-sub {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: #6b6f7a;
+}
+.sh-art-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.sh-art-lines > i {
+  height: 8px;
+  border-radius: 99px;
+  background: #e9eaee;
+}
+.sh-tile {
+  display: flex;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  color: #17181c;
+  background: #f1f2f5;
+}
+.sh-art-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 42px);
+  justify-content: center;
+  gap: 12px;
+}
+.sh-art-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 99px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #4b2bbf;
+  background: #ece6ff;
+}
+.sh-art-bars {
+  display: flex;
+  height: 64px;
+  align-items: flex-end;
+  gap: 8px;
+}
+.sh-art-bars > i {
+  flex: 1;
+  border-radius: 6px 6px 2px 2px;
+  background: linear-gradient(180deg, #f7b733, #e1702a);
+}
+.sh-art-msg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #3a3d46;
+  background: #f1f2f5;
+}
+.sh-art-send {
+  width: 22px;
+  height: 22px;
+  margin-inline-start: auto;
+  border-radius: 99px;
+  background: #3a55e6;
+}
+
+.sh-copy {
+  padding: 22px 26px 6px;
+}
+.sh-copy-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-paper);
+}
+.sh-copy-text {
+  margin: 6px 0 0;
+  max-width: 54ch;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--color-ash);
+  text-wrap: pretty;
+}
+.sh-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: auto;
+  padding: 22px 26px 22px;
+}
+.sh-btn {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-paper);
+  box-shadow: inset 0 0 0 1px var(--color-smoke);
+  transition:
+    background-color 140ms cubic-bezier(0.2, 0, 0, 1),
+    transform 140ms cubic-bezier(0.2, 0, 0, 1);
+}
+.sh-btn:hover {
+  background: rgb(var(--tint-rgb) / 0.06);
+}
+.sh-btn:active {
+  transform: scale(0.96);
+}
+.sh-btn.is-primary {
+  color: #0b0c10;
+  background: var(--color-acid);
+  box-shadow: none;
+}
+.sh-btn.is-primary:hover {
+  background: color-mix(in oklab, var(--color-acid) 88%, white);
+}
+.sh-btn:focus-visible {
+  outline: 2px solid var(--color-acid);
+  outline-offset: 2px;
+}
+
+/* Phones: topics become a scrolling row above the stage. */
+@media (max-width: 639px) {
+  .sh-dialog {
+    grid-template-columns: minmax(0, 1fr);
+    overflow-y: auto;
+  }
+  .sh-side {
+    gap: 12px;
+    padding: 18px 16px 12px;
+    border-inline-end: 0;
+    border-bottom: 1px solid var(--color-graphite);
+  }
+  .sh-side-title {
+    font-size: 20px;
+    padding-inline-end: 36px;
+  }
+  .sh-topics {
+    flex-direction: row;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .sh-topic {
+    width: auto;
+    white-space: nowrap;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--color-graphite);
+  }
+  .sh-topic[data-active],
+  :root[dir='rtl'] .sh-topic[data-active] {
+    box-shadow: inset 0 0 0 1px var(--color-acid);
+  }
+  .sh-close {
+    top: 14px;
+    color: var(--color-fog);
+    background: rgb(var(--tint-rgb) / 0.06);
+  }
+  .sh-main {
+    position: static;
+  }
+  .sh-stage {
+    height: 200px;
+  }
+  .sh-copy {
+    padding: 18px 16px 4px;
+  }
+  .sh-actions {
+    padding: 18px 16px;
+  }
+  .sh-btn {
+    flex: 1;
+    height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sh-dialog,
+  .sh-overlay,
+  .sh-screen {
+    animation: none;
+  }
+}

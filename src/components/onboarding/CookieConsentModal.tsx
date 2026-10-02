@@ -1,4 +1,5 @@
-import { Cookie } from 'lucide-react';
+import * as Dialog from '@radix-ui/react-dialog';
+import { Cookie, HardDrive } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/state/authStore';
 import { useLanguage } from '@/state/languageStore';
@@ -8,7 +9,7 @@ import {
   rememberConsentLocally,
   unsyncedLocalConsents,
 } from '@/state/onboarding';
-import { ConsentSheet } from './ConsentSheet';
+import { KanzWordmark } from '@/components/ui/KanzWordmark';
 
 /**
  * The one-time "we keep your data on this device" notice. Asked once per
@@ -40,30 +41,52 @@ export function CookieConsentModal(): JSX.Element {
   };
 
   return (
-    <ConsentSheet
-      open={open}
-      tone="gold"
-      partner={t('ob.cookie.partner')}
-      zIndex={85}
-      title={t('ob.cookie.title')}
-      body={<p>{t('ob.cookie.body')}</p>}
-      boxIcon={Cookie}
-      box={(link) => (
-        <p>
-          {t('ob.cookie.boxBefore')}
-          {link(t('ob.cookie.boxLink'))}
-          {t('ob.cookie.boxAfter')}
-        </p>
-      )}
-      details={
-        <p className="text-[#6b6a66]">
-          {t('ob.cookie.details')}
-        </p>
-      }
-      acceptLabel={t('ob.cookie.accept')}
-      cancelLabel={t('ob.decline')}
-      onAccept={() => choose('accepted')}
-      onCancel={() => choose('declined')}
-    />
+    <Dialog.Root open={open} onOpenChange={(o) => (o ? undefined : choose('declined'))}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="ck-overlay" />
+        <Dialog.Content className="ck-ticket" aria-describedby="ck-body">
+          {/* The card: glowing art, then a frosted strip with the title. */}
+          <div className="ck-card">
+            <div className="ck-art" aria-hidden>
+              <span className="ck-orb" />
+              <KanzWordmark height={22} gem="#ffffff" title="" className="ck-mark" />
+            </div>
+            <div className="ck-head">
+              <div className="min-w-0">
+                <Dialog.Title className="ck-title">{t('ob.cookie.title')}</Dialog.Title>
+                <p className="ck-sub">{t('ob.cookie.body')}</p>
+              </div>
+              <Cookie size={22} strokeWidth={1.6} className="ck-head-icon" aria-hidden />
+            </div>
+          </div>
+
+          {/* The stub: where it is kept, why, and the two answers. */}
+          <div className="ck-stub">
+            <div className="ck-stub-row">
+              <span className="ck-date" aria-hidden>
+                <span>{t('ob.cookie.boxTop')}</span>
+                <HardDrive size={20} strokeWidth={1.8} />
+              </span>
+              <p id="ck-body" className="ck-stub-text">
+                <strong>{t('ob.cookie.partner')}</strong>
+                <span>
+                  {t('ob.cookie.boxBefore')}
+                  {t('ob.cookie.boxLink')}
+                  {t('ob.cookie.boxAfter')}
+                </span>
+              </p>
+            </div>
+            <div className="ck-actions">
+              <button type="button" className="ck-btn" onClick={() => choose('declined')}>
+                {t('ob.decline')}
+              </button>
+              <button type="button" className="ck-btn is-primary" onClick={() => choose('accepted')}>
+                {t('ob.cookie.accept')}
+              </button>
+            </div>
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

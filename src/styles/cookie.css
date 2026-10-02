@@ -1,0 +1,211 @@
+/* ── Cookie notice as a ticket (components/onboarding/CookieConsentModal.tsx) */
+
+.ck-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 85;
+  background: rgb(0 0 0 / 0.6);
+  backdrop-filter: blur(5px);
+  animation: nx-fade 200ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+.ck-ticket {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 86;
+  display: flex;
+  width: min(360px, calc(100vw - 32px));
+  max-height: calc(100dvh - 24px);
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  scrollbar-width: none;
+  transform: translate(-50%, -50%);
+  animation: ck-in 320ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+@keyframes ck-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 14px)) scale(0.97);
+  }
+}
+
+/* The card: glass frame around a warm square of art. */
+.ck-card {
+  width: 100%;
+  padding: 10px;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgb(70 70 74 / 0.72) 0%, rgb(84 58 44 / 0.9) 62%, #9a4a25 100%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.14),
+    0 24px 60px -20px rgb(0 0 0 / 0.75);
+  backdrop-filter: blur(16px);
+}
+.ck-art {
+  position: relative;
+  display: flex;
+  aspect-ratio: 1 / 0.86;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 17px;
+  background: #f4ecd8;
+}
+/* A soft, grainy glow — the "sun" of the reference. */
+.ck-orb {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ff1f0f 0%, #ff4d10 28%, #ff9a1a 52%, rgb(255 190 80 / 0.45) 66%, transparent 74%);
+  filter: blur(14px);
+  animation: ck-breathe 6s ease-in-out infinite;
+}
+@keyframes ck-breathe {
+  50% {
+    transform: scale(1.06);
+  }
+}
+.ck-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.ck-mark {
+  position: relative;
+  z-index: 1;
+  color: #ffffff;
+  filter: drop-shadow(0 1px 6px rgb(120 20 0 / 0.35));
+}
+.ck-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 12px 10px;
+  color: #ffffff;
+}
+.ck-title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+.ck-sub {
+  margin: 3px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgb(255 255 255 / 0.72);
+  text-wrap: pretty;
+}
+.ck-head-icon {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  color: rgb(255 255 255 / 0.9);
+}
+
+/* The stub: narrower, orange, with a punched notch on each side. */
+.ck-stub {
+  width: calc(100% - 36px);
+  margin-top: -2px;
+  padding: 14px 16px 16px;
+  border-radius: 0 0 16px 16px;
+  color: #ffffff;
+  background: linear-gradient(180deg, #ea5a1c, #f06b22);
+  -webkit-mask:
+    radial-gradient(circle 7px at 0 22px, transparent 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 7px at 100% 22px, transparent 98%, #000) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle 7px at 0 22px, transparent 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 7px at 100% 22px, transparent 98%, #000) right / 51% 100% no-repeat;
+  box-shadow: 0 18px 40px -18px rgb(240 107 34 / 0.7);
+}
+.ck-stub-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ck-date {
+  display: flex;
+  width: 50px;
+  height: 52px;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-radius: 11px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.9);
+  background: rgb(255 255 255 / 0.18);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25);
+}
+.ck-stub-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: rgb(255 255 255 / 0.85);
+}
+.ck-stub-text strong {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #ffffff;
+}
+.ck-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.ck-btn {
+  height: 40px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgb(255 255 255 / 0.14);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.28);
+  transition:
+    background-color 140ms cubic-bezier(0.2, 0, 0, 1),
+    transform 140ms cubic-bezier(0.2, 0, 0, 1);
+}
+.ck-btn:hover {
+  background: rgb(255 255 255 / 0.22);
+}
+.ck-btn:active {
+  transform: scale(0.96);
+}
+.ck-btn.is-primary {
+  color: #9a3412;
+  background: #ffffff;
+  box-shadow: none;
+}
+.ck-btn.is-primary:hover {
+  background: #fff4ec;
+}
+.ck-btn:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .ck-btn {
+    height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ck-ticket,
+  .ck-overlay,
+  .ck-orb {
+    animation: none;
+  }
+}

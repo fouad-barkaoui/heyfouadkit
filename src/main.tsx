@@ -13,6 +13,8 @@ import './styles/notifications.css';
 import './styles/contact.css';
 import './styles/account-menu.css';
 import './styles/news.css';
+import './styles/tour.css';
+import './styles/cookie.css';
 import './styles/controls.css';
 
 /** Warm the connection to the cloud project as early as possible — a

@@ -11,15 +11,14 @@ export default defineDictionary({
     'ob.decline': 'Decline',
 
     // Cookie / local storage notice
-    'ob.cookie.partner': 'THIS DEVICE',
+    'ob.cookie.partner': 'Stays on this device',
+    'ob.cookie.boxTop': 'Local',
     'ob.cookie.title': 'Keep Your Workspace',
     'ob.cookie.body': 'Kanz saves your work in this browser, so everything is exactly how you left it next time.',
     'ob.cookie.boxBefore': 'By continuing, you accept that Kanz ',
     'ob.cookie.boxLink': 'stores your data locally',
     'ob.cookie.boxAfter': ' in this browser and reuses it on your next visit.',
-    'ob.cookie.details':
-      'Notes, tasks, docs and preferences live in this browser’s local storage — and, if you sign in, in your own private cloud copy. Nothing is used for tracking or ads. Declining only hides this notice; the app still needs local storage to remember your work.',
-    'ob.cookie.accept': 'Accept and Continue',
+    'ob.cookie.accept': 'Accept',
 
     // Cloud terms
     'ob.cloud.partner': 'CLOUD',
@@ -50,15 +49,14 @@ export default defineDictionary({
     'ob.allSet': 'تم',
     'ob.decline': 'رفض',
 
-    'ob.cookie.partner': 'هذا الجهاز',
+    'ob.cookie.partner': 'تبقى على هذا الجهاز',
+    'ob.cookie.boxTop': 'محلي',
     'ob.cookie.title': 'احتفظ بمساحة عملك',
     'ob.cookie.body': 'يحفظ كنز عملك في هذا المتصفح، لتجد كل شيء كما تركته في المرة القادمة.',
     'ob.cookie.boxBefore': 'بالمتابعة، أنت توافق على أن كنز ',
     'ob.cookie.boxLink': 'يحفظ بياناتك محليًا',
     'ob.cookie.boxAfter': ' في هذا المتصفح ويستخدمها في زيارتك القادمة.',
-    'ob.cookie.details':
-      'تُحفظ الملاحظات والمهام والوثائق والتفضيلات في التخزين المحلي لهذا المتصفح — وفي نسختك السحابية الخاصة إذا سجّلت الدخول. لا يُستخدم شيء منها للتتبع أو الإعلانات. الرفض يخفي هذا الإشعار فقط؛ فالتطبيق يحتاج إلى التخزين المحلي ليتذكر عملك.',
-    'ob.cookie.accept': 'موافق ومتابعة',
+    'ob.cookie.accept': 'موافق',
 
     'ob.cloud.partner': 'السحابة',
     'ob.cloud.title': 'تفعيل المزامنة السحابية',

@@ -151,8 +151,8 @@ export default defineDictionary({
     'pf.soon.recognition': 'Certificates, awards and programs will be listed here.',
 
     // Motto
-    'pf.motto.quote': 'Inspired by the fear of being average.',
-    'pf.motto.author': '— Unknown',
+    'pf.motto.lead': 'Inspired by the fear of',
+    'pf.motto.big': 'being average.',
   },
   ar: {
     // Page header
@@ -302,7 +302,7 @@ export default defineDictionary({
     'pf.soon.recognition': 'ستُدرَج هنا الشهادات والجوائز والبرامج.',
 
     // Motto
-    'pf.motto.quote': 'يُلهمني الخوف من أن أكون عاديًا.',
-    'pf.motto.author': '— مجهول',
+    'pf.motto.lead': 'يُلهمني الخوف من أن أكون',
+    'pf.motto.big': 'شخصًا عاديًا.',
   },
 });

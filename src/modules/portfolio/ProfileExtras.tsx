@@ -15,7 +15,6 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
-import { KanzStar } from '@/components/ui/KanzWordmark';
 import { useLanguage } from '@/state/languageStore';
 import { HOME_TZ, describeGap, formatDuration, formatMonth, tzOffsetMinutes } from './localTime';
 
@@ -491,19 +490,41 @@ export function RecognitionSoon(): JSX.Element {
 
 /* ── Motto ────────────────────────────────────────────────────────────── */
 
+/** Four-point sparkle, drawn so it can take the accent colour. */
+function Sparkle({ className }: { className?: string }): JSX.Element {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden>
+      <path d="M12 0c.9 6.4 5.6 11.1 12 12-6.4.9-11.1 5.6-12 12-.9-6.4-5.6-11.1-12-12C6.4 11.1 11.1 6.4 12 0Z" />
+    </svg>
+  );
+}
+
+/** The motto as a headline: a small lead line, then the key words selected. */
 export function Motto(): JSX.Element {
-  const { t, isArabic } = useLanguage();
+  const { t } = useLanguage();
   return (
     <div className="cp-motto-wrap">
-      <figure className="cp-motto">
-        <span className="cp-motto-mark" aria-hidden>
-          &ldquo;
-        </span>
-        <KanzStar size={26} className="cp-motto-sticker" />
-        <blockquote>
-          <p>{isArabic ? `«${t('pf.motto.quote')}»` : `\u201C${t('pf.motto.quote')}\u201D`}</p>
-        </blockquote>
-        <figcaption>{t('pf.motto.author')}</figcaption>
+      <figure className="cp-motto" aria-label={`${t('pf.motto.lead')} ${t('pf.motto.big')}`}>
+        <p className="cp-motto-lead" aria-hidden>
+          <span className="cp-motto-bubble">
+            <i />
+            <i />
+            <i />
+          </span>
+          <span className="cp-motto-lead-text">{t('pf.motto.lead')}</span>
+        </p>
+        <p className="cp-motto-big" aria-hidden>
+          <span className="cp-motto-sel">
+            {t('pf.motto.big')}
+            <i className="cp-motto-handle is-start" />
+            <i className="cp-motto-handle is-end" />
+          </span>
+          <span className="cp-motto-sparks">
+            <Sparkle className="is-a" />
+            <Sparkle className="is-b" />
+            <Sparkle className="is-c" />
+          </span>
+        </p>
       </figure>
     </div>
   );
