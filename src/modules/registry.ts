@@ -99,8 +99,9 @@ export const NAV_GROUPS: NavGroup[] = [
   { id: 'insight', labelKey: 'nav.group.insight', icon: BarChart3, children: ['reporting', 'analytics', 'trash'] },
 ];
 
-/** Modules only the admin can see or open (features in private beta). */
-export const ADMIN_ONLY: ModuleId[] = ['salary'];
+/** Modules hidden from everyone but the admin (none right now — the Salary
+ * Planner is visible to all and shows non-admins a beta preview). */
+export const ADMIN_ONLY: ModuleId[] = [];
 
 /** A group's children with the admin-only ones removed for everyone else. */
 export function visibleChildren(group: NavGroup, isAdmin: boolean): ModuleId[] {

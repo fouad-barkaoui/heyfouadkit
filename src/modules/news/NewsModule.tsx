@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { useRef, type ReactNode } from 'react';
 import { MenuButton } from '@/components/shell/MenuButton';
-import { useIsAdmin } from '@/components/shell/navShared';
 import { cn } from '@/lib/utils';
 import type { ModuleId } from '@/lib/types';
 import { MODULE_MAP } from '@/modules/registry';
@@ -110,7 +109,6 @@ export function NewsModule(): JSX.Element {
   const { t } = useLanguage();
   const { setModule } = useUI();
   const freeRef = useRef<HTMLElement>(null);
-  const isAdmin = useIsAdmin();
 
   return (
     <div className="flex h-full min-h-0 w-full min-w-0 flex-col bg-void/78 backdrop-blur-2xl">
@@ -178,11 +176,11 @@ export function NewsModule(): JSX.Element {
             <Card
               n={3}
               icon={Calculator}
-              tag={t('nf.kind.soon')}
+              tag={t('sh.flag.beta')}
               title={t('nf.soon.salary.name')}
               tone="soon"
               className="nb-tall"
-              onOpen={isAdmin ? () => setModule('salary') : undefined}
+              onOpen={() => setModule('salary')}
             >
               <div className="nb-bars" aria-hidden>
                 {[42, 68, 34, 82, 56, 74].map((h, i) => (

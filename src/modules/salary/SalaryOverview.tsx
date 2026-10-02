@@ -155,7 +155,8 @@ export function SalaryOverview({
           })}
         </ul>
         <p className="sp-foot-note">
-          {t('sal.rule.note', { needs: state.rule.needs, wants: state.rule.wants, savings: state.rule.savings })}
+          {/* The three numbers read left to right in both languages. */}
+          {t('sal.rule.note', { needs: `\u2066${state.rule.needs}`, wants: state.rule.wants, savings: `${state.rule.savings}\u2069` })}
         </p>
       </Card>
 

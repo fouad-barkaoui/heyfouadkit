@@ -127,6 +127,7 @@ export function SalaryPlan({
                 key={id}
                 type="button"
                 role="radio"
+                dir="ltr"
                 aria-checked={on}
                 data-active={on || undefined}
                 onClick={() => update((s) => ({ ...s, rule: { ...rule } }))}

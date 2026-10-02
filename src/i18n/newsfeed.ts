@@ -57,7 +57,7 @@ export default defineDictionary({
     'nf.soon.intro': 'What is being built right now.',
     'nf.soon.salary.name': 'Salary Planner',
     'nf.soon.salary':
-      'Plan your monthly salary: split it into needs, savings and goals, track spending and see where your money goes.',
+      'In beta now: split your salary into needs, wants and savings, track spending and reach your goals. Open it to watch a preview.',
     'nf.soon.team': 'Shared workspaces with invites and roles, so you can work with your team.',
 
     'nf.idea.title': 'Got an idea for a feature?',
@@ -137,7 +137,7 @@ export default defineDictionary({
     'nf.soon.title': 'القادم',
     'nf.soon.intro': 'ما يجري بناؤه الآن.',
     'nf.soon.salary.name': 'مخطّط الراتب',
-    'nf.soon.salary': 'خطّط لراتبك الشهري: قسّمه بين الضروريات والادخار والأهداف، وتتبّع مصاريفك، واعرف أين تذهب أموالك.',
+    'nf.soon.salary': 'متاح الآن كنسخة تجريبية: قسّم راتبك بين الضروريات والكماليات والادخار، وتتبّع مصاريفك، وحقّق أهدافك. افتحه لمشاهدة عرض مسبق.',
     'nf.soon.team': 'مساحات عمل مشتركة مع دعوات وأدوار، لتعمل مع فريقك.',
 
     'nf.idea.title': 'لديك فكرة لميزة جديدة؟',

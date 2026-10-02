@@ -90,7 +90,7 @@ function Setup({ api }: { api: SalaryApi }): JSX.Element {
             {RULE_PRESETS.map((p) => {
               const on = p.rule === rule;
               return (
-                <button key={p.id} type="button" role="radio" aria-checked={on} data-active={on || undefined} onClick={() => setRule(p.rule)}>
+                <button key={p.id} type="button" role="radio" dir="ltr" aria-checked={on} data-active={on || undefined} onClick={() => setRule(p.rule)}>
                   {p.id.replace(/-/g, ' / ')}
                 </button>
               );

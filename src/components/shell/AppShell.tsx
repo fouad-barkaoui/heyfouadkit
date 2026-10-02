@@ -69,6 +69,9 @@ const MedicationsModule = lazy(async () => ({
 const SalaryModule = lazy(async () => ({
   default: (await import('@/modules/salary/SalaryModule')).SalaryModule,
 }));
+const SalaryPreview = lazy(async () => ({
+  default: (await import('@/modules/salary/SalaryPreview')).SalaryPreview,
+}));
 const MedicationsPaywall = lazy(async () => ({
   default: (await import('@/modules/medications/MedicationsPaywall')).MedicationsPaywall,
 }));
@@ -195,8 +198,8 @@ export function AppShell(): JSX.Element {
       case 'medications':
         return canOpenMedications ? <MedicationsModule /> : <MedicationsPaywall />;
       case 'salary':
-        // Private beta: anyone else who lands on #/salary just sees Home.
-        return isAdmin ? <SalaryModule /> : <HomeModule />;
+        // In beta: the admin tests the real planner, everyone else sees a preview of it.
+        return isAdmin ? <SalaryModule /> : <SalaryPreview />;
       case 'articles':
         return <ArticlesModule />;
       case 'courses':
