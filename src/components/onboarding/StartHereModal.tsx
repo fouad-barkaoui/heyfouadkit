@@ -1,40 +1,24 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import {
-  Calculator,
-  CheckSquare,
-  FileText,
-  Flame,
-  GraduationCap,
-  Lightbulb,
-  Lock,
-  MessageSquareHeart,
-  NotebookPen,
-  Pill,
-  Sparkles,
-  X,
-  type LucideIcon,
-} from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { ArrowLeft, ArrowRight, Lock, Newspaper, Pill, Send, Sparkles, X } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { MARK_SRC } from '@/components/ui/BrandMark';
-import { cn } from '@/lib/utils';
+import type { ModuleId } from '@/lib/types';
+import { MODULE_MAP } from '@/modules/registry';
 import { useLanguage } from '@/state/languageStore';
 
 /**
- * Shown once before anything else: a small tour of what Kanz offers, with a
- * list on the left and a picture + note on the right, ending at News.
+ * The first thing a newcomer sees: a five-step story about what Kanz is,
+ * told one card at a time, ending on News. Each step has its own small
+ * animated scene; arrows, swipe and the keyboard move between them.
  */
 
-type TopicId = 'start' | 'free' | 'pro' | 'soon' | 'idea';
+type StepId = 'start' | 'free' | 'pro' | 'soon' | 'idea';
+const STEPS: StepId[] = ['start', 'free', 'pro', 'soon', 'idea'];
 
-const TOPICS: { id: TopicId; label: string }[] = [
-  { id: 'start', label: 'nf.kind.guide' },
-  { id: 'free', label: 'nf.tour.free.label' },
-  { id: 'pro', label: 'nf.kind.pro' },
-  { id: 'soon', label: 'nf.tour.soon.label' },
-  { id: 'idea', label: 'nf.kind.idea' },
-];
+const ORBIT: ModuleId[] = ['todo', 'calendar', 'habits', 'saveit', 'notebook', 'articles', 'courses', 'docs'];
+const FREE: ModuleId[] = ['todo', 'calendar', 'habits', 'saveit', 'notebook', 'articles', 'courses', 'docs', 'vault'];
 
-function Sparkle({ className }: { className?: string }): JSX.Element {
+function Spark({ className }: { className?: string }): JSX.Element {
   return (
     <svg className={className} viewBox="0 0 24 24" aria-hidden>
       <path d="M12 0c.9 6.4 5.6 11.1 12 12-6.4.9-11.1 5.6-12 12-.9-6.4-5.6-11.1-12-12C6.4 11.1 11.1 6.4 12 0Z" />
@@ -42,102 +26,143 @@ function Sparkle({ className }: { className?: string }): JSX.Element {
   );
 }
 
-function Tile({ icon: Icon }: { icon: LucideIcon }): JSX.Element {
+/* ── scenes ──────────────────────────────────────────────────────────── */
+
+function SceneStart(): JSX.Element {
   return (
-    <span className="sh-tile">
-      <Icon size={18} strokeWidth={1.7} />
-    </span>
+    <div className="sh2-orbit">
+      <span className="sh2-ring is-outer" />
+      <span className="sh2-ring is-inner" />
+      <div className="sh2-orbit-track">
+        {ORBIT.map((id, i) => {
+          const Icon = MODULE_MAP[id].icon;
+          return (
+            <span key={id} className="sh2-planet" style={{ ['--a' as string]: `${(360 / ORBIT.length) * i}deg` }}>
+              <span className="sh2-planet-in">
+                <Icon size={16} strokeWidth={1.7} />
+              </span>
+            </span>
+          );
+        })}
+      </div>
+      <span className="sh2-core">
+        <img src={MARK_SRC} alt="" width={72} height={72} />
+      </span>
+    </div>
   );
 }
 
-/** A small white "screen" floating on the coloured stage. */
-function Art({ id }: { id: TopicId }): JSX.Element {
+function SceneFree(): JSX.Element {
   const { t } = useLanguage();
-  let content: ReactNode;
-  if (id === 'start') {
-    content = (
-      <>
-        <div className="sh-art-row">
-          <img src={MARK_SRC} alt="" width={40} height={40} className="sh-art-mark" />
-          <div className="min-w-0">
-            <p className="sh-art-title">{t('nf.welcome.title')}</p>
-            <p className="sh-art-sub">{t('nf.tour.start.chip')}</p>
-          </div>
+  return (
+    <div className="sh2-tiles">
+      {FREE.map((id, i) => {
+        const m = MODULE_MAP[id];
+        return (
+          <span key={id} className="sh2-tile" style={{ ['--i' as string]: i }} data-hot={i === 4 || undefined}>
+            <m.icon size={17} strokeWidth={1.7} />
+            <span>{m.short}</span>
+          </span>
+        );
+      })}
+      <span className="sh2-free-badge">{t('nf.tour.free.badge')}</span>
+    </div>
+  );
+}
+
+function ScenePro(): JSX.Element {
+  const { t } = useLanguage();
+  return (
+    <div className="sh2-vault">
+      <div className="sh2-vault-card">
+        <span className="sh2-vault-icon">
+          <Pill size={20} strokeWidth={1.7} />
+        </span>
+        <div className="min-w-0">
+          <p className="sh2-vault-name">{MODULE_MAP.medications.label}</p>
+          <p className="sh2-vault-sub">{t('nf.tour.pro.chip')}</p>
         </div>
-        <div className="sh-art-lines">
-          <i style={{ width: '86%' }} />
-          <i style={{ width: '64%' }} />
-          <i style={{ width: '72%' }} />
-        </div>
-      </>
-    );
-  } else if (id === 'free') {
-    content = (
-      <div className="sh-art-grid">
-        {[CheckSquare, Flame, NotebookPen, FileText, GraduationCap, Sparkles].map((I, i) => (
-          <Tile key={i} icon={I} />
-        ))}
-      </div>
-    );
-  } else if (id === 'pro') {
-    content = (
-      <div className="sh-art-row">
-        <Tile icon={Pill} />
-        <div className="min-w-0 flex-1">
-          <p className="sh-art-title">{t('nav.medications')}</p>
-          <p className="sh-art-sub">{t('nf.tour.pro.chip')}</p>
-        </div>
-        <span className="sh-art-badge">
-          <Lock size={12} strokeWidth={2.2} /> {t('nf.kind.pro')}
+        <span className="sh2-vault-rows" aria-hidden>
+          <i />
+          <i />
+          <i />
         </span>
       </div>
-    );
-  } else if (id === 'soon') {
-    content = (
-      <>
-        <div className="sh-art-row">
-          <Tile icon={Calculator} />
-          <div className="min-w-0">
-            <p className="sh-art-title">{t('nf.soon.salary.name')}</p>
-            <p className="sh-art-sub">{t('nf.kind.soon')}</p>
-          </div>
-        </div>
-        <div className="sh-art-bars" aria-hidden>
-          <i style={{ height: '46%' }} />
-          <i style={{ height: '72%' }} />
-          <i style={{ height: '38%' }} />
-          <i style={{ height: '88%' }} />
-          <i style={{ height: '60%' }} />
-        </div>
-      </>
-    );
-  } else {
-    content = (
-      <>
-        <div className="sh-art-row">
-          <Tile icon={Lightbulb} />
-          <p className="sh-art-title">{t('nf.idea.title')}</p>
-        </div>
-        <div className="sh-art-msg">
-          <MessageSquareHeart size={15} strokeWidth={1.8} />
-          <span>{t('nf.tour.idea.chip')}</span>
-          <span className="sh-art-send" />
-        </div>
-      </>
-    );
-  }
+      <span className="sh2-lock">
+        <Lock size={18} strokeWidth={2} />
+        Pro
+      </span>
+    </div>
+  );
+}
+
+function SceneSoon(): JSX.Element {
+  const { t } = useLanguage();
   return (
-    <div className="sh-stage" data-topic={id}>
-      <Sparkle className="sh-spark is-a" />
-      <Sparkle className="sh-spark is-b" />
-      <Sparkle className="sh-spark is-c" />
-      <Sparkle className="sh-spark is-d" />
-      <div key={id} className="sh-screen">
-        {content}
+    <div className="sh2-salary">
+      <div className="sh2-salary-card">
+        <div className="sh2-salary-top">
+          <span className="sh2-salary-icon">
+            <MODULE_MAP.salary.icon size={16} strokeWidth={1.8} />
+          </span>
+          <span className="sh2-salary-name">{MODULE_MAP.salary.label}</span>
+          <span className="sh2-beta">{t('sh.flag.beta')}</span>
+        </div>
+        <p className="sh2-salary-label">{t('sal.hero.today')}</p>
+        <p className="sh2-salary-num num">164</p>
+        <div className="sh2-split" aria-hidden>
+          <i className="is-needs" />
+          <i className="is-wants" />
+          <i className="is-savings" />
+        </div>
+        <div className="sh2-split-key" aria-hidden>
+          <span>
+            <b className="is-needs" />
+            50%
+          </span>
+          <span>
+            <b className="is-wants" />
+            30%
+          </span>
+          <span>
+            <b className="is-savings" />
+            20%
+          </span>
+        </div>
       </div>
     </div>
   );
 }
+
+function SceneIdea(): JSX.Element {
+  const { t } = useLanguage();
+  return (
+    <div className="sh2-chat">
+      <div className="sh2-bubble is-typing" aria-hidden>
+        <i />
+        <i />
+        <i />
+      </div>
+      <div className="sh2-bubble is-msg">
+        <span>{t('nf.tour.idea.chip')}</span>
+        <span className="sh2-send">
+          <Send size={13} strokeWidth={2} />
+        </span>
+      </div>
+      <Send className="sh2-plane" size={22} strokeWidth={1.6} aria-hidden />
+    </div>
+  );
+}
+
+const SCENE: Record<StepId, () => JSX.Element> = {
+  start: SceneStart,
+  free: SceneFree,
+  pro: ScenePro,
+  soon: SceneSoon,
+  idea: SceneIdea,
+};
+
+/* ── dialog ──────────────────────────────────────────────────────────── */
 
 export function StartHereModal({
   open,
@@ -148,52 +173,117 @@ export function StartHereModal({
   onOpen: () => void;
   onLater: () => void;
 }): JSX.Element {
-  const { t } = useLanguage();
-  const [topic, setTopic] = useState<TopicId>('start');
+  const { t, language } = useLanguage();
+  const [step, setStep] = useState(0);
+  const [dir, setDir] = useState<1 | -1>(1);
+  const touch = useRef<number | null>(null);
+  const last = step === STEPS.length - 1;
+  const id = STEPS[step];
+  const View = SCENE[id];
+
+  const go = useCallback(
+    (next: number) => {
+      const n = Math.max(0, Math.min(STEPS.length - 1, next));
+      if (n === step) return;
+      setDir(n > step ? 1 : -1);
+      setStep(n);
+    },
+    [step],
+  );
+
+  useEffect(() => {
+    if (open) setStep(0);
+  }, [open]);
+
+  // Arrow keys follow reading direction.
+  const onKey = (e: React.KeyboardEvent): void => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const forward = (e.key === 'ArrowRight') !== (language === 'ar');
+    go(step + (forward ? 1 : -1));
+  };
 
   return (
     <Dialog.Root open={open} onOpenChange={(o) => (o ? undefined : onLater())}>
       <Dialog.Portal>
-        <Dialog.Overlay className="sh-overlay" />
-        <Dialog.Content className="sh-dialog" aria-describedby="sh-desc">
-          <nav className="sh-side" aria-label={t('nf.tour.title')}>
-            <Dialog.Title className="sh-side-title">{t('nf.tour.title')}</Dialog.Title>
-            <ul className="sh-topics" role="tablist" aria-orientation="vertical">
-              {TOPICS.map((tp) => (
-                <li key={tp.id}>
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={topic === tp.id}
-                    data-active={topic === tp.id || undefined}
-                    className="sh-topic"
-                    onClick={() => setTopic(tp.id)}
-                  >
-                    {t(tp.label)}
-                  </button>
-                </li>
+        <Dialog.Overlay className="sh2-overlay" />
+        <Dialog.Content
+          className="sh2-dialog"
+          aria-describedby="sh2-text"
+          onKeyDown={onKey}
+          onTouchStart={(e) => (touch.current = e.touches[0]?.clientX ?? null)}
+          onTouchEnd={(e) => {
+            const start = touch.current;
+            touch.current = null;
+            const end = e.changedTouches[0]?.clientX;
+            if (start === null || end === undefined || Math.abs(end - start) < 50) return;
+            const forward = (end < start) !== (language === 'ar');
+            go(step + (forward ? 1 : -1));
+          }}
+        >
+          <div className="sh2-stage" data-step={id}>
+            <div className="sh2-progress" role="tablist" aria-label={t('nf.tour.title')}>
+              {STEPS.map((s, i) => (
+                <button
+                  key={s}
+                  type="button"
+                  role="tab"
+                  aria-selected={i === step}
+                  aria-label={t(`nf.tour.${s}.title`)}
+                  data-state={i < step ? 'done' : i === step ? 'now' : undefined}
+                  onClick={() => go(i)}
+                >
+                  <i />
+                </button>
               ))}
-            </ul>
-          </nav>
-
-          <div className="sh-main">
-            <Dialog.Close className="sh-close" aria-label={t('nf.start.later')}>
+            </div>
+            <Dialog.Close className="sh2-close" aria-label={t('nf.start.later')}>
               <X size={16} strokeWidth={2} />
             </Dialog.Close>
-            <Art id={topic} />
-            <div className="sh-copy">
-              <h3 className="sh-copy-title">{t(`nf.tour.${topic}.title`)}</h3>
-              <p id="sh-desc" className="sh-copy-text">
-                {t(`nf.tour.${topic}.text`)}
+            <Spark className="sh2-spark is-a" />
+            <Spark className="sh2-spark is-b" />
+            <Spark className="sh2-spark is-c" />
+            <div key={id} className="sh2-scene" data-dir={dir}>
+              <View />
+            </div>
+          </div>
+
+          <div className="sh2-body">
+            <Dialog.Title className="sh2-kicker">
+              <Sparkles size={13} strokeWidth={2} aria-hidden />
+              {t('nf.tour.title')}
+              <span className="sh2-count num">
+                {/* Isolated so "01 / 05" keeps its order in Arabic. */}
+                {`\u2066${String(step + 1).padStart(2, '0')} / ${String(STEPS.length).padStart(2, '0')}\u2069`}
+              </span>
+            </Dialog.Title>
+            <div key={id} className="sh2-copy" data-dir={dir}>
+              <h2 className="sh2-title">{t(`nf.tour.${id}.title`)}</h2>
+              <p id="sh2-text" className="sh2-text" aria-live="polite">
+                {t(`nf.tour.${id}.text`)}
               </p>
             </div>
-            <div className="sh-actions">
-              <button type="button" className={cn('sh-btn')} onClick={onLater}>
-                {t('nf.start.later')}
-              </button>
-              <button type="button" className="sh-btn is-primary" onClick={onOpen}>
-                {t('nf.start.go')}
-              </button>
+            <div className="sh2-actions">
+              {step === 0 ? (
+                <button type="button" className="sh2-btn is-quiet" onClick={onLater}>
+                  {t('nf.start.later')}
+                </button>
+              ) : (
+                <button type="button" className="sh2-btn is-quiet" onClick={() => go(step - 1)}>
+                  <ArrowLeft size={15} strokeWidth={2} className="rtl:-scale-x-100" aria-hidden />
+                  {t('nf.tour.back')}
+                </button>
+              )}
+              {last ? (
+                <button type="button" className="sh2-btn is-primary" onClick={onOpen} autoFocus>
+                  <Newspaper size={15} strokeWidth={2} aria-hidden />
+                  {t('nf.start.go')}
+                </button>
+              ) : (
+                <button type="button" className="sh2-btn is-primary" onClick={() => go(step + 1)}>
+                  {t('nf.tour.next')}
+                  <ArrowRight size={15} strokeWidth={2} className="rtl:-scale-x-100" aria-hidden />
+                </button>
+              )}
             </div>
           </div>
         </Dialog.Content>
