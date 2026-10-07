@@ -327,3 +327,10 @@
 @media (max-width: 1100px) {
   .nb-bars { height: 80px; }
 }
+
+/* Arabic can't be set in a monospace font (letters stop joining). */
+[dir='rtl'] .nb-steps,
+[dir='rtl'] .nb-steps .nb-step-name {
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+}
