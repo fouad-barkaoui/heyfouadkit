@@ -25,9 +25,9 @@ export default defineDictionary({
     'an.detail.starred': 'items marked as interesting',
 
     // Charts
-    'an.heat.title': 'Activity — last 18 weeks',
+    'an.heat.title': 'Activity (last 18 weeks)',
     'an.heat.caption': 'One cell per day; darker means more records created or edited.',
-    'an.trend.title': 'Items touched per day — last 30 days',
+    'an.trend.title': 'Items touched per day (last 30 days)',
     'an.trend.caption': 'Every create or edit across all modules.',
     'an.mix.title': 'Library composition',
     'an.mix.caption': 'How the written material is distributed.',
@@ -82,9 +82,9 @@ export default defineDictionary({
     'an.detail.avgProgress': 'متوسط التقدّم {pct}%',
     'an.detail.starred': 'عناصر مميّزة بنجمة',
 
-    'an.heat.title': 'النشاط — آخر 18 أسبوعًا',
+    'an.heat.title': 'النشاط (آخر 18 أسبوعًا)',
     'an.heat.caption': 'خلية لكل يوم؛ كلما كان اللون أغمق زاد عدد السجلات المنشأة أو المعدّلة.',
-    'an.trend.title': 'العناصر المعدّلة يوميًا — آخر 30 يومًا',
+    'an.trend.title': 'العناصر المعدّلة يوميًا (آخر 30 يومًا)',
     'an.trend.caption': 'كل إنشاء أو تعديل في جميع الأقسام.',
     'an.mix.title': 'تكوين المكتبة',
     'an.mix.caption': 'كيف يتوزع المحتوى المكتوب.',

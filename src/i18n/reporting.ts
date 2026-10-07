@@ -14,7 +14,7 @@ export default defineDictionary({
     'rep.span.all': 'all time',
 
     // Header
-    'rep.subtitle': 'A written summary for {team} — {range}.',
+    'rep.subtitle': 'A written summary for {team} ({range}).',
     'rep.yourWorkspace': 'your workspace',
     'rep.copy': 'Copy as text',
     'rep.copied': 'Copied',
@@ -22,7 +22,7 @@ export default defineDictionary({
 
     // Report body
     'rep.personalWorkspace': 'Personal workspace',
-    'rep.title': 'Activity report — {range}',
+    'rep.title': 'Activity report: {range}',
     'rep.para.members.one': 'Over the last {range}, {count} member',
     'rep.para.members.other': 'Over the last {range}, {count} members',
     'rep.para.tasks.one': 'completed {count} task',
@@ -48,7 +48,7 @@ export default defineDictionary({
     'rep.member': 'Member',
 
     // "Copy as text" export
-    'rep.text.header': 'Activity report — {team} — {range} (generated {date})',
+    'rep.text.header': 'Activity report: {team}, {range} (generated {date})',
     'rep.text.personal': 'Personal',
     'rep.text.team.one': 'Team: {count} member',
     'rep.text.team.other': 'Team: {count} members',
@@ -75,14 +75,14 @@ export default defineDictionary({
     'rep.span.90': 'آخر 90 يومًا',
     'rep.span.all': 'كل الفترات',
 
-    'rep.subtitle': 'ملخص مكتوب لـ{team} — {range}.',
+    'rep.subtitle': 'ملخص مكتوب لـ{team} ({range}).',
     'rep.yourWorkspace': 'مساحة عملك',
     'rep.copy': 'نسخ كنص',
     'rep.copied': 'تم النسخ',
     'rep.print': 'طباعة',
 
     'rep.personalWorkspace': 'مساحة العمل الشخصية',
-    'rep.title': 'تقرير النشاط — {range}',
+    'rep.title': 'تقرير النشاط: {range}',
     'rep.para.members.one': 'خلال {range}، قام {count} عضو',
     'rep.para.members.other': 'خلال {range}، قام {count} أعضاء',
     'rep.para.tasks.one': 'بإنجاز {count} مهمة',
@@ -107,7 +107,7 @@ export default defineDictionary({
     'rep.noMembers': 'لا يوجد أعضاء بعد.',
     'rep.member': 'عضو',
 
-    'rep.text.header': 'تقرير النشاط — {team} — {range} (أُنشئ في {date})',
+    'rep.text.header': 'تقرير النشاط: {team}، {range} (أُنشئ في {date})',
     'rep.text.personal': 'شخصي',
     'rep.text.team.one': 'الفريق: {count} عضو',
     'rep.text.team.other': 'الفريق: {count} أعضاء',

@@ -1,4 +1,4 @@
-import { Camera, Check, Cloud, Crown, Gem, Link2, Pill, Share2, Sparkles, Star, Users } from 'lucide-react';
+import { Camera, Check, Cloud, Crown, Gem, Link2, Pill, Share2, Star, Users } from 'lucide-react';
 import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { dominantColor } from '@/data/avatar';
@@ -283,7 +283,7 @@ export function ProSpotlight({ className, compact = false }: { className?: strin
               </div>
             </div>
             <p className="mt-2 text-center text-[13px] pro-sub">
-              {t('prof.topTier', { month })} <Sparkles size={12} className="inline -mt-0.5 pro-crown" aria-hidden />
+              {t('prof.topTier', { month })} <Star size={12} className="inline -mt-0.5 pro-crown" aria-hidden />
             </p>
           </>
         ) : tab === 'activity' ? (

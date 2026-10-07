@@ -6,7 +6,7 @@ import {
   Newspaper,
   NotebookPen,
   Pill,
-  Sparkles,
+  Database,
   Users,
 } from 'lucide-react';
 import { useMemo } from 'react';
@@ -160,7 +160,7 @@ export function HomeModule(): JSX.Element {
               detail={activeTeam ? `${t('home.detail.in')} ${activeTeam.name}` : t('home.detail.noTeamYet')}
             />
             <StatTile
-              icon={<Sparkles size={14} strokeWidth={1.7} />}
+              icon={<Database size={14} strokeWidth={1.7} />}
               label={t('home.stat.records')}
               value={stats.records}
               detail={t('home.detail.recordsAcross')}

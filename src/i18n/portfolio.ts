@@ -5,11 +5,11 @@ export default defineDictionary({
   en: {
     // Page header
     'pf.title': 'About the Founder',
-    'pf.subtitle': 'The person behind Kanz — background, experience and stack.',
+    'pf.subtitle': 'The person behind Kanz: background, experience and stack.',
 
     // Cover + head
     'pf.cover.fig': 'Fig. 1.',
-    'pf.cover.caption': 'Kanz — the treasure kept inside',
+    'pf.cover.caption': 'Kanz, the treasure kept inside',
     'pf.theme.toDark.aria': 'Switch the whole app to dark theme',
     'pf.theme.toLight.aria': 'Switch the whole app to light theme',
     'pf.theme.toDark.title': 'Switch the whole app to dark',
@@ -35,11 +35,11 @@ export default defineDictionary({
     'pf.greeting.evening': 'Good evening',
 
     // Bio
-    'pf.bio.1': "I'm <b>Fouad Barkaoui</b> — a <b>beginner SOC analyst</b> and <b>fullstack web developer</b> from Morocco.",
+    'pf.bio.1': "I'm <b>Fouad Barkaoui</b>, a <b>beginner SOC analyst</b> and <b>fullstack web developer</b> from Morocco.",
     'pf.bio.2':
-      'A <b>programmer</b>, <b>vibe coder</b> and <b>prompt engineer</b> who turns ideas into working products — fast, clean and <b>secure by default</b>.',
+      'A <b>programmer</b>, <b>vibe coder</b> and <b>prompt engineer</b> who turns ideas into working products: fast, clean and <b>secure by default</b>.',
     'pf.bio.3':
-      'My edge is <b>problem solving</b>: I break big, messy problems into small steps, stay curious, and keep learning how systems get built — and how they get attacked.',
+      'My edge is <b>problem solving</b>: I break big, messy problems into small steps, stay curious, and keep learning how systems get built and how they get attacked.',
     'pf.writeToMe': 'Write to me',
 
     // Margin notes
@@ -127,6 +127,14 @@ export default defineDictionary({
     'pf.proj.kanz.p2': 'Works offline first and syncs through Supabase, with row-level security on every table.',
     'pf.proj.kanz.p3': 'Google sign-in, team invites and roles, and a private contact inbox.',
     'pf.proj.kanz.p4': 'Designed the brand end to end: the KANZ wordmark, the star icon and this page.',
+    'pf.proj.tag.owasp': 'OWASP LLM Top 10',
+    'pf.proj.tag.injection': 'Prompt injection',
+    'pf.proj.pe.title': 'Founder & Developer',
+    'pf.proj.pe.p1': 'Paste a prompt and a crawler reads it section by section: role, objective, context, rules, review and hand-off.',
+    'pf.proj.pe.p2': 'Flags what is vague, risky or missing, word by word, using 11 quality rules and 26 security rules.',
+    'pf.proj.pe.p3': 'Security rules follow my own detection taxonomy mapped to the OWASP LLM Top 10: injection, jailbreaks, leaked secrets and risky instructions.',
+    'pf.proj.pe.p4': 'Gives a spec score, fixes ranked P1 to P3 and a rebuilt prompt you can crawl again until it scores 90+.',
+    'pf.proj.pe.p5': 'Runs entirely in the browser, so no prompt leaves your machine. A Python tool measures each rule against a labeled test set.',
 
     // Socials
     'pf.social.resume.name': 'Resume',
@@ -134,10 +142,10 @@ export default defineDictionary({
     'pf.social.resume.note': 'My resume is coming soon.',
     'pf.social.github.name': 'GitHub',
     'pf.social.github.handle': 'fouad-barkaoui',
-    'pf.social.github.note': 'Under construction — a brand-new account, repositories are on their way.',
+    'pf.social.github.note': 'Under construction. A brand-new account with repositories on the way.',
     'pf.social.linkedin.name': 'LinkedIn',
     'pf.social.linkedin.handle': 'fouad-barkaoui',
-    'pf.social.linkedin.note': 'In development — the profile is still being put together.',
+    'pf.social.linkedin.note': 'In development. The profile is still being put together.',
     'pf.social.instagram.name': 'Instagram',
     'pf.social.instagram.handle': '@heyfouad',
     'pf.social.facebook.name': 'Facebook',
@@ -157,11 +165,11 @@ export default defineDictionary({
   ar: {
     // Page header
     'pf.title': 'عن المؤسس',
-    'pf.subtitle': 'الشخص الذي يقف وراء كنز — المسار والخبرة والأدوات.',
+    'pf.subtitle': 'الشخص الذي يقف وراء كنز: المسار والخبرة والأدوات.',
 
     // Cover + head
     'pf.cover.fig': 'الشكل 1.',
-    'pf.cover.caption': 'كنز — النفيس المحفوظ في الداخل',
+    'pf.cover.caption': 'كنز، النفيس المحفوظ في الداخل',
     'pf.theme.toDark.aria': 'تبديل التطبيق بالكامل إلى المظهر الداكن',
     'pf.theme.toLight.aria': 'تبديل التطبيق بالكامل إلى المظهر الفاتح',
     'pf.theme.toDark.title': 'التبديل إلى المظهر الداكن',
@@ -187,11 +195,11 @@ export default defineDictionary({
     'pf.greeting.evening': 'مساء الخير',
 
     // Bio
-    'pf.bio.1': 'أنا <b>فؤاد البركاوي</b> — <b>محلّل SOC مبتدئ</b> و<b>مطوّر ويب متكامل</b> من المغرب.',
+    'pf.bio.1': 'أنا <b>فؤاد البركاوي</b>، <b>محلّل SOC مبتدئ</b> و<b>مطوّر ويب متكامل</b> من المغرب.',
     'pf.bio.2':
-      '<b>مبرمج</b> و<b>Vibe Coder</b> و<b>مهندس أوامر للذكاء الاصطناعي</b>، أحوّل الأفكار إلى منتجات تعمل فعلًا — بسرعة وإتقان، و<b>آمنة منذ البداية</b>.',
+      '<b>مبرمج</b> و<b>Vibe Coder</b> و<b>مهندس أوامر للذكاء الاصطناعي</b>، أحوّل الأفكار إلى منتجات تعمل فعلًا، بسرعة وإتقان، و<b>آمنة منذ البداية</b>.',
     'pf.bio.3':
-      'نقطة قوّتي هي <b>حلّ المشكلات</b>: أفكّك المشكلات الكبيرة والمعقّدة إلى خطوات صغيرة، وأحافظ على فضولي، وأواصل تعلّم كيف تُبنى الأنظمة — وكيف تتعرّض للهجوم.',
+      'نقطة قوّتي هي <b>حلّ المشكلات</b>: أفكّك المشكلات الكبيرة والمعقّدة إلى خطوات صغيرة، وأحافظ على فضولي، وأواصل تعلّم كيف تُبنى الأنظمة وكيف تتعرّض للهجوم.',
     'pf.writeToMe': 'راسلني',
 
     // Margin notes
@@ -278,6 +286,14 @@ export default defineDictionary({
     'pf.proj.kanz.p2': 'تعمل دون اتصال أولًا وتتزامن عبر Supabase، مع أمان على مستوى الصفوف في كل جدول.',
     'pf.proj.kanz.p3': 'تسجيل الدخول عبر Google، ودعوات الفريق والأدوار، وصندوق رسائل خاص للتواصل.',
     'pf.proj.kanz.p4': 'صمّمت الهوية البصرية من البداية إلى النهاية: شعار KANZ الكتابي، وأيقونة النجمة، وهذه الصفحة.',
+    'pf.proj.tag.owasp': 'OWASP LLM Top 10',
+    'pf.proj.tag.injection': 'حقن الأوامر',
+    'pf.proj.pe.title': 'المؤسس والمطوّر',
+    'pf.proj.pe.p1': 'الصق أمرًا (prompt) فيقرؤه زاحف قسمًا قسمًا: الدور، والهدف، والسياق، والقواعد، والمراجعة، والتسليم.',
+    'pf.proj.pe.p2': 'يرصد كلمةً بكلمة ما هو غامض أو خطِر أو ناقص، عبر 11 قاعدة للجودة و26 قاعدة للأمان.',
+    'pf.proj.pe.p3': 'قواعد الأمان مبنيّة على تصنيف كشفٍ وضعته بنفسي ومربوط بقائمة OWASP LLM Top 10: الحقن، وكسر القيود، وتسريب الأسرار، والتعليمات الخطِرة.',
+    'pf.proj.pe.p4': 'يعطي درجة للمواصفات، وإصلاحات مرتّبة من P1 إلى P3، وأمرًا مُعاد بناؤه تُعيد فحصه حتى يتجاوز 90.',
+    'pf.proj.pe.p5': 'يعمل كليًا داخل المتصفح، فلا يغادر أي أمر جهازك. وتقيس أداة Python كل قاعدة على مجموعة اختبار موسومة.',
 
     // Socials
     'pf.social.resume.name': 'السيرة الذاتية',
@@ -285,10 +301,10 @@ export default defineDictionary({
     'pf.social.resume.note': 'سيرتي الذاتية ستكون متاحة قريبًا.',
     'pf.social.github.name': 'GitHub',
     'pf.social.github.handle': 'fouad-barkaoui',
-    'pf.social.github.note': 'قيد الإنشاء — حساب جديد كليًا، والمستودعات في الطريق.',
+    'pf.social.github.note': 'قيد الإنشاء. حساب جديد كليًا، والمستودعات في الطريق.',
     'pf.social.linkedin.name': 'LinkedIn',
     'pf.social.linkedin.handle': 'fouad-barkaoui',
-    'pf.social.linkedin.note': 'قيد التطوير — ما زلت أجهّز الملف الشخصي.',
+    'pf.social.linkedin.note': 'قيد التطوير. ما زلت أجهّز الملف الشخصي.',
     'pf.social.instagram.name': 'Instagram',
     'pf.social.instagram.handle': '@heyfouad',
     'pf.social.facebook.name': 'Facebook',

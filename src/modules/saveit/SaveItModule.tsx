@@ -10,7 +10,6 @@ import {
   Loader2,
   Orbit,
   Shuffle,
-  Sparkles,
   Star,
   Wand2,
 } from 'lucide-react';
@@ -327,7 +326,7 @@ export function SaveItModule(): JSX.Element {
 
   /* ── Panel ─────────────────────────────────────────────────────────── */
   const smartRows: { id: Smart; label: string; icon: typeof Inbox; count: number }[] = [
-    { id: 'all', label: t('si.smart.all'), icon: Sparkles, count: stats.total },
+    { id: 'all', label: t('si.smart.all'), icon: LayoutGrid, count: stats.total },
     { id: 'unread', label: t('si.smart.unread'), icon: Inbox, count: stats.unread },
     { id: 'favorites', label: t('si.smart.favorites'), icon: Star, count: stats.favorites },
     { id: 'recent', label: t('si.smart.recent'), icon: Clock3, count: links.filter((l) => Date.now() - new Date(l.openedAt ?? l.createdAt).getTime() < 7 * 864e5).length },
@@ -562,9 +561,6 @@ export function SaveItModule(): JSX.Element {
         title={
           <span className="flex items-center gap-2">
             {t('nav.saveit')}
-            <span className="save-title-spark" aria-hidden>
-              <Sparkles size={14} strokeWidth={2} />
-            </span>
           </span>
         }
         subtitle={
@@ -648,7 +644,7 @@ export function SaveItModule(): JSX.Element {
               <LinkMedia link={rediscover} ratio="16 / 10" className="w-[38%] max-w-[260px] shrink-0" />
               <span className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-4">
                 <span className="flex items-center gap-1.5 text-[10.5px] font-medium uppercase tracking-[0.1em] text-accent">
-                  <Sparkles size={12} strokeWidth={2} aria-hidden /> {t('si.rediscover')}
+                  <Shuffle size={12} strokeWidth={2} aria-hidden /> {t('si.rediscover')}
                 </span>
                 <span className="line-clamp-2 text-[15px] font-medium leading-[1.35] text-paper">{rediscover.title}</span>
                 <span className="truncate text-[12px] text-ash">

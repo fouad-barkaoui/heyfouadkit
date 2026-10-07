@@ -1181,28 +1181,6 @@
   --spv-a: #1f8a5b;
   --spv-b: #9fb40d;
 }
-.spv-spark {
-  position: absolute;
-  fill: rgb(255 255 255 / 0.85);
-  animation: spv-twinkle 3.2s ease-in-out infinite;
-}
-.spv-spark.is-a {
-  top: 9%;
-  inset-inline-start: 6%;
-  width: 18px;
-}
-.spv-spark.is-b {
-  bottom: 10%;
-  inset-inline-end: 5%;
-  width: 24px;
-  animation-delay: 1.4s;
-}
-@keyframes spv-twinkle {
-  50% {
-    opacity: 0.35;
-    transform: scale(0.8) rotate(20deg);
-  }
-}
 
 .spv-window {
   width: 100%;
@@ -1825,7 +1803,6 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .spv-spark,
   .spv-caret {
     animation: none;
   }

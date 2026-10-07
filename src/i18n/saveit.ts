@@ -26,7 +26,7 @@ export default defineDictionary({
     'si.inbox': 'Inbox',
 
     // Toasts
-    'si.toast.already': 'Already in your SaveIt — here it is.',
+    'si.toast.already': 'Already in your SaveIt. Here it is.',
     'si.toast.saved': 'Saved',
     'si.toast.savedMany': 'Saved {count} links',
     'si.toast.notLink': "That doesn't look like a link. Try pasting a full URL.",
@@ -53,7 +53,7 @@ export default defineDictionary({
     'si.bm.button': 'Save to SaveIt',
 
     // Capture bar
-    'si.capture.placeholder': 'Paste a link — a video, an article, a repo, anything…',
+    'si.capture.placeholder': 'Paste a link: a video, an article, a repo, anything…',
     'si.capture.aria': 'Link to save',
     'si.save': 'Save',
     'si.tip.press': 'Tip: press',
@@ -65,7 +65,7 @@ export default defineDictionary({
     // Empty / no results
     'si.empty.title': 'Your internet, kept.',
     'si.empty.body':
-      'Save the videos, articles, repos and sites worth coming back to. Each one becomes a rich card — videos play right here, articles show how long they take to read.',
+      'Save the videos, articles, repos and sites worth coming back to. Each one becomes a rich card: videos play right here, articles show how long they take to read.',
     'si.empty.try': 'Try: {label}',
     'si.sample.video': 'A YouTube video',
     'si.sample.repo': 'A GitHub repo',
@@ -155,7 +155,7 @@ export default defineDictionary({
     'si.byAuthor': 'بواسطة {author}',
     'si.inbox': 'الوارد',
 
-    'si.toast.already': 'موجود مسبقًا في محفوظاتك — ها هو.',
+    'si.toast.already': 'موجود مسبقًا في محفوظاتك. ها هو.',
     'si.toast.saved': 'تم الحفظ',
     'si.toast.savedMany': 'تم حفظ {count} من الروابط',
     'si.toast.notLink': 'لا يبدو هذا رابطًا. جرّب لصق عنوان URL كاملًا.',
@@ -180,7 +180,7 @@ export default defineDictionary({
     'si.bm.dragTip': 'اسحبني إلى شريط الإشارات المرجعية',
     'si.bm.button': 'احفظ في المحفوظات',
 
-    'si.capture.placeholder': 'الصق رابطًا — فيديو، مقالًا، مستودعًا، أي شيء…',
+    'si.capture.placeholder': 'الصق رابطًا: فيديو، مقالًا، مستودعًا، أي شيء…',
     'si.capture.aria': 'الرابط المراد حفظه',
     'si.save': 'حفظ',
     'si.tip.press': 'نصيحة: اضغط',
@@ -191,7 +191,7 @@ export default defineDictionary({
 
     'si.empty.title': 'إنترنتك، محفوظ.',
     'si.empty.body':
-      'احفظ الفيديوهات والمقالات والمستودعات والمواقع التي تستحق العودة إليها. يصبح كل منها بطاقة غنية — تُشغَّل الفيديوهات هنا مباشرة، وتعرض المقالات مدة قراءتها.',
+      'احفظ الفيديوهات والمقالات والمستودعات والمواقع التي تستحق العودة إليها. يصبح كل منها بطاقة غنية: تُشغَّل الفيديوهات هنا مباشرة، وتعرض المقالات مدة قراءتها.',
     'si.empty.try': 'جرّب: {label}',
     'si.sample.video': 'فيديو على YouTube',
     'si.sample.repo': 'مستودع على GitHub',

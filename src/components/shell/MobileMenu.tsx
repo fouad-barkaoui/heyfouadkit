@@ -97,7 +97,7 @@ export function MobileMenu(): JSX.Element {
           onClick={() => setModule(id)}
           data-active={active}
           aria-current={active ? 'page' : undefined}
-          aria-label={flag ? `${label} — ${t(FLAG_TOOLTIP[flag])}` : label}
+          aria-label={flag ? `${label}, ${t(FLAG_TOOLTIP[flag])}` : label}
           className="menu-tile"
           style={{ ['--i' as string]: i }}
         >
@@ -180,7 +180,7 @@ export function MobileMenu(): JSX.Element {
                 <MessageSquareHeart size={17} strokeWidth={1.6} aria-hidden />
               </button>
               <AccountMenu side="top" align="end">
-              <button type="button" aria-label={`${t('shell.account')} — ${accountName}`} className="menu-foot-btn">
+              <button type="button" aria-label={`${t('shell.account')}: ${accountName}`} className="menu-foot-btn">
                 <span className="relative shrink-0">
                   <Avatar src={avatarUrl} name={user ? accountName : t('sh.guest')} size={30} pro={pro} />
                   <span className="absolute -bottom-0.5 -end-0.5 flex h-[14px] w-[14px] items-center justify-center rounded-full bg-void" aria-hidden>

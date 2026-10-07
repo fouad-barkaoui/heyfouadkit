@@ -244,7 +244,7 @@ function InviteModal({ open, onOpenChange }: { open: boolean; onOpenChange: (ope
           <Select id="invite-role" value={role} onChange={(e) => setRole(e.target.value as TeamRole)}>
             {(['viewer', 'editor', 'admin'] as TeamRole[]).map((r) => (
               <option key={r} value={r}>
-                {roleLabel(t, r)} — {t(`team2.roleHint.${r}`)}
+                {roleLabel(t, r)}: {t(`team2.roleHint.${r}`)}
               </option>
             ))}
           </Select>

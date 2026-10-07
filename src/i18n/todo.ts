@@ -31,7 +31,7 @@ export default defineDictionary({
     'task.quad.delegateHint': 'Urgent · not important',
     'task.quad.eliminate': 'Eliminate',
     'task.quad.eliminateHint': 'Neither',
-    'task.matrix.empty': 'Nothing here — good.',
+    'task.matrix.empty': 'Nothing here. Good.',
 
     // Views & filters
     'task.view.list': 'List',
@@ -51,7 +51,7 @@ export default defineDictionary({
     'task.noDate': 'No date set',
     'task.empty.filtered': 'Nothing matches this filter',
     'task.empty.none': 'No open tasks',
-    'task.empty.hint': 'Tasks carry a priority and an optional due date — both feed the matrix and timeline views.',
+    'task.empty.hint': 'Tasks carry a priority and an optional due date. Both feed the matrix and timeline views.',
     'task.ringLabel': '{percent}% complete',
     'task.tasksCompleted': 'tasks completed',
     'task.overdueCount': '{count} overdue',
@@ -116,7 +116,7 @@ export default defineDictionary({
     'task.quad.delegateHint': 'عاجل · غير مهم',
     'task.quad.eliminate': 'استبعد',
     'task.quad.eliminateHint': 'لا هذا ولا ذاك',
-    'task.matrix.empty': 'لا شيء هنا — جيد.',
+    'task.matrix.empty': 'لا شيء هنا. جيد.',
 
     'task.view.list': 'قائمة',
     'task.view.board': 'لوحة',
@@ -134,7 +134,7 @@ export default defineDictionary({
     'task.noDate': 'بلا تاريخ',
     'task.empty.filtered': 'لا شيء يطابق هذا الفلتر',
     'task.empty.none': 'لا توجد مهام مفتوحة',
-    'task.empty.hint': 'لكل مهمة أولوية وتاريخ استحقاق اختياري — وكلاهما يغذّي عرضَي المصفوفة والخط الزمني.',
+    'task.empty.hint': 'لكل مهمة أولوية وتاريخ استحقاق اختياري، وكلاهما يغذّي عرضَي المصفوفة والخط الزمني.',
     'task.ringLabel': 'مكتمل بنسبة {percent}%',
     'task.tasksCompleted': 'مهام مكتملة',
     'task.overdueCount': 'متأخرة: {count}',

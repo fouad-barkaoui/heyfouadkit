@@ -5,7 +5,9 @@ import {
   Lightbulb,
   Lock,
   Search,
-  Sparkles,
+  Compass,
+  LayoutGrid,
+  PenLine,
   UserRound,
   type LucideIcon,
 } from 'lucide-react';
@@ -125,7 +127,7 @@ export function NewsModule(): JSX.Element {
       <div className="scroll-y nb-grid-bg min-h-0 flex-1">
         <div className="nb-wrap">
           <p className="nb-from">
-            <Sparkles size={13} strokeWidth={2} aria-hidden />
+            <PenLine size={13} strokeWidth={2} aria-hidden />
             {t('nf.from')}
           </p>
 
@@ -133,7 +135,7 @@ export function NewsModule(): JSX.Element {
           <section className="nb-bento" aria-label={t('nf.kind.guide')}>
             <Card
               n={1}
-              icon={Sparkles}
+              icon={Compass}
               tag={t('nf.kind.guide')}
               title={t('nf.welcome.title')}
               className="nb-hero"
@@ -227,7 +229,7 @@ export function NewsModule(): JSX.Element {
                   <Card
                     key={tool.module ?? tool.name}
                     n={i + 1}
-                    icon={meta?.icon ?? tool.icon ?? Sparkles}
+                    icon={meta?.icon ?? tool.icon ?? LayoutGrid}
                     title={meta ? meta.label : t(tool.name ?? '')}
                     onOpen={tool.module ? () => setModule(tool.module!) : undefined}
                   >

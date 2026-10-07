@@ -1032,15 +1032,15 @@ a.cp-venture-name:hover {
 }
 .cp-built-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.cp-built-grid > li:not(:nth-child(3n + 1)) {
+.cp-built-grid > li:not(:nth-child(4n + 1)) {
   border-inline-start: 1px dashed var(--color-smoke);
 }
-.cp-built-grid > li:nth-child(n + 4) {
+.cp-built-grid > li:nth-child(n + 5) {
   border-top: 1px dashed var(--color-smoke);
 }
 /* Any official logo becomes one flat colour that follows the theme. */

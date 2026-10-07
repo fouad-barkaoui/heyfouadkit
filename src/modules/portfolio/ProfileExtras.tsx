@@ -4,11 +4,12 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   Code2,
+  ScanText,
   Clock,
   Copy,
   Globe,
   ShieldCheck,
-  Sparkles,
+  Terminal,
   Languages,
   Mail,
   MapPin,
@@ -174,7 +175,7 @@ export function Overview({ email, flag }: { email: string; flag: ReactNode }): J
       </h3>
       <ul className="cp-ov">
         <Row icon={Briefcase}>{t('pf.ov.role')}</Row>
-        <Row icon={Sparkles}>{t('pf.ov.craft')}</Row>
+        <Row icon={Terminal}>{t('pf.ov.craft')}</Row>
         <Row icon={Clock}>
           <LocalTime />
         </Row>
@@ -205,7 +206,7 @@ const STACK: { group: string; items: string[] }[] = [
   { group: 'pf.stack.languages', items: ['Python', 'TypeScript', 'JavaScript', 'SQL'] },
   { group: 'pf.stack.frontend', items: ['React', 'Vite', 'Tailwind CSS', 'Three.js'] },
   { group: 'pf.stack.backend', items: ['REST APIs', 'Supabase', 'PostgreSQL', 'IndexedDB'] },
-  { group: 'pf.stack.infra', items: ['Kali Linux', 'Docker', 'Git', 'GitHub', 'Vercel', 'Claude'] },
+  { group: 'pf.stack.infra', items: ['Kali Linux', 'Docker', 'Git', 'GitHub', 'Vercel'] },
 ];
 
 export function Stack(): JSX.Element {
@@ -272,6 +273,22 @@ interface Venture {
 
 const PROJECTS: Venture[] = [
   {
+    name: 'Prompt Engine',
+    where: 'pf.proj.remote',
+    status: 'pf.proj.status.live',
+    url: 'https://pebyfouad.vercel.app',
+    roles: [
+      {
+        title: 'pf.proj.pe.title',
+        icon: ScanText,
+        kind: 'pf.proj.kind.product',
+        start: '2026-10',
+        points: ['pf.proj.pe.p1', 'pf.proj.pe.p2', 'pf.proj.pe.p3', 'pf.proj.pe.p4', 'pf.proj.pe.p5'],
+        tags: ['JavaScript', 'HTML & CSS', 'Canvas', 'Python', 'pf.proj.tag.owasp', 'pf.proj.tag.injection', 'Vercel'],
+      },
+    ],
+  },
+  {
     name: 'ASSAS',
     where: 'pf.proj.remote',
     status: 'pf.proj.status.dev',
@@ -298,7 +315,7 @@ const PROJECTS: Venture[] = [
         kind: 'pf.proj.kind.product',
         start: '2026-09',
         points: ['pf.proj.kanz.p1', 'pf.proj.kanz.p2', 'pf.proj.kanz.p3', 'pf.proj.kanz.p4'],
-        tags: ['React', 'TypeScript', 'Vite', 'Tailwind CSS', 'Supabase', 'PostgreSQL', 'Vercel', 'Claude Code'],
+        tags: ['React', 'TypeScript', 'Vite', 'Tailwind CSS', 'Supabase', 'PostgreSQL', 'Vercel'],
       },
     ],
   },
@@ -327,7 +344,7 @@ function RoleItem({ role }: { role: Role }): JSX.Element {
           <span className="cp-role-meta">
             <span>{t(role.kind)}</span>
             <span>
-              {formatMonth(role.start)} — <span aria-label={t('pf.present')}>∞</span>
+              {formatMonth(role.start)} – <span aria-label={t('pf.present')}>∞</span>
             </span>
             <span>{formatDuration(role.start, now)}</span>
           </span>
@@ -408,8 +425,6 @@ const logoFor = (slug: string): string | undefined =>
 
 const BUILT_WITH = [
   { name: 'Supabase', slug: 'supabase', url: 'https://supabase.com' },
-  { name: 'Claude', slug: 'claude', url: 'https://claude.ai' },
-  { name: 'Claude Code', slug: 'claude-code', url: 'https://claude.com/claude-code' },
   { name: 'Vercel', slug: 'vercel', url: 'https://vercel.com' },
   { name: 'GitHub', slug: 'github', url: 'https://github.com' },
   { name: 'MITRE ATT&CK', slug: 'mitre-attack', url: 'https://attack.mitre.org' },

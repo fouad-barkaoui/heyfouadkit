@@ -89,7 +89,7 @@ function RailRow({
         onClick={onSelect}
         data-active={active}
         aria-label={
-          flag ? `${label} — ${t(FLAG_TOOLTIP[flag])}` : count ? t('sh.withNew', { label, count }) : label
+          flag ? `${label}, ${t(FLAG_TOOLTIP[flag])}` : count ? t('sh.withNew', { label, count }) : label
         }
         aria-current={active ? 'page' : undefined}
         onPointerEnter={() => prefetchModule(meta.id)}
@@ -558,7 +558,7 @@ export function IconRail({ overlay = false }: { overlay?: boolean }): JSX.Elemen
           <AccountMenu side="right" align="end">
             <button
               type="button"
-              aria-label={`${t('shell.account')} — ${accountName}`}
+              aria-label={`${t('shell.account')}: ${accountName}`}
               className={cn('nav-row', expanded ? 'rail-account' : 'is-compact')}
             >
               <span className="relative shrink-0">

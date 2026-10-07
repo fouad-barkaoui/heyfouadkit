@@ -72,7 +72,7 @@ export default defineDictionary({
 
     // Empty states
     'hab.emptyHabitsTitle': 'Small things, every day.',
-    'hab.emptyHabitsBody': 'Pick a habit, tick it off each day, and watch your streak — and your year — fill up.',
+    'hab.emptyHabitsBody': 'Pick a habit, tick it off each day, and watch your streak (and your year) fill up.',
     'hab.emptyHabitsCta': 'Create your first habit',
     'hab.emptyGoalsTitle': 'Big goals, small steps.',
     'hab.emptyGoalsBody':
@@ -98,10 +98,10 @@ export default defineDictionary({
     'hab.goal': 'Goal',
     'hab.goalPlaceholder': 'Pass the CompTIA Security+ exam',
     'hab.why': 'Why it matters',
-    'hab.whyPlaceholder': 'Your reason — shown on the goal to keep you going.',
+    'hab.whyPlaceholder': 'Your reason, shown on the goal to keep you going.',
     'hab.targetDate': 'Target date',
-    'hab.addStepsLine': 'Add steps — one per line',
-    'hab.stepsLine': 'Steps — one per line',
+    'hab.addStepsLine': 'Add steps (one per line)',
+    'hab.stepsLine': 'Steps (one per line)',
     'hab.stepsPlaceholder': 'Book the exam\nFinish the video course\nDo 3 practice tests',
 
     // Year grid
@@ -183,7 +183,7 @@ export default defineDictionary({
 
     // Empty states
     'hab.emptyHabitsTitle': 'أشياء صغيرة، كل يوم.',
-    'hab.emptyHabitsBody': 'اختر عادة، وأنجزها كل يوم، وشاهد سلسلتك — وسنتك — تمتلئ.',
+    'hab.emptyHabitsBody': 'اختر عادة، وأنجزها كل يوم، وشاهد سلسلتك (وسنتك) تمتلئ.',
     'hab.emptyHabitsCta': 'أنشئ عادتك الأولى',
     'hab.emptyGoalsTitle': 'أهداف كبيرة، خطوات صغيرة.',
     'hab.emptyGoalsBody':
@@ -209,10 +209,10 @@ export default defineDictionary({
     'hab.goal': 'الهدف',
     'hab.goalPlaceholder': 'اجتياز امتحان CompTIA Security+',
     'hab.why': 'لماذا يهمك',
-    'hab.whyPlaceholder': 'سببك — يظهر على الهدف ليحفّزك.',
+    'hab.whyPlaceholder': 'سببك، يظهر على الهدف ليحفّزك.',
     'hab.targetDate': 'التاريخ المستهدف',
-    'hab.addStepsLine': 'إضافة خطوات — خطوة في كل سطر',
-    'hab.stepsLine': 'الخطوات — خطوة في كل سطر',
+    'hab.addStepsLine': 'إضافة خطوات (خطوة في كل سطر)',
+    'hab.stepsLine': 'الخطوات (خطوة في كل سطر)',
     'hab.stepsPlaceholder': 'حجز الامتحان\nإنهاء الدورة المصورة\nإجراء 3 اختبارات تجريبية',
 
     // Year grid

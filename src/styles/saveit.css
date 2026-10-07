@@ -401,10 +401,6 @@
   transform: rotate(180deg);
   transition: transform 400ms var(--ease-snap);
 }
-.save-title-spark {
-  color: var(--color-accent);
-  animation: save-twinkle 3.4s ease-in-out infinite;
-}
 @keyframes save-twinkle {
   50% {
     transform: rotate(20deg) scale(1.2);
@@ -590,7 +586,6 @@
   .save-play-btn::after,
   .save-empty-sat,
   .save-empty-core,
-  .save-title-spark,
   .save-skel,
   .save-media-shimmer {
     animation: none !important;

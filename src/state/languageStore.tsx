@@ -66,7 +66,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'notif.emptyHint': 'Overdue tasks, missed habits and goal deadlines will show up here.',
     'notif.alerts': 'Phone & desktop alerts',
     'notif.alertsHint': 'Get an alert on this device when something is missed.',
-    'notif.alertsDenied': 'Blocked — allow notifications for this site in your browser settings.',
+    'notif.alertsDenied': 'Blocked. Allow notifications for this site in your browser settings.',
     'notif.alertsUnsupported': 'This browser can’t show alerts. On iPhone, add the app to your Home Screen first.',
 
     // Settings modal
@@ -110,7 +110,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'home.liveIn': 'Live in',
     'home.member': 'member',
     'home.members': 'members',
-    'home.workingLocalOnly': 'Working on this device only — sign in to sync with your team.',
+    'home.workingLocalOnly': 'Working on this device only. Sign in to sync with your team.',
     'home.stat.openTasks': 'Open tasks',
     'home.stat.dueSoon': 'Due soon',
     'home.stat.teammates': 'Teammates',
@@ -122,7 +122,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'home.detail.in': 'In',
     'home.detail.recordsAcross': 'Across notes, tasks, docs and more',
     'home.recentActivity': 'Recent activity',
-    'home.nothingYet': 'Nothing yet — create something to see it here.',
+    'home.nothingYet': 'Nothing yet. Create something to see it here.',
     'home.jumpTo': 'Jump to',
     'home.link.saveit.label': 'SaveIt',
     'home.link.saveit.hint': 'Keep videos, articles and links',
@@ -193,7 +193,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'notif.emptyHint': 'ستظهر هنا المهام المتأخرة والعادات الفائتة ومواعيد الأهداف.',
     'notif.alerts': 'تنبيهات الهاتف والحاسوب',
     'notif.alertsHint': 'احصل على تنبيه على هذا الجهاز عندما يفوتك شيء.',
-    'notif.alertsDenied': 'محظورة — اسمح بالإشعارات لهذا الموقع من إعدادات المتصفح.',
+    'notif.alertsDenied': 'محظورة. اسمح بالإشعارات لهذا الموقع من إعدادات المتصفح.',
     'notif.alertsUnsupported': 'هذا المتصفح لا يدعم التنبيهات. على الآيفون، أضف التطبيق إلى الشاشة الرئيسية أولاً.',
 
     // Settings modal
@@ -237,7 +237,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'home.liveIn': 'متصل في',
     'home.member': 'عضو',
     'home.members': 'أعضاء',
-    'home.workingLocalOnly': 'تعمل على هذا الجهاز فقط — سجّل الدخول للمزامنة مع فريقك.',
+    'home.workingLocalOnly': 'تعمل على هذا الجهاز فقط. سجّل الدخول للمزامنة مع فريقك.',
     'home.stat.openTasks': 'مهام مفتوحة',
     'home.stat.dueSoon': 'تستحق قريبًا',
     'home.stat.teammates': 'زملاء الفريق',
@@ -249,7 +249,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'home.detail.in': 'في',
     'home.detail.recordsAcross': 'عبر الملاحظات والمهام والوثائق والمزيد',
     'home.recentActivity': 'النشاط الأخير',
-    'home.nothingYet': 'لا شيء بعد — أنشئ شيئًا لتراه هنا.',
+    'home.nothingYet': 'لا شيء بعد. أنشئ شيئًا لتراه هنا.',
     'home.jumpTo': 'انتقل إلى',
     'home.link.saveit.label': 'المحفوظات',
     'home.link.saveit.hint': 'احفظ الفيديوهات والمقالات والروابط',

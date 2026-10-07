@@ -87,7 +87,7 @@ export default defineDictionary({
     'med.editor.dosageRequired': 'Please provide the amount.',
     'med.editor.typeLabel': 'Type',
     'med.editor.asNeededNote':
-      '"As needed" medicines don\'t carry a fixed schedule — log a dose whenever it\'s taken.',
+      '"As needed" medicines don\'t carry a fixed schedule. Log a dose whenever it\'s taken.',
     'med.editor.daysLabel': 'Days',
     'med.editor.timesLabel': 'Times',
     'med.editor.every8h': 'Every 8h',
@@ -98,7 +98,7 @@ export default defineDictionary({
     'med.editor.durationLabel': 'Duration',
     'med.editor.decrease': 'Decrease',
     'med.editor.increase': 'Increase',
-    'med.editor.ongoing': 'Ongoing — no end date (∞)',
+    'med.editor.ongoing': 'Ongoing, no end date (∞)',
     'med.editor.ongoingNote': 'This medicine continues indefinitely once started.',
     'med.editor.runsFor': 'Runs for {count} {unit} from the start date.',
 
@@ -132,7 +132,7 @@ export default defineDictionary({
     'med.paywall.subtitle': 'Subscriber feature',
     'med.paywall.title': 'Medications is a subscriber feature',
     'med.paywall.body':
-      "Track medicines and treatment plans — dosing, schedules, and history — with an active subscription. Billing isn't set up yet, so this isn't purchasable from here just yet.",
+      "Track medicines and treatment plans (dosing, schedules, and history) with an active subscription. Billing isn't set up yet, so this isn't purchasable from here just yet.",
   },
   ar: {
     // Module chrome
@@ -219,7 +219,7 @@ export default defineDictionary({
     'med.editor.dosageLabel': 'الجرعة',
     'med.editor.dosageRequired': 'يرجى إدخال الكمية.',
     'med.editor.typeLabel': 'النوع',
-    'med.editor.asNeededNote': 'الأدوية «عند الحاجة» ليس لها جدول ثابت — سجّل الجرعة كلما تناولتها.',
+    'med.editor.asNeededNote': 'الأدوية «عند الحاجة» ليس لها جدول ثابت. سجّل الجرعة كلما تناولتها.',
     'med.editor.daysLabel': 'الأيام',
     'med.editor.timesLabel': 'الأوقات',
     'med.editor.every8h': 'كل 8 ساعات',
@@ -230,7 +230,7 @@ export default defineDictionary({
     'med.editor.durationLabel': 'المدة',
     'med.editor.decrease': 'إنقاص',
     'med.editor.increase': 'زيادة',
-    'med.editor.ongoing': 'مستمر — بدون تاريخ انتهاء (∞)',
+    'med.editor.ongoing': 'مستمر، بدون تاريخ انتهاء (∞)',
     'med.editor.ongoingNote': 'يستمر هذا الدواء دون توقف بعد البدء.',
     'med.editor.runsFor': 'يستمر {count} {unit} من تاريخ البدء.',
 
@@ -264,6 +264,6 @@ export default defineDictionary({
     'med.paywall.subtitle': 'ميزة للمشتركين',
     'med.paywall.title': 'الأدوية ميزة خاصة بالمشتركين',
     'med.paywall.body':
-      'تتبّع الأدوية وخطط العلاج — الجرعات والجداول والسجل — باشتراك نشط. لم يتم إعداد الدفع بعد، لذا لا يمكن الشراء من هنا حاليًا.',
+      'تتبّع الأدوية وخطط العلاج (الجرعات والجداول والسجل) باشتراك نشط. لم يتم إعداد الدفع بعد، لذا لا يمكن الشراء من هنا حاليًا.',
   },
 });

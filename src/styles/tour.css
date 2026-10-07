@@ -161,35 +161,6 @@
 .sh2-close:active {
   transform: scale(0.94);
 }
-.sh2-spark {
-  position: absolute;
-  z-index: 1;
-  fill: rgb(255 255 255 / 0.9);
-  animation: sh2-twinkle 3.4s ease-in-out infinite;
-}
-.sh2-spark.is-a {
-  top: 26%;
-  inset-inline-start: 10%;
-  width: 16px;
-}
-.sh2-spark.is-b {
-  bottom: 16%;
-  inset-inline-end: 11%;
-  width: 22px;
-  animation-delay: 1.2s;
-}
-.sh2-spark.is-c {
-  top: 22%;
-  inset-inline-end: 22%;
-  width: 10px;
-  animation-delay: 2.1s;
-}
-@keyframes sh2-twinkle {
-  50% {
-    opacity: 0.3;
-    transform: scale(0.75) rotate(25deg);
-  }
-}
 
 .sh2-scene {
   position: absolute;
@@ -847,7 +818,6 @@
   .sh2-orbit-track,
   .sh2-planet-in,
   .sh2-core,
-  .sh2-spark,
   .sh2-vault-card::after,
   .sh2-bubble.is-typing,
   .sh2-bubble.is-typing i {

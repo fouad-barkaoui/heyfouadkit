@@ -47,9 +47,18 @@ fast — and builds them secure by default.*
 "Inspired by the fear of **being average.**" — his own line. Do **not** attribute it to anyone
 else, and do not add "— Unknown".
 
-### Projects (both started 2026-09, both ongoing)
+### Projects (newest first, all ongoing)
 
-**ASSAS** — *Founder & Security Developer* · Own SaaS · Morocco (Remote) · **In development**
+**Prompt Engine (PEbyFOUAD)** · *Founder & Developer* · Own product · **Live** · https://pebyfouad.vercel.app · since 2026-10
+- Paste a prompt and a crawler reads it section by section: role, objective, context, rules, review and hand-off.
+- Flags what is vague, risky or missing, word by word, using 11 quality rules and 26 security rules.
+- Security rules follow his own detection taxonomy mapped to the OWASP LLM Top 10: injection, jailbreaks, leaked secrets and risky instructions.
+- Gives a spec score, fixes ranked P1 to P3 and a rebuilt prompt you can crawl again until it scores 90+.
+- Runs entirely in the browser, so no prompt leaves your machine. A Python tool measures each rule against a labeled test set.
+- Tags: JavaScript · HTML & CSS · Canvas · Python · OWASP LLM Top 10 · Prompt injection · Vercel
+
+
+**ASSAS** · *Founder & Security Developer* · Own SaaS · since 2026-09 · Morocco (Remote) · **In development**
 - A SaaS that scans a full codebase for threats, bugs and violations of security rules.
 - Checks authentication, encryption, session handling, input validation, rate limiting and error handling.
 - Covers logging, backups, monitoring and dependency scanning, then reports every finding in one place.
@@ -57,12 +66,12 @@ else, and do not add "— Unknown".
 - Built as a multi-tenant cloud service, one workspace per team.
 - Tags: Python · Static analysis · Dependency scanning · Firecrawl · REST APIs · Docker · SaaS
 
-**Kanz** — *Founder & Fullstack Developer* · Own product · **Live** · https://kanz-workspace.vercel.app
+**Kanz** · *Founder & Fullstack Developer* · Own product · **Live** · https://kanz-workspace.vercel.app · since 2026-09
 - A private workspace that keeps notes, tasks, articles, courses, docs and analytics on one spatial canvas.
 - Works offline first and syncs through Supabase, with row-level security on every table.
 - Google sign-in, team invites and roles, and a private contact inbox.
 - Designed the brand end to end: the KANZ wordmark, the star icon and the founder page.
-- Tags: React · TypeScript · Vite · Tailwind CSS · Supabase · PostgreSQL · Vercel · Claude Code
+- Tags: React · TypeScript · Vite · Tailwind CSS · Supabase · PostgreSQL · Vercel
 - Shipped features you can show (all real, in the repo): English/Arabic with full right-to-left
   layout, light/dark/system theme, news feed, Salary Planner (admin beta + animated public
   preview), Medications catalog (Pro), cookie and terms onboarding, a "Start here" tour.
@@ -72,10 +81,10 @@ else, and do not add "— Unknown".
 - **Languages:** Python · TypeScript · JavaScript · SQL
 - **Frontend:** React · Vite · Tailwind CSS · Three.js
 - **Backend & data:** REST APIs · Supabase · PostgreSQL · IndexedDB
-- **Infra & tools:** Kali Linux · Docker · Git · GitHub · Vercel · Claude
+- **Infra & tools:** Kali Linux · Docker · Git · GitHub · Vercel
 
 ### Built with (logo wall — official logo files only, never redraw a brand)
-Supabase · Claude · Claude Code · Vercel · GitHub · MITRE ATT&CK
+Supabase · Vercel · GitHub · MITRE ATT&CK
 
 ### Socials
 | Name | Handle / link | Status to show |
@@ -126,6 +135,7 @@ Supabase · Claude · Claude Code · Vercel · GitHub · MITRE ATT&CK
   Respect `prefers-reduced-motion`.
 - **Bilingual:** English and Arabic with a toggle; Arabic flips to right-to-left; brand and tool
   names stay in Latin script.
+- No mentions of AI tools, no sparkle icons, no em-dash-heavy copy; it should read as hand-made.
 - Avoid: skill-percentage bars, fake stats ("100+ projects"), stock photos, testimonial carousels,
   every-card hover animations.
 

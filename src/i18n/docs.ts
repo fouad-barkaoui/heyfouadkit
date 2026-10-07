@@ -18,7 +18,7 @@ export default defineDictionary({
     'doc.badgesHeading': 'Doc badges',
     'doc.newBadge': 'New badge',
     'doc.noBadges': 'No doc badges yet.',
-    'doc.badgeScope': 'This namespace is scoped to Docs Storage — Course Hub badges never appear here.',
+    'doc.badgeScope': 'This namespace is scoped to Docs Storage. Course Hub badges never appear here.',
     'doc.general': 'General',
 
     // Browser
@@ -28,7 +28,7 @@ export default defineDictionary({
     'doc.backToAll': 'Back to all',
     'doc.empty.filtered': 'Nothing matches this filter',
     'doc.empty.folder': 'This folder is empty',
-    'doc.empty.hint': 'Documents here are technical references — runbooks, snippets, architecture notes.',
+    'doc.empty.hint': 'Documents here are technical references: runbooks, snippets, architecture notes.',
     'doc.newDocument': 'New document',
     'doc.col.name': 'Name',
     'doc.col.badge': 'Badge',
@@ -69,7 +69,7 @@ export default defineDictionary({
     'doc.badgesHeading': 'شارات الوثائق',
     'doc.newBadge': 'شارة جديدة',
     'doc.noBadges': 'لا توجد شارات للوثائق بعد.',
-    'doc.badgeScope': 'هذه الشارات خاصة بتخزين الوثائق — شارات مركز الدورات لا تظهر هنا أبدًا.',
+    'doc.badgeScope': 'هذه الشارات خاصة بتخزين الوثائق. شارات مركز الدورات لا تظهر هنا أبدًا.',
     'doc.general': 'عام',
 
     'doc.folders': 'المجلدات',
@@ -78,7 +78,7 @@ export default defineDictionary({
     'doc.backToAll': 'العودة إلى الكل',
     'doc.empty.filtered': 'لا شيء يطابق عامل التصفية هذا',
     'doc.empty.folder': 'هذا المجلد فارغ',
-    'doc.empty.hint': 'الوثائق هنا مراجع تقنية — أدلة تشغيل، مقتطفات برمجية، ملاحظات معمارية.',
+    'doc.empty.hint': 'الوثائق هنا مراجع تقنية: أدلة تشغيل، مقتطفات برمجية، ملاحظات معمارية.',
     'doc.newDocument': 'وثيقة جديدة',
     'doc.col.name': 'الاسم',
     'doc.col.badge': 'الشارة',

@@ -69,14 +69,6 @@ function Bar({ pct, a, b, tone, over }: { pct: number; a: number; b: number; ton
   );
 }
 
-function Spark({ className }: { className?: string }): JSX.Element {
-  return (
-    <svg className={cn('spv-spark', className)} viewBox="0 0 24 24" aria-hidden>
-      <path d="M12 0c.9 6.4 5.6 11.1 12 12-6.4.9-11.1 5.6-12 12-.9-6.4-5.6-11.1-12-12C6.4 11.1 11.1 6.4 12 0Z" />
-    </svg>
-  );
-}
-
 /* ── scenes ──────────────────────────────────────────────────────────── */
 
 function SceneSetup(): JSX.Element {
@@ -413,8 +405,6 @@ function Player(): JSX.Element {
   return (
     <section className="spv-player" aria-roledescription={t('spv.player')} aria-label={t('spv.title')}>
       <div className="spv-stage" data-scene={id}>
-        <Spark className="is-a" />
-        <Spark className="is-b" />
         <div className="spv-window">
           <div className="spv-window-bar" aria-hidden>
             <i />

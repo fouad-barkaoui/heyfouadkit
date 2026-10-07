@@ -1,5 +1,5 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import { ArrowLeft, ArrowRight, Lock, Newspaper, Pill, Send, Sparkles, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Compass, Lock, Newspaper, Pill, Send, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { MARK_SRC } from '@/components/ui/BrandMark';
 import type { ModuleId } from '@/lib/types';
@@ -17,14 +17,6 @@ const STEPS: StepId[] = ['start', 'free', 'pro', 'soon', 'idea'];
 
 const ORBIT: ModuleId[] = ['todo', 'calendar', 'habits', 'saveit', 'notebook', 'articles', 'courses', 'docs'];
 const FREE: ModuleId[] = ['todo', 'calendar', 'habits', 'saveit', 'notebook', 'articles', 'courses', 'docs', 'vault'];
-
-function Spark({ className }: { className?: string }): JSX.Element {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden>
-      <path d="M12 0c.9 6.4 5.6 11.1 12 12-6.4.9-11.1 5.6-12 12-.9-6.4-5.6-11.1-12-12C6.4 11.1 11.1 6.4 12 0Z" />
-    </svg>
-  );
-}
 
 /* ── scenes ──────────────────────────────────────────────────────────── */
 
@@ -239,9 +231,6 @@ export function StartHereModal({
             <Dialog.Close className="sh2-close" aria-label={t('nf.start.later')}>
               <X size={16} strokeWidth={2} />
             </Dialog.Close>
-            <Spark className="sh2-spark is-a" />
-            <Spark className="sh2-spark is-b" />
-            <Spark className="sh2-spark is-c" />
             <div key={id} className="sh2-scene" data-dir={dir}>
               <View />
             </div>
@@ -249,7 +238,7 @@ export function StartHereModal({
 
           <div className="sh2-body">
             <Dialog.Title className="sh2-kicker">
-              <Sparkles size={13} strokeWidth={2} aria-hidden />
+              <Compass size={13} strokeWidth={2} aria-hidden />
               {t('nf.tour.title')}
               <span className="sh2-count num">
                 {/* Isolated so "01 / 05" keeps its order in Arabic. */}

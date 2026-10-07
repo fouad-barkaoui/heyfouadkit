@@ -18,7 +18,7 @@ import {
   NotebookPen,
   Pill,
   Wallet,
-  Sparkles,
+  House,
   Trash2,
   MessageSquareHeart,
   Users,
@@ -50,7 +50,7 @@ function mod(id: ModuleId, icon: LucideIcon): ModuleMeta {
 
 /** Every routable pane — order here is display order within its nav group. */
 export const MODULES: ModuleMeta[] = [
-  mod('home', Sparkles),
+  mod('home', House),
   mod('todo', ListChecks),
   mod('calendar', CalendarDays),
   mod('habits', Flame),

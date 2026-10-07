@@ -1,4 +1,4 @@
-import { Lock, Plus, Sparkles, Trash2, Unlock } from 'lucide-react';
+import { Lock, Plus, RefreshCw, Trash2, Unlock } from 'lucide-react';
 import { useState } from 'react';
 import { Select, TextInput } from '@/components/ui/Field';
 import { cn } from '@/lib/utils';
@@ -201,7 +201,7 @@ export function SalaryPlan({
             </>
           ) : (
             <button type="button" className="btn btn-ghost" onClick={() => setConfirmSplit(true)} disabled={totalIncome(plan) <= 0}>
-              <Sparkles size={14} strokeWidth={1.8} aria-hidden /> {t('sal.split.auto')}
+              <RefreshCw size={14} strokeWidth={1.8} aria-hidden /> {t('sal.split.auto')}
             </button>
           )}
         </div>

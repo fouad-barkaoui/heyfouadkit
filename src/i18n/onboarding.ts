@@ -31,7 +31,7 @@ export default defineDictionary({
     'ob.cloud.accept': 'Accept Terms and Continue',
     'ob.cloud.rule.private.title': 'This space is only yours',
     'ob.cloud.rule.private.body':
-      'Row-level security in the database enforces it — nobody else can read or write your rows or files.',
+      'Row-level security in the database enforces it. Nobody else can read or write your rows or files.',
     'ob.cloud.rule.storage.title': 'Storage is limited to {total}',
     'ob.cloud.rule.storage.body':
       'Each file can be up to {each}. Once you reach the total, remove something before adding more.',
@@ -66,7 +66,7 @@ export default defineDictionary({
     'ob.cloud.boxAfter': ' وعلى أن تكون مساحة تخزينك السحابية محدودة بـ {total}، وألا يتجاوز كل ملف {each}.',
     'ob.cloud.accept': 'قبول الشروط والمتابعة',
     'ob.cloud.rule.private.title': 'هذه المساحة لك وحدك',
-    'ob.cloud.rule.private.body': 'يفرض ذلك أمانٌ على مستوى الصفوف في قاعدة البيانات — لا أحد غيرك يستطيع قراءة بياناتك أو ملفاتك أو تعديلها.',
+    'ob.cloud.rule.private.body': 'يفرض ذلك أمانٌ على مستوى الصفوف في قاعدة البيانات. لا أحد غيرك يستطيع قراءة بياناتك أو ملفاتك أو تعديلها.',
     'ob.cloud.rule.storage.title': 'مساحة التخزين محدودة بـ {total}',
     'ob.cloud.rule.storage.body': 'يمكن أن يصل حجم كل ملف إلى {each}. عند بلوغ الحد الإجمالي، احذف شيئًا قبل إضافة المزيد.',
     'ob.cloud.rule.control.title': 'التحكم بيدك دائمًا',

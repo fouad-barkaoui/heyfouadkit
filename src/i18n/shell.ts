@@ -10,7 +10,7 @@ export default defineDictionary({
     'sh.update': 'Update',
     'sh.retry': 'Retry',
     'sh.delete': 'Delete',
-    'sh.confirmAgain': '{label} — press again to confirm',
+    'sh.confirmAgain': '{label}: press again to confirm',
     'sh.signOut': 'Sign out',
     'sh.guest': 'Guest',
     'sh.loading': 'Loading',
@@ -44,7 +44,7 @@ export default defineDictionary({
     'sh.flag.soonTip': 'Coming soon',
     'sh.flag.lockedTip': 'Subscriber feature',
     'sh.flag.beta': 'Beta',
-    'sh.flag.betaTip': 'Beta — still being built',
+    'sh.flag.betaTip': 'Beta: still being built',
 
     // Team switcher
     'sh.team.aria': 'Team: {name}',
@@ -109,7 +109,7 @@ export default defineDictionary({
     'sh.account.pwPlaceholder': 'At least 8 characters',
     'sh.account.resetDevice': 'Reset this device',
     'sh.account.resetConfirm':
-      'Reset this device? Everything stored on it is cleared — your cloud copy is not touched.',
+      'Reset this device? Everything stored on it is cleared. Your cloud copy is not touched.',
 
     // Account menu
     'sh.tier.admin': 'Admin · Founder',
@@ -195,8 +195,8 @@ export default defineDictionary({
     'sh.files.title': 'Files',
     'sh.files.add': 'Add files',
     'sh.files.drop': 'Drop files here, or browse',
-    'sh.files.dropHintUser': 'Images, PDFs and documents up to 50 MB — stored in your cloud bucket',
-    'sh.files.dropHintGuest': 'Sign in to attach files — up to 50 MB each, backed up to your account',
+    'sh.files.dropHintUser': 'Images, PDFs and documents up to 50 MB, stored in your cloud bucket',
+    'sh.files.dropHintGuest': 'Sign in to attach files (up to 50 MB each, backed up to your account)',
     'sh.files.needTitle': 'Give this record a title first, then attach files to it.',
     'sh.files.preview': 'Preview {name}',
     'sh.files.remove': 'Remove {name}',
@@ -247,7 +247,7 @@ export default defineDictionary({
     'sh.update': 'تحديث',
     'sh.retry': 'إعادة المحاولة',
     'sh.delete': 'حذف',
-    'sh.confirmAgain': '{label} — اضغط مرة أخرى للتأكيد',
+    'sh.confirmAgain': '{label}: اضغط مرة أخرى للتأكيد',
     'sh.signOut': 'تسجيل الخروج',
     'sh.guest': 'زائر',
     'sh.loading': 'جارٍ التحميل',
@@ -281,7 +281,7 @@ export default defineDictionary({
     'sh.flag.soonTip': 'قريبًا',
     'sh.flag.lockedTip': 'ميزة للمشتركين',
     'sh.flag.beta': 'تجريبي',
-    'sh.flag.betaTip': 'نسخة تجريبية — قيد البناء',
+    'sh.flag.betaTip': 'نسخة تجريبية: قيد البناء',
 
     // Team switcher
     'sh.team.aria': 'الفريق: {name}',
@@ -346,7 +346,7 @@ export default defineDictionary({
     'sh.account.pwPlaceholder': '8 أحرف على الأقل',
     'sh.account.resetDevice': 'إعادة ضبط هذا الجهاز',
     'sh.account.resetConfirm':
-      'هل تريد إعادة ضبط هذا الجهاز؟ سيُمسح كل ما هو مخزّن عليه — ولن تتأثر نسختك السحابية.',
+      'هل تريد إعادة ضبط هذا الجهاز؟ سيُمسح كل ما هو مخزّن عليه، ولن تتأثر نسختك السحابية.',
 
     // Account menu
     'sh.tier.admin': 'مشرف · المؤسس',
@@ -431,8 +431,8 @@ export default defineDictionary({
     'sh.files.title': 'الملفات',
     'sh.files.add': 'إضافة ملفات',
     'sh.files.drop': 'أفلت الملفات هنا، أو تصفّح',
-    'sh.files.dropHintUser': 'صور وملفات PDF ووثائق حتى 50 م.ب — تُخزَّن في مساحتك السحابية',
-    'sh.files.dropHintGuest': 'سجّل الدخول لإرفاق الملفات — حتى 50 م.ب لكل ملف، مع نسخة احتياطية في حسابك',
+    'sh.files.dropHintUser': 'صور وملفات PDF ووثائق حتى 50 م.ب، تُخزَّن في مساحتك السحابية',
+    'sh.files.dropHintGuest': 'سجّل الدخول لإرفاق الملفات (حتى 50 م.ب لكل ملف، مع نسخة احتياطية في حسابك)',
     'sh.files.needTitle': 'أعطِ هذا السجل عنوانًا أولًا، ثم أرفق الملفات به.',
     'sh.files.preview': 'معاينة {name}',
     'sh.files.remove': 'إزالة {name}',

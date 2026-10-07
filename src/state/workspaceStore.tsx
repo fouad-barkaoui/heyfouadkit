@@ -221,7 +221,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }): JSX.El
         const { workspace: remote, failed } = await withTimeout(
           fetchTeamWorkspace(supabase, activeTeamId),
           20000,
-          'Timed out reaching the cloud — check your connection and try again.',
+          'Timed out reaching the cloud. Check your connection and try again.',
         );
         if (cancelled) return;
         const pending = readOutbox();

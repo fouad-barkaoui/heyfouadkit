@@ -80,7 +80,7 @@ export function ActivityHeatmap({ cells, weeks = 18 }: { cells: HeatCell[]; week
         <span>{t('sh.chart.more')}</span>
         {hover ? (
           <span className="ms-auto text-mist">
-            {fmtDate(hover.date, locale)} — <span className="num">{hover.count}</span>{' '}
+            {fmtDate(hover.date, locale)}: <span className="num">{hover.count}</span>{' '}
             {t(hover.count === 1 ? 'sh.chart.item' : 'sh.chart.items')}
           </span>
         ) : null}

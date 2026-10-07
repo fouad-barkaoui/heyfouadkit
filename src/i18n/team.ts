@@ -41,7 +41,7 @@ export default defineDictionary({
 
     // Invite
     'team2.inviteTitle': 'Invite to the team',
-    'team2.inviteDesc': 'Anyone with this link can join with the role you pick — good for 7 days.',
+    'team2.inviteDesc': 'Anyone with this link can join with the role you pick. Good for 7 days.',
     'team2.generating': 'Generating...',
     'team2.generateLink': 'Generate link',
     'team2.joinRole': 'Role for people who join',
@@ -53,7 +53,7 @@ export default defineDictionary({
     'team2.renameTitle': 'Rename team',
     'team2.deleteTitle': 'Delete team',
     'team2.deleteDesc':
-      'This permanently deletes the team and everything in it — notes, tasks, docs, links, habits and files — for every member.',
+      'This permanently deletes the team and everything in it (notes, tasks, docs, links, habits and files) for every member.',
     'team2.deleting': 'Deleting…',
     'team2.deleteForever': 'Delete forever',
     'team2.typeBefore': 'Type ',
@@ -61,13 +61,13 @@ export default defineDictionary({
 
     // Signed out
     'team2.signInTitle': 'Sign in to use teams',
-    'team2.signInHint': 'Team collaboration is shared across signed-in members — sign in first.',
+    'team2.signInHint': 'Team collaboration is shared across signed-in members. Sign in first.',
 
     // Team list
     'team2.yourTeams': 'Your teams',
     'team2.new': 'New',
     'team2.loadingTeams': 'Loading teams…',
-    'team2.noTeams': 'No teams yet — create one.',
+    'team2.noTeams': 'No teams yet. Create one.',
     'team2.active': 'Active',
     'team2.allTeams': 'All teams ({count})',
 
@@ -84,7 +84,7 @@ export default defineDictionary({
     // Body
     'team2.stillGrowing': 'Still growing',
     'team2.stillGrowingBody':
-      ' — create, rename and delete teams, invite people, change roles, remove members and cancel invites all work. Shared editing extras are on the way.',
+      ': create, rename and delete teams, invite people, change roles, remove members and cancel invites all work. Shared editing extras are on the way.',
     'team2.membersHeading': 'Members',
     'team2.loadingMembers': 'Loading members…',
     'team2.noMembers': 'No members yet.',
@@ -101,7 +101,7 @@ export default defineDictionary({
     'team2.inviteMeta': '{used} used · created {date}',
     'team2.expires': ' · expires {date}',
     'team2.cancelInvite': 'Cancel invite',
-    'team2.inviteCancelled': 'Invite cancelled — the link no longer works.',
+    'team2.inviteCancelled': 'Invite cancelled. The link no longer works.',
     'team2.deleted': '“{name}” was deleted.',
     'team2.renamed': 'Team renamed.',
 
@@ -151,7 +151,7 @@ export default defineDictionary({
 
     // Invite
     'team2.inviteTitle': 'الدعوة إلى الفريق',
-    'team2.inviteDesc': 'يمكن لأي شخص لديه هذا الرابط الانضمام بالدور الذي تختاره — صالح لمدة 7 أيام.',
+    'team2.inviteDesc': 'يمكن لأي شخص لديه هذا الرابط الانضمام بالدور الذي تختاره. صالح لمدة 7 أيام.',
     'team2.generating': 'جارٍ الإنشاء...',
     'team2.generateLink': 'إنشاء رابط',
     'team2.joinRole': 'دور المنضمين',
@@ -163,7 +163,7 @@ export default defineDictionary({
     'team2.renameTitle': 'إعادة تسمية الفريق',
     'team2.deleteTitle': 'حذف الفريق',
     'team2.deleteDesc':
-      'سيُحذف الفريق نهائيًا مع كل ما فيه — الملاحظات والمهام والمستندات والروابط والعادات والملفات — لجميع الأعضاء.',
+      'سيُحذف الفريق نهائيًا مع كل ما فيه (الملاحظات والمهام والمستندات والروابط والعادات والملفات) لجميع الأعضاء.',
     'team2.deleting': 'جارٍ الحذف…',
     'team2.deleteForever': 'حذف نهائي',
     'team2.typeBefore': 'اكتب ',
@@ -171,13 +171,13 @@ export default defineDictionary({
 
     // Signed out
     'team2.signInTitle': 'سجّل الدخول لاستخدام الفرق',
-    'team2.signInHint': 'التعاون في الفريق متاح للأعضاء المسجلين — سجّل الدخول أولًا.',
+    'team2.signInHint': 'التعاون في الفريق متاح للأعضاء المسجلين. سجّل الدخول أولًا.',
 
     // Team list
     'team2.yourTeams': 'فرقك',
     'team2.new': 'جديد',
     'team2.loadingTeams': 'جارٍ تحميل الفرق…',
-    'team2.noTeams': 'لا توجد فرق بعد — أنشئ واحدًا.',
+    'team2.noTeams': 'لا توجد فرق بعد. أنشئ واحدًا.',
     'team2.active': 'نشط',
     'team2.allTeams': 'كل الفرق ({count})',
 
@@ -194,7 +194,7 @@ export default defineDictionary({
     // Body
     'team2.stillGrowing': 'قيد التطوير',
     'team2.stillGrowingBody':
-      ' — إنشاء الفرق وإعادة تسميتها وحذفها، ودعوة الأشخاص، وتغيير الأدوار، وإزالة الأعضاء، وإلغاء الدعوات، كلها تعمل. ميزات التحرير المشترك الإضافية قادمة.',
+      ': إنشاء الفرق وإعادة تسميتها وحذفها، ودعوة الأشخاص، وتغيير الأدوار، وإزالة الأعضاء، وإلغاء الدعوات، كلها تعمل. ميزات التحرير المشترك الإضافية قادمة.',
     'team2.membersHeading': 'الأعضاء',
     'team2.loadingMembers': 'جارٍ تحميل الأعضاء…',
     'team2.noMembers': 'لا يوجد أعضاء بعد.',
@@ -211,7 +211,7 @@ export default defineDictionary({
     'team2.inviteMeta': 'استُخدمت {used} مرة · أُنشئت {date}',
     'team2.expires': ' · تنتهي {date}',
     'team2.cancelInvite': 'إلغاء الدعوة',
-    'team2.inviteCancelled': 'أُلغيت الدعوة — لم يعد الرابط يعمل.',
+    'team2.inviteCancelled': 'أُلغيت الدعوة. لم يعد الرابط يعمل.',
     'team2.deleted': 'تم حذف «{name}».',
     'team2.renamed': 'تمت إعادة تسمية الفريق.',
 
