@@ -150,6 +150,8 @@ export default defineDictionary({
     'sh.auth.signupHint': 'Free, private, and ready in a minute.',
     'sh.auth.resetHint': "Enter your email and we'll send you a reset link.",
     'sh.auth.signinHint': 'Sign in to pick up where you left off.',
+    'sh.auth.cloudUnreachable':
+      "Kanz can't reach its cloud service right now. Signing in works again as soon as it answers; work saved on this device is untouched.",
     'sh.auth.openingGoogle': 'Opening Google…',
     'sh.auth.continueGoogle': 'Continue with Google',
     'sh.auth.orEmail': 'or with email',
@@ -386,6 +388,8 @@ export default defineDictionary({
     'sh.auth.signupHint': 'مجانية وخاصة وجاهزة خلال دقيقة.',
     'sh.auth.resetHint': 'أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين.',
     'sh.auth.signinHint': 'سجّل الدخول لتكمل من حيث توقفت.',
+    'sh.auth.cloudUnreachable':
+      'لا يستطيع كنز الوصول إلى خدمته السحابية الآن. سيعمل تسجيل الدخول من جديد فور استجابتها، وما حفظته على هذا الجهاز لم يُمَسّ.',
     'sh.auth.openingGoogle': 'جارٍ فتح Google…',
     'sh.auth.continueGoogle': 'المتابعة باستخدام Google',
     'sh.auth.orEmail': 'أو بالبريد الإلكتروني',

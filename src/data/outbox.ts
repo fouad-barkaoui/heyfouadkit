@@ -183,6 +183,15 @@ export function flushOutbox(client: SupabaseClient, userId: string): Promise<Flu
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         const tries = (head.tries ?? 0) + 1;
+        // An unreachable network or server is never a reason to throw a change
+        // away. A paused project or a long outage can outlast any retry budget,
+        // and once a change leaves the queue the next cloud load wipes it from
+        // the screen. Keep it, in order, until the cloud answers again.
+        if (isTransientError(message)) {
+          writeOutbox(readOutbox().map((o) => (o.seq === head.seq ? { ...o, tries } : o)));
+          result.blocked = true;
+          break;
+        }
         if (isRetryable(message) && tries < 50) {
           writeOutbox(readOutbox().map((o) => (o.seq === head.seq ? { ...o, tries } : o)));
           result.blocked = true;

@@ -294,6 +294,12 @@ export function AuthOverlay({
           </h1>
           <p className="mt-1.5 text-[13.5px] text-[#9aa1b2]">{subtitle}</p>
 
+          {googleStatus === 'unknown' ? (
+            <p role="status" className="mt-4 rounded-[9px] bg-[#2a2410] px-3 py-2.5 text-[12.5px] leading-[1.5] text-[#f0d878]">
+              {t('sh.auth.cloudUnreachable')}
+            </p>
+          ) : null}
+
           {showGoogle ? (
             <>
               <button
