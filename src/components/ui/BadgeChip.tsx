@@ -75,7 +75,7 @@ const STATUS_COLOR = {
   success: '#27a644',
   danger: '#eb5757',
   info: '#6366f1',
-  accent: '#e4f222',
+  accent: '#a1a1a1',
   violet: '#8b5cf6',
   teal: '#02b8cc',
 } as const;

@@ -70,7 +70,7 @@ function applyTheme(preference: ResolvedTheme): void {
   document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', `only ${preference}`);
   document
     .querySelector('meta[name="theme-color"]')
-    ?.setAttribute('content', preference === 'light' ? '#fbfbfa' : '#06070b');
+    ?.setAttribute('content', preference === 'light' ? '#ffffff' : '#0a0a0a');
 }
 
 function store(preference: ThemePreference): void {
@@ -200,11 +200,4 @@ export function useTheme(): ThemeContextValue {
   const ctx = useContext(ThemeContext);
   if (!ctx) throw new Error('useTheme must be used inside <ThemeProvider>');
   return ctx;
-}
-
-/** Centre of the element that was clicked — handy origin for the reveal. */
-export function originOf(el: Element | null): ThemeOrigin | undefined {
-  if (!el) return undefined;
-  const r = el.getBoundingClientRect();
-  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
 }

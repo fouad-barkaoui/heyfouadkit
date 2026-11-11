@@ -1,7 +1,6 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { ChevronLeft, ChevronRight, Download, Eye, EyeOff, FlaskConical, MoreHorizontal, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
-import { MenuButton } from '@/components/shell/MenuButton';
 import { Select } from '@/components/ui/Field';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/state/languageStore';
@@ -18,6 +17,7 @@ import {
   txnsInMonth,
   type Currency,
   type Rule,
+  DEFAULT_RULE,
 } from './salaryModel';
 import { AmountInput, useCategoryName, useMoney, useMonthLabel } from './parts';
 import { SalaryGoals } from './SalaryGoals';
@@ -45,7 +45,7 @@ function Setup({ api }: { api: SalaryApi }): JSX.Element {
   const [salary, setSalary] = useState(0);
   const [payday, setPayday] = useState(1);
   const [currency, setCurrency] = useState<Currency>('MAD');
-  const [rule, setRule] = useState<Rule>(RULE_PRESETS[0].rule);
+  const [rule, setRule] = useState<Rule>(DEFAULT_RULE);
   return (
     <section className="sp-setup">
       <p className="sp-eyebrow">{t('sal.setup.kicker')}</p>
@@ -149,7 +149,6 @@ export function SalaryModule(): JSX.Element {
   return (
     <div className="flex h-full min-h-0 w-full min-w-0 flex-col bg-void/78 backdrop-blur-2xl">
       <header className="flex items-center gap-3 border-b border-graphite px-4 py-3.5 md:px-7 md:py-4">
-        <MenuButton className="md:hidden" />
         <div className="min-w-0 flex-1">
           <h1 className="flex min-w-0 items-center gap-2 text-[19px] font-medium leading-tight tracking-[-0.016em] text-paper md:text-[21px]">
             <span className="truncate">{t('nav.salary')}</span>

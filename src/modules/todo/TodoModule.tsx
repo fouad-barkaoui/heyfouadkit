@@ -127,7 +127,7 @@ export function TodoModule(): JSX.Element {
                 key={todo.id}
                 className={cn(
                   'rounded-[8px] transition-shadow duration-300',
-                  highlightId === todo.id && 'shadow-[0_0_0_1px_rgba(228,242,34,0.55)]',
+                  highlightId === todo.id && 'shadow-[0_0_0_1px_var(--color-fog)]',
                 )}
               >
                 <TaskCard

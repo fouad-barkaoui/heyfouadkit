@@ -4,10 +4,9 @@ import { cn } from '@/lib/utils';
 import { useUI } from '@/state/uiStore';
 import { ScrollIndex } from '@/components/motion/ScrollIndex';
 import { useI18n } from '@/components/ui/useI18n';
-import { MenuButton } from './MenuButton';
 
 /**
- * The three-pane knowledge-base shell: rail (outside) · context panel · content.
+ * A module's two panes: the list column and the content.
  * On narrow screens the two panes become one stack — the panel is the list
  * view, the content is the detail view, with a back affordance between them.
  */
@@ -50,7 +49,7 @@ export function ModuleLayout({
       {/* ── Context panel ─────────────────────────────────────────────── */}
       <aside
         className={cn(
-          'flex h-full min-h-0 flex-col overflow-hidden border-graphite bg-void/72 backdrop-blur-2xl',
+          'flex h-full min-h-0 flex-col overflow-hidden border-graphite bg-void',
           'w-full shrink-0',
           panelExpanded ? 'border-r md:w-[248px] lg:w-[286px]' : 'md:w-0 md:border-r-0',
           detailOpenOnMobile && 'hidden md:flex',
@@ -58,7 +57,6 @@ export function ModuleLayout({
         style={{ transition: 'width 220ms var(--ease-snap), border-color 220ms var(--ease-snap)' }}
       >
         <div className="flex items-center gap-2 px-4 pb-2.5 pt-3.5">
-          <MenuButton className="md:hidden" />
           <h2 className="flex-1 truncate text-[13px] font-medium tracking-[-0.011em] text-paper">
             {panelTitle}
           </h2>
@@ -104,7 +102,7 @@ export function ModuleLayout({
       {/* ── Content pane ──────────────────────────────────────────────── */}
       <section
         className={cn(
-          'flex h-full min-h-0 min-w-0 flex-1 flex-col bg-void/78 backdrop-blur-2xl',
+          'flex h-full min-h-0 min-w-0 flex-1 flex-col bg-void',
           !detailOpenOnMobile && 'hidden md:flex',
         )}
       >
@@ -113,9 +111,7 @@ export function ModuleLayout({
             <button type="button" className="btn-icon md:hidden" aria-label={t('sh.panel.back')} onClick={onMobileBack}>
               <ChevronLeft size={17} strokeWidth={1.8} className="rtl:-scale-x-100" />
             </button>
-          ) : (
-            <MenuButton className="md:hidden" />
-          )}
+          ) : null}
           {!panelExpanded ? (
             <button
               type="button"

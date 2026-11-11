@@ -64,22 +64,12 @@ function Section({ title, children }: { title: string; children: ReactNode }): J
  * clears) but keeps the list — items leave when they're dismissed or when
  * the underlying thing is done (task completed, habit ticked…).
  *
- * `variant="rail"` renders as a sidebar row; the default is a square header
- * button that sits next to the phone menu button.
+ * Lives in the top bar on every screen size.
  */
-export function NotificationBell({
-  variant = 'button',
-  expanded = false,
-  className,
-}: {
-  variant?: 'button' | 'rail';
-  expanded?: boolean;
-  className?: string;
-}): JSX.Element {
+export function NotificationBell({ className }: { className?: string }): JSX.Element {
   const { t } = useI18n();
   const { setModule } = useUI();
-  const { items, unread, isRead, markAllRead, dismiss, dismissAll, alertsOn, alertSupport, setAlertsOn } =
-    useNotifications();
+  const { items, unread, isRead, markAllRead, dismiss, dismissAll } = useNotifications();
   const [open, setOpen] = useState(false);
   // Which items were unread when the panel opened — they keep their dot for
   // this viewing even though the badge has already cleared.
@@ -105,40 +95,16 @@ export function NotificationBell({
     setModule(r.module);
   };
 
-  const trigger =
-    variant === 'rail' ? (
-      <button
-        type="button"
-        aria-label={label}
-        title={expanded ? undefined : label}
-        className={cn('nav-row notif-trigger', !expanded && 'is-compact', className)}
-        data-open={open}
-      >
-        <span className="relative inline-flex shrink-0">
-          <BellIcon size={16} strokeWidth={1.6} aria-hidden className={cn(unread && 'notif-ring')} />
-          {unread && !expanded ? <span className="notif-badge is-dot" aria-hidden /> : null}
+  const trigger = (
+    <button type="button" aria-label={label} className={cn('tb-pill tb-circle notif-trigger', className)} data-open={open}>
+      <BellIcon size={18} strokeWidth={1.6} aria-hidden className={cn(unread && 'notif-ring')} />
+      {unread ? (
+        <span className="notif-badge is-floating mono" aria-hidden>
+          {badge}
         </span>
-        {expanded ? (
-          <>
-            <span className="flex-1 truncate text-start">{t('notif.title')}</span>
-            {unread ? (
-              <span className="notif-badge mono" aria-hidden>
-                {badge}
-              </span>
-            ) : null}
-          </>
-        ) : null}
-      </button>
-    ) : (
-      <button type="button" aria-label={label} className={cn('menu-btn notif-trigger', className)} data-open={open}>
-        <BellIcon size={17} strokeWidth={1.7} aria-hidden className={cn(unread && 'notif-ring')} />
-        {unread ? (
-          <span className="notif-badge is-floating mono" aria-hidden>
-            {badge}
-          </span>
-        ) : null}
-      </button>
-    );
+      ) : null}
+    </button>
+  );
 
   return (
     <Popover.Root open={open} onOpenChange={onOpenChange}>
@@ -146,8 +112,8 @@ export function NotificationBell({
       <Popover.Portal>
         <Popover.Content
           className="notif-panel"
-          side={variant === 'rail' ? 'right' : 'bottom'}
-          align="start"
+          side="bottom"
+          align="end"
           sideOffset={10}
           collisionPadding={10}
           aria-label={t('notif.title')}
@@ -220,26 +186,16 @@ export function NotificationBell({
           </div>
 
           <footer className="notif-foot">
-            <label className="notif-switch-row">
-              <span className="min-w-0 flex-1">
-                <span className="notif-switch-label">{t('notif.alerts')}</span>
-                <span className="notif-switch-hint">
-                  {alertSupport === 'denied'
-                    ? t('notif.alertsDenied')
-                    : alertSupport === 'unsupported'
-                      ? t('notif.alertsUnsupported')
-                      : t('notif.alertsHint')}
-                </span>
-              </span>
-              <input
-                type="checkbox"
-                role="switch"
-                className="notif-switch"
-                checked={alertsOn}
-                disabled={alertSupport === 'denied' || alertSupport === 'unsupported'}
-                onChange={(e) => void setAlertsOn(e.target.checked)}
-              />
-            </label>
+            <button
+              type="button"
+              className="notif-link"
+              onClick={() => {
+                setOpen(false);
+                setModule('settings');
+              }}
+            >
+              {t('notif.settings')}
+            </button>
           </footer>
         </Popover.Content>
       </Popover.Portal>

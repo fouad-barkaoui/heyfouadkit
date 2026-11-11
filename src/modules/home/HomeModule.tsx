@@ -1,57 +1,53 @@
-import {
-  ArrowRight,
-  BookmarkPlus,
-  CalendarDays,
-  ListChecks,
-  Newspaper,
-  NotebookPen,
-  Pill,
-  Database,
-  Users,
-} from 'lucide-react';
-import { useMemo } from 'react';
-import { useStagger } from '@/components/motion/ViewTransition';
-import { StatTile } from '@/components/charts/StatTile';
-import { ProSpotlight } from '@/components/profile/ProSpotlight';
-import { Avatar } from '@/components/ui/Avatar';
-import { isProUser } from '@/lib/access';
-import { Timeline, type TimelineEntry } from '@/components/ui/Timeline';
+import { ArrowUpRight, BarChart3, Briefcase, CalendarCheck2, ChevronDown, LibraryBig, type LucideIcon } from 'lucide-react';
+import { useId, useMemo, useState } from 'react';
+import { PORTFOLIO_URL } from '@/components/shell/TopBar';
 import type { ModuleId, Workspace } from '@/lib/types';
+import { dueInfo } from '@/modules/todo/taskMeta';
 import { getDisplayName, useAuth } from '@/state/authStore';
 import { useLanguage } from '@/state/languageStore';
 import { useTeam } from '@/state/teamStore';
 import { useUI } from '@/state/uiStore';
 import { useWorkspace } from '@/state/workspaceStore';
-import { dueInfo } from '@/modules/todo/taskMeta';
-import { MenuButton } from '@/components/shell/MenuButton';
-import { ScrollIndex } from '@/components/motion/ScrollIndex';
 
-/** `kind` is a stable id (also used in row keys); its label is `home2.kind.<kind>`. */
-function collectTimestamps(
-  ws: Workspace,
-  t: (key: string) => string,
-): { id: string; title: string; when: string; kind: string; module: ModuleId }[] {
+interface Row {
+  key: string;
+  title: string;
+  /** Short uppercase label at the end of the dotted line (a date, or "Open"). */
+  meta: string;
+  detail: string;
+  module: ModuleId;
+}
+
+/** Everything in the workspace that carries a "last touched" time. `kind` is a `home2.kind.*` key. */
+function collect(ws: Workspace, t: (key: string) => string): { id: string; title: string; when: string; kind: string; module: ModuleId }[] {
   return [
-    ...ws.notes.map((n) => ({ id: n.id, title: n.title || t('home2.untitled.note'), when: n.updatedAt, kind: 'Note', module: 'notebook' as ModuleId })),
-    ...ws.todos.map((x) => ({ id: x.id, title: x.title, when: x.updatedAt, kind: 'Task', module: 'todo' as ModuleId })),
-    ...ws.articles.map((a) => ({ id: a.id, title: a.title || t('home2.untitled.article'), when: a.updatedAt, kind: 'Article', module: 'articles' as ModuleId })),
-    ...ws.docs.map((d) => ({ id: d.id, title: d.title || t('home2.untitled.document'), when: d.updatedAt, kind: 'Document', module: 'docs' as ModuleId })),
-    ...ws.courses.map((c) => ({ id: c.id, title: c.title || t('home2.untitled.course'), when: c.updatedAt, kind: 'Course', module: 'courses' as ModuleId })),
-    ...ws.news.map((n) => ({ id: n.id, title: n.title || t('home2.untitled.story'), when: n.updatedAt, kind: 'News', module: 'news' as ModuleId })),
-    ...ws.medicines.map((m) => ({ id: m.id, title: m.name || t('home2.untitled.medicine'), when: m.updatedAt, kind: 'Medicine', module: 'medications' as ModuleId })),
+    ...ws.notes.map((n) => ({ id: n.id, title: n.title || t('home2.untitled.note'), when: n.updatedAt, kind: 'note', module: 'notebook' as const })),
+    ...ws.todos.map((x) => ({ id: x.id, title: x.title, when: x.updatedAt, kind: 'task', module: 'todo' as const })),
+    ...ws.links.map((l) => ({ id: l.id, title: l.title || l.url, when: l.updatedAt, kind: 'link', module: 'saveit' as const })),
+    ...ws.articles.map((a) => ({ id: a.id, title: a.title || t('home2.untitled.article'), when: a.updatedAt, kind: 'article', module: 'articles' as const })),
+    ...ws.docs.map((d) => ({ id: d.id, title: d.title || t('home2.untitled.document'), when: d.updatedAt, kind: 'document', module: 'docs' as const })),
+    ...ws.courses.map((c) => ({ id: c.id, title: c.title || t('home2.untitled.course'), when: c.updatedAt, kind: 'course', module: 'courses' as const })),
+    ...ws.news.map((n) => ({ id: n.id, title: n.title || t('home2.untitled.story'), when: n.updatedAt, kind: 'news', module: 'news' as const })),
+    ...ws.medicines.map((m) => ({ id: m.id, title: m.name || t('home2.untitled.medicine'), when: m.updatedAt, kind: 'medicine', module: 'medications' as const })),
   ];
 }
+
+/** Shown instead of activity while the workspace is still empty. */
+const STARTERS: ModuleId[] = ['todo', 'notebook', 'saveit', 'habits', 'calendar', 'docs'];
+
+const SECTIONS: { id: string; icon: LucideIcon; open: ModuleId }[] = [
+  { id: 'plan', icon: CalendarCheck2, open: 'todo' },
+  { id: 'library', icon: LibraryBig, open: 'saveit' },
+  { id: 'workspace', icon: Briefcase, open: 'team' },
+  { id: 'insight', icon: BarChart3, open: 'reporting' },
+];
+
+const FAQ_COUNT = 7;
 
 function daysUntil(iso: string | null | undefined): number {
   if (!iso) return Infinity;
   const startOf = (d: Date): number => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
   return Math.round((startOf(new Date(iso)) - startOf(new Date())) / 86_400_000);
-}
-
-function formatWhen(iso: string, locale: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleString(locale, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
 
 function greetingKey(): string {
@@ -62,157 +58,160 @@ function greetingKey(): string {
   return 'home.greeting.evening';
 }
 
+function Faq(): JSX.Element {
+  const { t } = useLanguage();
+  const { setModule } = useUI();
+  const [open, setOpen] = useState<number | null>(null);
+  const base = useId();
+  return (
+    <section className="home-faq" aria-labelledby={`${base}-title`}>
+      <div className="home-faq-intro">
+        <h2 id={`${base}-title`}>{t('home.faq.title')}</h2>
+        <p>{t('home.faq.lead')}</p>
+        <p>
+          {t('home.faq.more')}{' '}
+          <button type="button" className="home-inline-link" onClick={() => setModule('contact')}>
+            {t('home.faq.contact')}
+          </button>
+        </p>
+      </div>
+      <div className="home-faq-list">
+        {Array.from({ length: FAQ_COUNT }, (_, i) => {
+          const isOpen = open === i;
+          return (
+            <div key={i} className="home-faq-item" data-open={isOpen || undefined}>
+              <h3>
+                <button
+                  type="button"
+                  aria-expanded={isOpen}
+                  aria-controls={`${base}-a${i}`}
+                  id={`${base}-q${i}`}
+                  onClick={() => setOpen(isOpen ? null : i)}
+                >
+                  <span>{t(`home.faq.q${i + 1}`)}</span>
+                  <ChevronDown size={16} strokeWidth={1.8} aria-hidden />
+                </button>
+              </h3>
+              <div className="home-faq-answer" id={`${base}-a${i}`} role="region" aria-labelledby={`${base}-q${i}`}>
+                <div>
+                  <p>{t(`home.faq.a${i + 1}`)}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export function HomeModule(): JSX.Element {
   const { workspace, live } = useWorkspace();
-  const { user, avatarUrl } = useAuth();
-  const pro = isProUser(user);
-  const { activeTeam, members } = useTeam();
+  const { user } = useAuth();
+  const { activeTeam } = useTeam();
   const { setModule } = useUI();
   const { t, locale } = useLanguage();
 
-  const QUICK_LINKS: { id: ModuleId; labelKey: string; hintKey: string; icon: typeof ListChecks }[] = [
-    { id: 'saveit', labelKey: 'home.link.saveit.label', hintKey: 'home.link.saveit.hint', icon: BookmarkPlus },
-    { id: 'todo', labelKey: 'home.link.tasks.label', hintKey: 'home.link.tasks.hint', icon: ListChecks },
-    { id: 'calendar', labelKey: 'home.link.calendar.label', hintKey: 'home.link.calendar.hint', icon: CalendarDays },
-    { id: 'team', labelKey: 'home.link.team.label', hintKey: 'home.link.team.hint', icon: Users },
-    { id: 'news', labelKey: 'home.link.news.label', hintKey: 'home.link.news.hint', icon: Newspaper },
-    { id: 'medications', labelKey: 'home.link.medications.label', hintKey: 'home.link.medications.hint', icon: Pill },
-    { id: 'notebook', labelKey: 'home.link.notebook.label', hintKey: 'home.link.notebook.hint', icon: NotebookPen },
-  ];
+  const { rows, hasActivity } = useMemo<{ rows: Row[]; hasActivity: boolean }>(() => {
+    const fmt = new Intl.DateTimeFormat(locale, { month: 'short', day: '2-digit', year: 'numeric' });
+    const latest = collect(workspace, t)
+      .filter((r) => !Number.isNaN(new Date(r.when).getTime()))
+      .sort((a, b) => new Date(b.when).getTime() - new Date(a.when).getTime())
+      .slice(0, 8);
+    if (latest.length > 0) {
+      const activity = latest.map((r) => ({
+        key: `${r.kind}-${r.id}`,
+        title: r.title,
+        meta: fmt.format(new Date(r.when)).replace(',', ''),
+        detail: t(`home2.kind.${r.kind}`),
+        module: r.module,
+      }));
+      return { rows: activity, hasActivity: true };
+    }
+    const starters = STARTERS.map((id) => ({
+      key: id,
+      title: t(`nav.${id === 'docs' ? 'docsStorage' : id}`),
+      meta: t('home.row.open'),
+      detail: t(`home.start.${id}`),
+      module: id,
+    }));
+    return { rows: starters, hasActivity: false };
+  }, [workspace, t, locale]);
 
-  const stats = useMemo(() => {
-    const openTasks = workspace.todos.filter((t) => t.status !== 'completed' && t.status !== 'archived');
-    const dueSoon = openTasks.filter((t) => {
-      const info = dueInfo(t);
-      // Overdue, or due today / tomorrow — from the date itself, not the (translatable) label.
-      return info ? info.overdue || (t.status !== 'completed' && daysUntil(t.dueDate) <= 1) : false;
-    });
-    const overdue = openTasks.filter((t) => dueInfo(t)?.overdue);
-    return {
-      open: openTasks.length,
-      dueSoon: dueSoon.length,
-      overdue: overdue.length,
-      records: workspace.notes.length + workspace.todos.length + workspace.articles.length + workspace.courses.length + workspace.docs.length,
-    };
+  const summary = useMemo(() => {
+    const open = workspace.todos.filter((x) => x.status !== 'completed' && x.status !== 'archived');
+    const soon = open.filter((x) => dueInfo(x)?.overdue || daysUntil(x.dueDate) <= 1).length;
+    return { open: open.length, soon };
   }, [workspace]);
 
-  const recent = useMemo<TimelineEntry[]>(() => {
-    return collectTimestamps(workspace, t)
-      .sort((a, b) => new Date(b.when).getTime() - new Date(a.when).getTime())
-      .slice(0, 7)
-      .map((row, i) => ({
-        id: `${row.kind}-${row.id}`,
-        timestamp: row.when ? formatWhen(row.when, locale) : '—',
-        title: row.title,
-        description: t(`home2.kind.${row.kind.toLowerCase()}`),
-        state: i === 0 ? 'active' : 'done',
-        onClick: () => setModule(row.module),
-      }));
-  }, [workspace, setModule, t, locale]);
-
-  const gridRef = useStagger([workspace, activeTeam?.id]);
-  const name = getDisplayName(user).split(' ')[0] || getDisplayName(user);
-  const memberCount = members.length || 1;
-  const memberWord = memberCount === 1 ? t('home.member') : t('home.members');
+  const first = getDisplayName(user).split(' ')[0];
+  const lead = !user
+    ? t('home.lead.guest')
+    : [
+        t('home.lead.open', { count: summary.open }),
+        summary.soon > 0 ? t('home.lead.soon', { count: summary.soon }) : null,
+        live && activeTeam ? activeTeam.name : null,
+      ]
+        .filter(Boolean)
+        .join(' · ');
 
   return (
-    <div className="flex h-full min-h-0 w-full min-w-0 flex-col">
-      <header className="flex items-center gap-3 border-b border-graphite px-4 py-3.5 md:px-7 md:py-4">
-        <MenuButton className="md:hidden" />
-        <span className="home-hello-avatar hidden shrink-0 rounded-full sm:block">
-          <Avatar src={avatarUrl} name={getDisplayName(user) || t('home2.you')} size={42} pro={pro} />
-        </span>
-        <div className="min-w-0 flex-1">
-          <h1 className="flex min-w-0 items-center gap-2 truncate text-[19px] font-medium leading-tight tracking-[-0.016em] text-paper md:text-[21px]">
-            <span className="truncate">
-              {t(greetingKey())}
-              {name ? `, ${name}` : ''}
-            </span>
+    <div className="home scroll-y">
+      <div className="home-frame">
+        <header className="home-head">
+          <h1>
+            {t(greetingKey())}
+            {user && first ? `, ${first}` : ''}
           </h1>
-          <p className="mt-1 text-[12.5px] text-ash">
-            {live
-              ? `${t('home.liveIn')} ${activeTeam?.name ?? t('home2.yourTeam')} · ${memberCount} ${memberWord}`
-              : t('home.workingLocalOnly')}
-          </p>
-        </div>
-      </header>
+          <p>{lead}</p>
+        </header>
 
-      <div className="scroll-y min-h-0 flex-1 px-4 py-5 md:px-7 md:py-6">
-        <ScrollIndex />
-        <div ref={gridRef} className="mx-auto max-w-[1080px] space-y-4">
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <StatTile
-              icon={<ListChecks size={14} strokeWidth={1.7} />}
-              label={t('home.stat.openTasks')}
-              value={stats.open}
-              detail={stats.overdue > 0 ? `${stats.overdue} ${t('home.detail.overdue')}` : t('home.detail.nothingOverdue')}
-            />
-            <StatTile
-              icon={<CalendarDays size={14} strokeWidth={1.7} />}
-              label={t('home.stat.dueSoon')}
-              value={stats.dueSoon}
-              detail={t('home.detail.dueTodayTomorrow')}
-            />
-            <StatTile
-              icon={<Users size={14} strokeWidth={1.7} />}
-              label={t('home.stat.teammates')}
-              value={members.length}
-              detail={activeTeam ? `${t('home.detail.in')} ${activeTeam.name}` : t('home.detail.noTeamYet')}
-            />
-            <StatTile
-              icon={<Database size={14} strokeWidth={1.7} />}
-              label={t('home.stat.records')}
-              value={stats.records}
-              detail={t('home.detail.recordsAcross')}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-            <div data-stagger className="surface-card p-4">
-              <p className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">
-                {t('home.recentActivity')}
-              </p>
-              {recent.length === 0 ? (
-                <p className="py-6 text-center text-[12.5px] text-ash">{t('home.nothingYet')}</p>
-              ) : (
-                <Timeline entries={recent} />
-              )}
-            </div>
-
-            <div data-stagger className="space-y-2.5">
-              {pro ? <ProSpotlight className="mb-4" /> : null}
-              <p className="px-1 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">
-                {t('home.jumpTo')}
-              </p>
-              {QUICK_LINKS.map((link) => {
-                const Icon = link.icon;
-                return (
-                  <button
-                    key={link.id}
-                    type="button"
-                    onClick={() => setModule(link.id)}
-                    className="group flex w-full items-center gap-3 rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 text-start shadow-[inset_0_0_0_1px_var(--color-graphite)] transition-[background-color,box-shadow] duration-150 hover:bg-[rgb(var(--tint-rgb)/0.04)] hover:shadow-[inset_0_0_0_1px_var(--color-smoke)]"
-                  >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] bg-[rgb(var(--tint-rgb)/0.05)] text-fog">
-                      <Icon size={14} strokeWidth={1.7} aria-hidden />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13px] text-paper">{t(link.labelKey)}</span>
-                      <span className="block truncate text-[11.5px] text-ash">{t(link.hintKey)}</span>
-                    </span>
-                    <ArrowRight
-                      size={14}
-                      strokeWidth={1.8}
-                      className="shrink-0 text-ash rtl:-scale-x-100 transition-transform duration-150 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 group-hover:text-mist"
-                      aria-hidden
-                    />
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+        <section aria-labelledby="home-list-title">
+          <h2 id="home-list-title" className="home-eyebrow">
+            {hasActivity ? t('home.recentActivity') : t('home.startHere')}
+          </h2>
+          <ul className="home-rows">
+            {rows.map((row) => (
+              <li key={row.key}>
+                <button type="button" onClick={() => setModule(row.module)}>
+                  <span className="home-row-line">
+                    <span className="home-row-title">{row.title}</span>
+                    <span className="home-row-dots" aria-hidden />
+                    <span className="home-row-meta">{row.meta}</span>
+                  </span>
+                  <span className="home-row-detail">{row.detail}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
+
+      <section className="home-features" aria-labelledby="home-features-title">
+        <h2 id="home-features-title">{t('home.features.title')}</h2>
+        <p>{t('home.features.lead')}</p>
+        <div className="home-feature-grid">
+          {SECTIONS.map(({ id, icon: Icon, open }) => (
+            <button key={id} type="button" className="home-feature" onClick={() => setModule(open)}>
+              <span className="home-feature-icon" aria-hidden>
+                <Icon size={18} strokeWidth={1.6} />
+              </span>
+              <span className="home-feature-title">{t(`nav.group.${id}`)}</span>
+              <span className="home-feature-text">{t(`home.features.${id}`)}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <Faq />
+
+      <footer className="home-foot">
+        <span>{t('home.foot.built')}</span>
+        <a href={PORTFOLIO_URL} target="_blank" rel="noopener noreferrer">
+          {t('home.foot.portfolio')}
+          <ArrowUpRight size={14} strokeWidth={1.8} aria-hidden />
+        </a>
+      </footer>
     </div>
   );
 }

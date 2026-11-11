@@ -1,7 +1,7 @@
 import type { User } from '@supabase/supabase-js';
 
 /**
- * Consent + "what's new" bookkeeping.
+ * Consent bookkeeping.
  *
  * Every decision is asked ONCE per person, for life: signed in, it is stored
  * on the account itself (Supabase user_metadata), so it follows the person
@@ -12,17 +12,10 @@ import type { User } from '@supabase/supabase-js';
 export type ConsentKey = 'cookies' | 'terms';
 export type ConsentValue = 'accepted' | 'declined';
 
-/** Bump when there is something new to announce — everyone sees it once. */
-export const WHATS_NEW_RELEASE = '2026-10-start-here';
-
-/** Kept for AuthOverlay, which still flags a fresh sign-in in this tab. */
-export const JUST_AUTHED_KEY = 'kanz.justAuthed.v1';
-
 const LEGACY_COOKIE_KEY = 'kanz.cookieConsent.v1';
 const legacyTermsKey = (uid: string): string => `kanz.cloudTerms.${uid}`;
 const localKey = (key: ConsentKey, uid: string | null): string =>
   key === 'cookies' ? LEGACY_COOKIE_KEY : legacyTermsKey(uid ?? 'guest');
-const whatsNewKey = (uid: string): string => `kanz.whatsNew.${uid}`;
 
 function safeGet(key: string): string | null {
   try {
@@ -93,26 +86,4 @@ export function unsyncedLocalConsents(user: User | null): Partial<Record<Consent
     if (local && !acct[k]) out[k] = local;
   }
   return out;
-}
-
-export function hasSeenWhatsNew(user: User | null): boolean {
-  if (!user) return true;
-  const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
-  return meta.whats_new_seen === WHATS_NEW_RELEASE || safeGet(whatsNewKey(user.id)) === WHATS_NEW_RELEASE;
-}
-
-export function rememberWhatsNewLocally(user: User): void {
-  safeSet(whatsNewKey(user.id), WHATS_NEW_RELEASE);
-}
-
-/* ── "Start here" for visitors without an account (once per device) ───── */
-
-const GUEST_START_KEY = 'kanz.startHere.v1';
-
-export function guestHasSeenStartHere(): boolean {
-  return safeGet(GUEST_START_KEY) === WHATS_NEW_RELEASE;
-}
-
-export function rememberGuestStartHere(): void {
-  safeSet(GUEST_START_KEY, WHATS_NEW_RELEASE);
 }

@@ -162,6 +162,9 @@ function isOfflineAuthError(error: { name?: string; message?: string; status?: n
   return m.includes('retryable') || m.includes('fetch') || m.includes('network') || error.status === 0;
 }
 
+/** How long start-up waits for the cloud before using the session kept on this device. */
+const AUTH_BOOT_DEADLINE_MS = 8000;
+
 /** The last session this device saw (supabase-js keeps it under our storage key). */
 function readStoredSession(): Session | null {
   try {
@@ -182,10 +185,22 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
     if (!supabase) return;
     let cancelled = false;
 
-    supabase.auth
-      .getSession()
-      .then(({ data, error }) => {
+    // A backend that is paused or down can leave this call hanging for a long
+    // time. Wait a bounded while, then start from the session kept on this
+    // device; the auth listener below delivers the real one if it arrives.
+    let deadline: number | undefined;
+    const late = new Promise<'late'>((resolve) => {
+      deadline = window.setTimeout(() => resolve('late'), AUTH_BOOT_DEADLINE_MS);
+    });
+
+    Promise.race([supabase.auth.getSession(), late])
+      .then((outcome) => {
         if (cancelled) return;
+        if (outcome === 'late') {
+          setSession(readStoredSession());
+          return;
+        }
+        const { data, error } = outcome;
         // Offline with an expired token the refresh can't run, and the client
         // reports "no session". The person hasn't signed out — keep them in
         // (reads come from this device, writes queue) until the network is
@@ -197,6 +212,7 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
         if (!cancelled) setSession(readStoredSession());
       })
       .finally(() => {
+        window.clearTimeout(deadline);
         if (!cancelled) setReady(true);
       });
 

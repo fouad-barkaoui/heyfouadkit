@@ -22,7 +22,6 @@ import { useWorkspace } from '@/state/workspaceStore';
 import { TaskCheckbox } from '@/modules/todo/TaskCard';
 import { TaskEditor } from '@/modules/todo/TaskEditor';
 import { dueInfo, PRIORITY_TONE, STATUS_TONE } from '@/modules/todo/taskMeta';
-import { MenuButton } from '@/components/shell/MenuButton';
 
 const DAY_MS = 86_400_000;
 const DAY_SPAN = 21;
@@ -371,7 +370,6 @@ export function CalendarModule(): JSX.Element {
     <>
       <div className="flex h-full min-h-0 w-full min-w-0 flex-col">
         <header className="flex flex-wrap items-start gap-x-3 gap-y-2.5 border-b border-graphite px-4 py-3.5 md:px-7 md:py-4">
-          <MenuButton className="md:hidden" />
           <div className="min-w-0 flex-1 basis-[190px]">
             <h1 className="truncate text-[17px] font-medium leading-tight tracking-[-0.016em] text-paper md:text-[19px]">
               {t('cal.title')}

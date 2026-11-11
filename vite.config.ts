@@ -17,8 +17,11 @@ function serviceWorker(): Plugin {
     name: 'kanz-sw',
     apply: 'build',
     generateBundle(_opts, bundle) {
+      // The 3D link map and the PDF reader are large and rarely opened: they are
+      // cached the first time they load instead of on install.
+      const onDemand = /assets\/(three|pdf|Constellation|PdfViewer)-/;
       const built = Object.keys(bundle)
-        .filter((f) => !f.endsWith('.map') && f !== 'sw.js')
+        .filter((f) => !f.endsWith('.map') && f !== 'sw.js' && !onDemand.test(f))
         .map((f) => `/${f}`);
       const publicDir = fileURLToPath(new URL('./public', import.meta.url));
       const staticFiles = readdirSync(publicDir).filter((f) => f !== 'kanz-mark-256.png');
@@ -45,7 +48,7 @@ export default defineConfig({
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
   build: {
-    // three.js is ~800 kB on its own and only loads for the 3D backdrop.
+    // three.js is ~800 kB on its own and only loads for SaveIt's 3D link map.
     chunkSizeWarningLimit: 900,
     rollupOptions: {
       output: {

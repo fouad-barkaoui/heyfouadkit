@@ -1,34 +1,17 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { ModuleId } from '@/lib/types';
 
 interface UIContextValue {
   module: ModuleId;
-  previousModule: ModuleId | null;
   setModule: (next: ModuleId) => void;
   paletteOpen: boolean;
   setPaletteOpen: (open: boolean) => void;
-  railExpanded: boolean;
-  toggleRail: () => void;
-  setRailExpanded: (expanded: boolean) => void;
-  /** The context panel inside ModuleLayout (the list column between the
-   * icon rail and the content pane) — collapsible the same way the rail is. */
+  /** The list column inside ModuleLayout. */
   panelExpanded: boolean;
   togglePanel: () => void;
-  mobileNavOpen: boolean;
-  setMobileNavOpen: (open: boolean) => void;
-  /** One account panel for the whole app, so any component — including a
-   * creation guard deep in a module — can open it, not just the sidebar. */
+  /** The sign-in screen. Any component can open it, e.g. a creation guard. */
   accountOpen: boolean;
   setAccountOpen: (open: boolean) => void;
-  /** Theme / language / storage / contact panel, opened from the rail's gear icon. */
   /** Cross-module deep link: set by search, consumed by the target module. */
   focusRequest: { module: ModuleId; id: string } | null;
   requestFocus: (module: ModuleId, id: string) => void;
@@ -37,8 +20,6 @@ interface UIContextValue {
 
 const UIContext = createContext<UIContextValue | null>(null);
 
-/** Full-screen background styles for the WebGL field. */
-export type BgStyle = 'waves' | 'starfield' | 'flow' | 'orbit';
 const VALID: ModuleId[] = [
   'home',
   'notebook',
@@ -57,7 +38,7 @@ const VALID: ModuleId[] = [
   'vault',
   'reporting',
   'trash',
-  'portfolio',
+  'settings',
   'contact',
   'inbox',
 ];
@@ -71,25 +52,13 @@ export function UIProvider({ children }: { children: ReactNode }): JSX.Element {
   const [module, setModuleState] = useState<ModuleId>(() =>
     typeof window === 'undefined' ? 'home' : moduleFromHash(),
   );
-  const [previousModule, setPreviousModule] = useState<ModuleId | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
-  // Labelled rail on a roomy screen; icon rail on a laptop or tablet, where the
-  // three panes would otherwise leave the content pane too narrow to work in.
-  const [railExpanded, setRailExpanded] = useState(
-    () => typeof window === 'undefined' || window.innerWidth >= 1180,
-  );
   const [panelExpanded, setPanelExpanded] = useState(true);
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [focusRequest, setFocusRequest] = useState<{ module: ModuleId; id: string } | null>(null);
 
   const setModule = useCallback((next: ModuleId) => {
-    setModuleState((current) => {
-      if (current === next) return current;
-      setPreviousModule(current);
-      return next;
-    });
-    setMobileNavOpen(false);
+    setModuleState(next);
     if (typeof window !== 'undefined') window.location.hash = `/${next}`;
   }, []);
 
@@ -104,17 +73,6 @@ export function UIProvider({ children }: { children: ReactNode }): JSX.Element {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
         setPaletteOpen((open) => !open);
-        return;
-      }
-      // "[" toggles the sidebar, Linear-style — but never while typing.
-      if (event.key === '[' && !event.metaKey && !event.ctrlKey && !event.altKey) {
-        const el = event.target as HTMLElement | null;
-        const typing =
-          !!el && (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName));
-        if (!typing && window.innerWidth >= 768) {
-          event.preventDefault();
-          setRailExpanded((v) => !v);
-        }
       }
     };
     window.addEventListener('keydown', onKey);
@@ -133,35 +91,18 @@ export function UIProvider({ children }: { children: ReactNode }): JSX.Element {
   const value = useMemo<UIContextValue>(
     () => ({
       module,
-      previousModule,
       setModule,
       paletteOpen,
       setPaletteOpen,
-      railExpanded,
-      toggleRail: () => setRailExpanded((v) => !v),
-      setRailExpanded,
       panelExpanded,
       togglePanel: () => setPanelExpanded((v) => !v),
-      mobileNavOpen,
-      setMobileNavOpen,
       accountOpen,
       setAccountOpen,
       focusRequest,
       requestFocus,
       clearFocus: () => setFocusRequest(null),
     }),
-    [
-      module,
-      previousModule,
-      setModule,
-      paletteOpen,
-      railExpanded,
-      panelExpanded,
-      mobileNavOpen,
-      accountOpen,
-      focusRequest,
-      requestFocus,
-    ],
+    [module, setModule, paletteOpen, panelExpanded, accountOpen, focusRequest, requestFocus],
   );
 
   return <UIContext.Provider value={value}>{children}</UIContext.Provider>;

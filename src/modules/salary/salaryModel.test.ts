@@ -35,7 +35,7 @@ describe('salary model', () => {
 
   it('summarizes spending per bucket', () => {
     const s = stateWith(10000);
-    const rent = s.months['2026-10'].categories.find((c) => c.key === 'sal.cat.rent')!;
+    const rent = s.months['2026-10']!.categories.find((c) => c.key === 'sal.cat.rent')!;
     s.txns.push({ id: 't1', date: '2026-10-03', amount: 2500, categoryId: rent.id, note: '' });
     s.txns.push({ id: 't2', date: '2026-09-30', amount: 999, categoryId: rent.id, note: '' });
     const sum = summarize(s, '2026-10');
@@ -112,9 +112,9 @@ describe('salary model', () => {
     expect(s.currency).toBe('MAD');
     expect(s.payday).toBe(31);
     expect(Object.keys(s.months)).toEqual(['2026-10']);
-    expect(s.months['2026-10'].incomes[0].amount).toBe(0);
-    expect(s.months['2026-10'].categories[0].bucket).toBe('needs');
-    expect(s.months['2026-10'].categories[0].key).toBeUndefined();
+    expect(s.months['2026-10']!.incomes[0]!.amount).toBe(0);
+    expect(s.months['2026-10']!.categories[0]!.bucket).toBe('needs');
+    expect(s.months['2026-10']!.categories[0]!.key).toBeUndefined();
     expect(s.txns).toHaveLength(1);
   });
 

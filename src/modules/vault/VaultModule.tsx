@@ -37,7 +37,7 @@ interface VaultItem {
 /** `label` is a translation key. */
 const TYPE_META: Record<ItemType, { label: string; icon: LucideIcon; color: string }> = {
   note: { label: 'vlt.type.note', icon: NotebookPen, color: '#6366f1' },
-  todo: { label: 'vlt.type.todo', icon: ListChecks, color: '#e4f222' },
+  todo: { label: 'vlt.type.todo', icon: ListChecks, color: '#a1a1a1' },
   article: { label: 'vlt.type.article', icon: FileText, color: '#12a3b0' },
   course: { label: 'vlt.type.course', icon: GraduationCap, color: '#8b5cf6' },
   doc: { label: 'vlt.type.doc', icon: BookMarked, color: '#dd6a4e' },

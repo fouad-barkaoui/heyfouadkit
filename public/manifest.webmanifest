@@ -1,13 +1,13 @@
 {
   "name": "Kanz",
   "short_name": "Kanz",
-  "description": "Notes, tasks, articles, courses, documents and analytics on one spatial canvas.",
+  "description": "A private workspace for tasks, habits, notes, saved links and documents, in English and Arabic.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#08090a",
-  "theme_color": "#08090a",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
   "categories": [
     "productivity",
     "utilities"

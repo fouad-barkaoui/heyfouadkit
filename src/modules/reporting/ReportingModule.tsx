@@ -7,7 +7,6 @@ import { fmtDate } from '@/modules/docs/localTime';
 import { useLanguage } from '@/state/languageStore';
 import { useTeam } from '@/state/teamStore';
 import { useWorkspace } from '@/state/workspaceStore';
-import { MenuButton } from '@/components/shell/MenuButton';
 import { ScrollIndex } from '@/components/motion/ScrollIndex';
 
 type RangeId = '7' | '30' | '90' | 'all';
@@ -150,7 +149,6 @@ export function ReportingModule(): JSX.Element {
   return (
     <div className="flex h-full min-h-0 w-full min-w-0 flex-col">
       <header className="flex flex-wrap items-start gap-x-3 gap-y-2.5 border-b border-graphite px-4 py-3.5 md:px-7 md:py-4">
-        <MenuButton className="md:hidden" />
         <div className="min-w-0 flex-1 basis-[190px]">
           <h1 className="truncate text-[17px] font-medium leading-tight tracking-[-0.016em] text-paper md:text-[19px]">
             {t('nav.reporting')}

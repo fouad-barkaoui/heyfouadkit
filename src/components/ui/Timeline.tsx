@@ -17,8 +17,8 @@ export interface TimelineEntry {
 }
 
 const NODE_STYLE: Record<TimelineState, { ring: string; fill: string; ink: string }> = {
-  done: { ring: 'rgba(228,242,34,0.55)', fill: '#e4f222', ink: 'var(--ink-fixed)' },
-  active: { ring: 'rgba(228,242,34,0.45)', fill: 'rgba(228,242,34,0.10)', ink: 'var(--color-accent)' },
+  done: { ring: 'var(--color-fog)', fill: 'var(--color-acid)', ink: 'var(--ink-fixed)' },
+  active: { ring: 'var(--color-fog)', fill: 'rgb(var(--tint-rgb) / 0.08)', ink: 'var(--color-accent)' },
   pending: { ring: 'var(--color-graphite)', fill: 'transparent', ink: 'var(--color-ash)' },
 };
 
@@ -69,7 +69,7 @@ export function Timeline({ entries, className }: { entries: TimelineEntry[]; cla
                   background:
                     entry.state === 'pending'
                       ? 'linear-gradient(to bottom, var(--color-graphite), color-mix(in srgb, var(--color-graphite) 35%, transparent))'
-                      : 'linear-gradient(to bottom, rgba(228,242,34,0.35), color-mix(in srgb, var(--color-graphite) 60%, transparent))',
+                      : 'linear-gradient(to bottom, var(--color-smoke), color-mix(in srgb, var(--color-graphite) 60%, transparent))',
                 }}
               />
             ) : null}

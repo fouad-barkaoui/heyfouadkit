@@ -73,7 +73,7 @@ export function KanbanBoard({
             className={cn(
               'flex min-h-[220px] flex-col rounded-[10px] bg-[rgb(var(--tint-rgb)/0.012)] p-2.5 transition-[box-shadow,background-color] duration-150',
               dropTarget === status
-                ? 'bg-acid/[0.045] shadow-[inset_0_0_0_1px_rgba(228,242,34,0.35)]'
+                ? 'bg-acid/[0.045] shadow-[inset_0_0_0_1px_var(--color-smoke)]'
                 : 'shadow-[inset_0_0_0_1px_var(--color-graphite)]',
             )}
           >

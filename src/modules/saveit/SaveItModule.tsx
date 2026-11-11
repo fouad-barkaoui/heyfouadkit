@@ -27,7 +27,7 @@ import { LinkPreview } from './LinkPreview';
 import { KindBadge, KIND_ICON, LinkMedia } from './LinkVisuals';
 import { detect, draftLink, enrich, extractUrls, KIND_META, KIND_ORDER, normalizeUrl } from './linkIntel';
 
-const Constellation = lazy(async () => ({ default: (await import('@/three/Constellation')).Constellation }));
+const Constellation = lazy(async () => ({ default: (await import('./Constellation')).Constellation }));
 
 type View = 'grid' | 'list' | 'space';
 type Smart = 'all' | 'unread' | 'favorites' | 'recent';

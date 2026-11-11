@@ -16,7 +16,7 @@ export type ModuleId =
   | 'reporting'
   | 'analytics'
   | 'trash'
-  | 'portfolio'
+  | 'settings'
   | 'contact'
   | 'inbox';
 

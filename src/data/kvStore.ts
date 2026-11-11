@@ -135,19 +135,3 @@ export async function kvSet(key: string, value: unknown): Promise<void> {
     /* quota — the cache is an optimisation, never a requirement */
   }
 }
-
-export async function kvDel(key: string): Promise<void> {
-  const db = await openDb();
-  if (db) {
-    try {
-      await tx(db, 'readwrite', (s) => s.delete(key));
-    } catch {
-      /* ignore */
-    }
-  }
-  try {
-    window.localStorage.removeItem(`kanz.kv.${key}`);
-  } catch {
-    /* ignore */
-  }
-}

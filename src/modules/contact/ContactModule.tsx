@@ -1,6 +1,5 @@
 import { Check, Loader2, Send } from 'lucide-react';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { MenuButton } from '@/components/shell/MenuButton';
 import { Button } from '@/components/ui/Button';
 import { cloudConfigured } from '@/data/supabaseClient';
 import {
@@ -12,7 +11,6 @@ import {
 import { cn } from '@/lib/utils';
 import { getDisplayName, useAuth } from '@/state/authStore';
 import { useLanguage } from '@/state/languageStore';
-import { Note, Rule } from '@/modules/portfolio/ProfileExtras';
 import { TOPICS } from './topics';
 
 const DRAFT_KEY = 'kanz.contact.draft.v1';
@@ -359,7 +357,6 @@ export function ContactModule(): JSX.Element {
   return (
     <div className="flex h-full min-h-0 w-full min-w-0 flex-col bg-void/78 backdrop-blur-2xl">
       <header className="flex items-center gap-3 border-b border-graphite px-4 py-3.5 md:px-7 md:py-4">
-        <MenuButton className="md:hidden" />
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-[19px] font-medium leading-tight tracking-[-0.016em] text-paper md:text-[21px]">
             {t('cf.title')}
@@ -370,10 +367,8 @@ export function ContactModule(): JSX.Element {
 
       <div className="scroll-y min-h-0 flex-1">
         <div className="cp-wrap">
-          <Rule />
           <div className="cp-frame">
             <div className="cp-lower">
-              <Note>{t('cf.sayHello')}</Note>
               <section id="contact-form-card" aria-labelledby="form-title" className="surface-card contact-form-card">
                 <div className="contact-form-head">
                   <span className="contact-form-icon" aria-hidden>
@@ -390,7 +385,6 @@ export function ContactModule(): JSX.Element {
               </section>
             </div>
 
-            <Rule />
           </div>
         </div>
       </div>

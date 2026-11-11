@@ -49,10 +49,3 @@ export function formatDaysShort(days: number[]): string {
   if (sorted.join(',') === EVERY_OTHER_DAY.join(',')) return translate('med.days.everyOtherDay');
   return sorted.map((d) => weekdayLetter(d)).join(' ');
 }
-
-/** True when today falls on one of the medicine's scheduled days (always true for as-needed). */
-export function isDueToday(med: Medicine): boolean {
-  if (med.type === 'as_needed') return true;
-  const today = new Date().getDay();
-  return med.days.includes(today);
-}

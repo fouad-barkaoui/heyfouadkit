@@ -132,7 +132,7 @@ export function AttachmentPanel({
       className={cn('rounded-[8px] p-3 transition-[background-color,box-shadow] duration-150', className)}
       style={
         dragging
-          ? { background: 'rgba(228,242,34,0.045)', boxShadow: 'inset 0 0 0 1px rgba(228,242,34,0.4)' }
+          ? { background: 'rgb(var(--tint-rgb) / 0.045)', boxShadow: 'inset 0 0 0 1px var(--color-fog)' }
           : { background: 'rgb(var(--tint-rgb) / 0.02)', boxShadow: 'inset 0 0 0 1px var(--color-graphite)' }
       }
       onDragOver={(e) => {

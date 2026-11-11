@@ -12,7 +12,6 @@ import {
   Wallet,
 } from 'lucide-react';
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { MenuButton } from '@/components/shell/MenuButton';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/state/languageStore';
 import { useUI } from '@/state/uiStore';
@@ -392,7 +391,7 @@ function Player(): JSX.Element {
     return () => cancelAnimationFrame(raf);
   }, [playing]);
 
-  const id = SCENES[scene];
+  const id: SceneId = SCENES[scene] ?? 'setup';
   const View = SCENE_VIEW[id];
   // Without motion (or when paused on a fresh chapter) show the finished frame.
   const clock = reduce ? DURATION : time;
@@ -472,7 +471,6 @@ export function SalaryPreview(): JSX.Element {
   return (
     <div className="flex h-full min-h-0 w-full min-w-0 flex-col bg-void/78 backdrop-blur-2xl">
       <header className="flex items-center gap-3 border-b border-graphite px-4 py-3.5 md:px-7 md:py-4">
-        <MenuButton className="md:hidden" />
         <div className="min-w-0 flex-1">
           <h1 className="flex min-w-0 items-center gap-2 text-[19px] font-medium leading-tight tracking-[-0.016em] text-paper md:text-[21px]">
             <span className="truncate">{t('nav.salary')}</span>

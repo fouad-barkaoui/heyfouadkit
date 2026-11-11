@@ -1,0 +1,118 @@
+/* Storage notice (corner card) and the cloud terms dialog. */
+
+.cookie-card {
+  position: fixed;
+  inset-inline-end: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 55;
+  width: min(360px, calc(100vw - 32px));
+  border-radius: 16px;
+  background: var(--pill);
+  box-shadow:
+    inset 0 0 0 1px var(--color-graphite),
+    0 16px 40px rgb(0 0 0 / 0.3);
+  padding: 16px;
+  animation: nx-rise 260ms var(--ease-out-quint) both;
+}
+.cookie-card h2 {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.cookie-card p {
+  margin-top: 6px;
+  color: var(--color-fog);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.cookie-actions,
+.consent-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.consent-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgb(0 0 0 / 0.6);
+  animation: nx-fade 180ms ease both;
+}
+.consent-card {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 70;
+  width: min(420px, calc(100vw - 24px));
+  max-height: calc(var(--vvh, 100dvh) - 24px);
+  transform: translate(-50%, -50%);
+  overflow-y: auto;
+  border-radius: 16px;
+  background: var(--color-carbon);
+  box-shadow:
+    inset 0 0 0 1px var(--color-graphite),
+    0 24px 60px rgb(0 0 0 / 0.45);
+  padding: 20px;
+}
+.consent-title {
+  color: var(--color-paper);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.consent-body {
+  margin-top: 6px;
+  color: var(--color-fog);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.consent-box {
+  margin-top: 16px;
+  border-radius: 12px;
+  background: rgb(var(--tint-rgb) / 0.03);
+  box-shadow: inset 0 0 0 1px var(--color-graphite);
+  padding: 14px;
+  color: var(--color-fog);
+}
+.consent-box-text {
+  margin-top: 8px;
+  color: var(--color-mist);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.consent-link {
+  cursor: pointer;
+  color: var(--color-paper);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.consent-details {
+  display: grid;
+  grid-template-rows: 0fr;
+  font-size: 12.5px;
+  line-height: 1.55;
+  transition: grid-template-rows 240ms var(--ease-out-quint);
+}
+.consent-details.is-open {
+  grid-template-rows: 1fr;
+}
+.consent-details > div {
+  min-height: 0;
+  overflow: hidden;
+}
+.consent-details.is-open > div {
+  padding-top: 12px;
+}
+.consent-more {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-fog);
+  font-size: 12.5px;
+}
+.consent-more:hover {
+  color: var(--color-paper);
+}

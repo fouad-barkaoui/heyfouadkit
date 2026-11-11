@@ -3,16 +3,11 @@ import { defineDictionary } from './types';
 export default defineDictionary({
   en: {
     // Consent sheet (shared)
-    'ob.cancel': 'Cancel',
-    'ob.close': 'Close',
     'ob.hideDetails': 'Hide details',
     'ob.readDetails': 'Read the details',
-    'ob.allSet': 'All set',
     'ob.decline': 'Decline',
 
     // Cookie / local storage notice
-    'ob.cookie.partner': 'Stays on this device',
-    'ob.cookie.boxTop': 'Local',
     'ob.cookie.title': 'Keep Your Workspace',
     'ob.cookie.body': 'Kanz saves your work in this browser, so everything is exactly how you left it next time.',
     'ob.cookie.boxBefore': 'By continuing, you accept that Kanz ',
@@ -21,7 +16,6 @@ export default defineDictionary({
     'ob.cookie.accept': 'Accept',
 
     // Cloud terms
-    'ob.cloud.partner': 'CLOUD',
     'ob.cloud.title': 'Turn On Cloud Sync',
     'ob.cloud.body':
       'Kanz uses a private cloud for your library, so your notes, tasks and files are on every device right away.',
@@ -42,15 +36,10 @@ export default defineDictionary({
     // What's new
   },
   ar: {
-    'ob.cancel': 'إلغاء',
-    'ob.close': 'إغلاق',
     'ob.hideDetails': 'إخفاء التفاصيل',
     'ob.readDetails': 'اقرأ التفاصيل',
-    'ob.allSet': 'تم',
     'ob.decline': 'رفض',
 
-    'ob.cookie.partner': 'تبقى على هذا الجهاز',
-    'ob.cookie.boxTop': 'محلي',
     'ob.cookie.title': 'احتفظ بمساحة عملك',
     'ob.cookie.body': 'يحفظ كنز عملك في هذا المتصفح، لتجد كل شيء كما تركته في المرة القادمة.',
     'ob.cookie.boxBefore': 'بالمتابعة، أنت توافق على أن كنز ',
@@ -58,7 +47,6 @@ export default defineDictionary({
     'ob.cookie.boxAfter': ' في هذا المتصفح ويستخدمها في زيارتك القادمة.',
     'ob.cookie.accept': 'موافق',
 
-    'ob.cloud.partner': 'السحابة',
     'ob.cloud.title': 'تفعيل المزامنة السحابية',
     'ob.cloud.body': 'يستخدم كنز سحابة خاصة لمكتبتك، لتكون ملاحظاتك ومهامك وملفاتك على كل أجهزتك فورًا.',
     'ob.cloud.boxBefore': 'بالمتابعة، أنت توافق على ',

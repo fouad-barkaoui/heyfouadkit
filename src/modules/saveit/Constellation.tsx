@@ -282,7 +282,7 @@ function Scene({
   }, [layout]);
   const spokeMat = useMemo(() => new THREE.LineBasicMaterial({ color: '#8a8f98', transparent: true, opacity: 0.12, depthWrite: false }), []);
   const tagMat = useMemo(
-    () => new THREE.LineBasicMaterial({ color: '#e4f222', transparent: true, opacity: 0.28, depthWrite: false, blending: THREE.AdditiveBlending }),
+    () => new THREE.LineBasicMaterial({ color: '#d4d4d4', transparent: true, opacity: 0.28, depthWrite: false, blending: THREE.AdditiveBlending }),
     [],
   );
   const coreGeo = useMemo(() => new THREE.SphereGeometry(0.1, 20, 20), []);

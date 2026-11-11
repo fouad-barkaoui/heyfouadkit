@@ -27,12 +27,8 @@ export function CloudTermsModal({
   return (
     <ConsentSheet
       open={open}
-      tone="green"
-      partner={t('ob.cloud.partner')}
       title={t('ob.cloud.title')}
-      body={
-        <p>{t('ob.cloud.body')}</p>
-      }
+      body={<p>{t('ob.cloud.body')}</p>}
       boxIcon={Lock}
       box={(link) => (
         <p>
@@ -45,10 +41,10 @@ export function CloudTermsModal({
         <ul className="space-y-2.5">
           {RULES.map(({ icon: Icon, key }) => (
             <li key={key} className="flex items-start gap-2.5">
-              <Icon size={14} strokeWidth={1.9} className="mt-[2px] shrink-0 text-[#1d1c1a]" aria-hidden />
+              <Icon size={14} strokeWidth={1.9} className="mt-[2px] shrink-0 text-fog" aria-hidden />
               <span>
-                <span className="block font-medium text-[#1d1c1a]">{t(`ob.cloud.rule.${key}.title`, limits)}</span>
-                <span className="block text-[#6b6a66]">{t(`ob.cloud.rule.${key}.body`, limits)}</span>
+                <span className="block font-medium text-paper">{t(`ob.cloud.rule.${key}.title`, limits)}</span>
+                <span className="block text-fog">{t(`ob.cloud.rule.${key}.body`, limits)}</span>
               </span>
             </li>
           ))}

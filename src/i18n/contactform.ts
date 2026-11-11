@@ -44,7 +44,6 @@ export default defineDictionary({
     // Page
     'cf.title': 'Contact',
     'cf.subtitle': 'Send a message straight to my inbox. I read every one.',
-    'cf.sayHello': 'say hello',
     'cf.formTitle': 'Send a message',
     'cf.formHint': 'I read every message personally.',
   },
@@ -87,7 +86,6 @@ export default defineDictionary({
 
     'cf.title': 'تواصل معي',
     'cf.subtitle': 'أرسل رسالة مباشرة إلى صندوق رسائلي. أقرأ كل رسالة.',
-    'cf.sayHello': 'قل مرحبًا',
     'cf.formTitle': 'أرسل رسالة',
     'cf.formHint': 'أقرأ كل رسالة بنفسي.',
   },

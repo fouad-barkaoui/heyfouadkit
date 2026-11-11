@@ -358,11 +358,11 @@ export function MedicineEditor({
                   </button>
                 </div>
                 <div className="space-y-2">
-                  {draft.times.map((t, i) => (
+                  {draft.times.map((time, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <input
                         type="time"
-                        value={t}
+                        value={time}
                         onChange={(e) => setTime(i, e.target.value)}
                         className="field max-w-[160px]"
                         aria-label={t('med.editor.timeN', { n: i + 1 })}

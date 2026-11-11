@@ -20,11 +20,6 @@ function safeSet(key: string, value: string): void {
   }
 }
 
-/** True while this device's workspace is still empty and untouched. */
-export function isPristineSeed(): boolean {
-  return safeGet(STORAGE_KEY) === null || safeGet('kanz.touched.v1') === null;
-}
-
 export function markTouched(): void {
   safeSet('kanz.touched.v1', '1');
 }

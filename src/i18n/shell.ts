@@ -12,11 +12,8 @@ export default defineDictionary({
     'sh.delete': 'Delete',
     'sh.confirmAgain': '{label}: press again to confirm',
     'sh.signOut': 'Sign out',
-    'sh.guest': 'Guest',
     'sh.loading': 'Loading',
     'sh.searchEllipsis': 'Search…',
-    'sh.withNew': '{label} ({count} new)',
-    'sh.liveSignedIn': 'Live · signed in',
 
     // Units and relative time
     'sh.unit.bytes': '{n} {unit}',
@@ -31,26 +28,12 @@ export default defineDictionary({
 
     // Navigation
     'sh.nav.open': 'Open navigation',
-    'sh.nav.close': 'Close navigation',
-    'sh.nav.collapse': 'Collapse navigation',
-    'sh.nav.expand': 'Expand navigation',
-    'sh.nav.collapseShort': 'Collapse',
-    'sh.nav.expandShort': 'Expand',
     'sh.nav.modules': 'Modules',
-    'sh.nav.title': 'Navigation',
-    'sh.nav.menu': 'Menu',
     'sh.flag.soon': 'Soon',
     'sh.flag.pro': 'Pro',
-    'sh.flag.soonTip': 'Coming soon',
-    'sh.flag.lockedTip': 'Subscriber feature',
     'sh.flag.beta': 'Beta',
-    'sh.flag.betaTip': 'Beta: still being built',
 
     // Team switcher
-    'sh.team.aria': 'Team: {name}',
-    'sh.team.personal': 'Personal',
-    'sh.team.yours': 'Your teams',
-    'sh.team.manage': 'Manage teams & invites',
     'sh.role.owner': 'owner',
     'sh.role.admin': 'admin',
     'sh.role.editor': 'editor',
@@ -93,18 +76,12 @@ export default defineDictionary({
       'With Supabase configured, check that the tables in {file} exist and that row-level security allows the signed-in user to read them.',
 
     // Account panel
-    'sh.account.description': 'Your workspace lives in the cloud and updates live for everyone on your team.',
-    'sh.account.noCloud':
-      'This build has no cloud project configured. Set {url} and {key} and rebuild to enable accounts.',
     'sh.account.pwUpdated': 'Password updated.',
     'sh.account.usernameUpdated': 'Username updated.',
     'sh.account.syncFailed': 'Cloud sync failed',
     'sh.account.liveIn': 'Live in {team} · {count} records',
     'sh.account.yourTeam': 'your team',
     'sh.account.cloudStorage': 'Cloud storage',
-    'sh.account.manageTeam': 'Manage team & invites',
-    'sh.account.username': 'Username',
-    'sh.account.usernamePlaceholder': 'How should we address you?',
     'sh.account.changePassword': 'Change password',
     'sh.account.pwPlaceholder': 'At least 8 characters',
     'sh.account.resetDevice': 'Reset this device',
@@ -114,34 +91,14 @@ export default defineDictionary({
     // Account menu
     'sh.tier.admin': 'Admin · Founder',
     'sh.tier.pro': 'Pro member',
-    'sh.theme.system': 'Match device',
-    'sh.am.notSignedIn': 'Not signed in',
-    'sh.am.deviceOnly': 'Saved on this device only',
-    'sh.am.changePicture': 'Change profile picture',
     'sh.am.usage': '{used} used of {total}',
     'sh.am.adminAccount': 'Admin account',
     'sh.am.proPlan': 'Pro plan',
     'sh.am.beta': 'Beta · free while in beta',
-    'sh.am.profileAccount': 'Profile & account',
-    'sh.am.signInOrCreate': 'Sign in or create account',
     'sh.am.pictureTitle': 'Profile picture',
     'sh.am.pictureHintUser': 'Shown on your profile, next to your name, and to your team on every device.',
-    'sh.am.pictureHintGuest':
-      'Saved on this device. When you create an account or sign in, it moves to your account automatically.',
 
     // Sign-in screen
-    'sh.auth.closeKeepBrowsing': 'Close and keep browsing',
-    'sh.auth.kanzMeaning': 'Kanz means treasure in Arabic',
-    'sh.auth.tagline': "One workspace for the work that doesn't sleep.",
-    'sh.auth.pitch':
-      'Notes, tasks, habits, courses and a vault, kept in one private place and synced across every device.',
-    'sh.auth.feature1': 'Notebook, articles and CVE write-ups',
-    'sh.auth.feature2': 'Task board and habit streaks',
-    'sh.auth.feature3': 'Course tracker and document vault',
-    'sh.auth.feature4': 'Shared team workspaces',
-    'sh.auth.rls': 'Row-level security on',
-    'sh.auth.encrypted': 'Encrypted at rest',
-    'sh.auth.offline': 'Works offline',
     'sh.auth.createAccount': 'Create account',
     'sh.auth.backToSignIn': 'Back to sign in',
     'sh.auth.signupTitle': 'Create your workspace',
@@ -150,6 +107,8 @@ export default defineDictionary({
     'sh.auth.signupHint': 'Free, private, and ready in a minute.',
     'sh.auth.resetHint': "Enter your email and we'll send you a reset link.",
     'sh.auth.signinHint': 'Sign in to pick up where you left off.',
+    'sh.auth.cloudUnreachable':
+      "Kanz can't reach its cloud service right now. Signing in works again as soon as it answers; work saved on this device is untouched.",
     'sh.auth.openingGoogle': 'Opening Google…',
     'sh.auth.continueGoogle': 'Continue with Google',
     'sh.auth.orEmail': 'or with email',
@@ -167,9 +126,6 @@ export default defineDictionary({
     'sh.auth.haveAccount': 'Already have an account?',
     'sh.auth.noAccount': "Don't have an account?",
     'sh.auth.createOne': 'Create one',
-    'sh.auth.keepBrowsing': 'Keep browsing without an account',
-    'sh.auth.questions': 'Questions?',
-    'sh.auth.message': 'Message {handle}',
     'sh.auth.signedIn': 'Signed in.',
 
     // Tag input
@@ -249,11 +205,8 @@ export default defineDictionary({
     'sh.delete': 'حذف',
     'sh.confirmAgain': '{label}: اضغط مرة أخرى للتأكيد',
     'sh.signOut': 'تسجيل الخروج',
-    'sh.guest': 'زائر',
     'sh.loading': 'جارٍ التحميل',
     'sh.searchEllipsis': 'بحث…',
-    'sh.withNew': '{label} ({count} جديدة)',
-    'sh.liveSignedIn': 'متصل · مسجّل الدخول',
 
     // Units and relative time
     'sh.unit.bytes': '{n} {unit}',
@@ -268,26 +221,12 @@ export default defineDictionary({
 
     // Navigation
     'sh.nav.open': 'فتح القائمة',
-    'sh.nav.close': 'إغلاق القائمة',
-    'sh.nav.collapse': 'طيّ الشريط الجانبي',
-    'sh.nav.expand': 'توسيع الشريط الجانبي',
-    'sh.nav.collapseShort': 'طيّ',
-    'sh.nav.expandShort': 'توسيع',
     'sh.nav.modules': 'الوحدات',
-    'sh.nav.title': 'التنقل',
-    'sh.nav.menu': 'القائمة',
     'sh.flag.soon': 'قريبًا',
     'sh.flag.pro': 'Pro',
-    'sh.flag.soonTip': 'قريبًا',
-    'sh.flag.lockedTip': 'ميزة للمشتركين',
     'sh.flag.beta': 'تجريبي',
-    'sh.flag.betaTip': 'نسخة تجريبية: قيد البناء',
 
     // Team switcher
-    'sh.team.aria': 'الفريق: {name}',
-    'sh.team.personal': 'شخصي',
-    'sh.team.yours': 'فرقك',
-    'sh.team.manage': 'إدارة الفرق والدعوات',
     'sh.role.owner': 'المالك',
     'sh.role.admin': 'مشرف',
     'sh.role.editor': 'محرّر',
@@ -330,18 +269,12 @@ export default defineDictionary({
       'إذا كان Supabase مُعدًّا، فتأكد من وجود الجداول المعرّفة في {file} ومن أن سياسات الأمان على مستوى الصفوف تسمح للمستخدم المسجّل بقراءتها.',
 
     // Account panel
-    'sh.account.description': 'مساحة عملك محفوظة في السحابة وتتحدّث مباشرةً لكل أعضاء فريقك.',
-    'sh.account.noCloud':
-      'هذه النسخة غير مرتبطة بأي مشروع سحابي. عيّن {url} و{key} ثم أعد البناء لتفعيل الحسابات.',
     'sh.account.pwUpdated': 'تم تحديث كلمة المرور.',
     'sh.account.usernameUpdated': 'تم تحديث اسم المستخدم.',
     'sh.account.syncFailed': 'فشلت المزامنة السحابية',
     'sh.account.liveIn': 'متصل في {team} · السجلات: {count}',
     'sh.account.yourTeam': 'فريقك',
     'sh.account.cloudStorage': 'التخزين السحابي',
-    'sh.account.manageTeam': 'إدارة الفريق والدعوات',
-    'sh.account.username': 'اسم المستخدم',
-    'sh.account.usernamePlaceholder': 'بماذا نناديك؟',
     'sh.account.changePassword': 'تغيير كلمة المرور',
     'sh.account.pwPlaceholder': '8 أحرف على الأقل',
     'sh.account.resetDevice': 'إعادة ضبط هذا الجهاز',
@@ -351,33 +284,14 @@ export default defineDictionary({
     // Account menu
     'sh.tier.admin': 'مشرف · المؤسس',
     'sh.tier.pro': 'عضو Pro',
-    'sh.theme.system': 'حسب الجهاز',
-    'sh.am.notSignedIn': 'غير مسجّل الدخول',
-    'sh.am.deviceOnly': 'محفوظ على هذا الجهاز فقط',
-    'sh.am.changePicture': 'تغيير صورة الملف الشخصي',
     'sh.am.usage': '{used} مستخدمة من {total}',
     'sh.am.adminAccount': 'حساب مشرف',
     'sh.am.proPlan': 'خطة Pro',
     'sh.am.beta': 'نسخة تجريبية · مجانية خلال الفترة التجريبية',
-    'sh.am.profileAccount': 'الملف الشخصي والحساب',
-    'sh.am.signInOrCreate': 'سجّل الدخول أو أنشئ حسابًا',
     'sh.am.pictureTitle': 'صورة الملف الشخصي',
     'sh.am.pictureHintUser': 'تظهر في ملفك الشخصي وبجانب اسمك، ولفريقك على كل الأجهزة.',
-    'sh.am.pictureHintGuest':
-      'محفوظة على هذا الجهاز. عند إنشاء حساب أو تسجيل الدخول، تنتقل إلى حسابك تلقائيًا.',
 
     // Sign-in screen
-    'sh.auth.closeKeepBrowsing': 'إغلاق ومتابعة التصفح',
-    'sh.auth.kanzMeaning': 'كنز تعني treasure بالإنجليزية',
-    'sh.auth.tagline': 'مساحة عمل واحدة لعمل لا يتوقف.',
-    'sh.auth.pitch': 'الملاحظات والمهام والعادات والدورات وخزنة، في مكان خاص واحد ومتزامنة على كل أجهزتك.',
-    'sh.auth.feature1': 'دفتر ملاحظات ومقالات وتقارير CVE',
-    'sh.auth.feature2': 'لوحة مهام وسلاسل العادات',
-    'sh.auth.feature3': 'متابعة الدورات وخزنة الوثائق',
-    'sh.auth.feature4': 'مساحات عمل مشتركة للفرق',
-    'sh.auth.rls': 'أمان على مستوى الصفوف',
-    'sh.auth.encrypted': 'تشفير البيانات المخزّنة',
-    'sh.auth.offline': 'يعمل دون اتصال',
     'sh.auth.createAccount': 'إنشاء حساب',
     'sh.auth.backToSignIn': 'العودة إلى تسجيل الدخول',
     'sh.auth.signupTitle': 'أنشئ مساحة عملك',
@@ -386,6 +300,8 @@ export default defineDictionary({
     'sh.auth.signupHint': 'مجانية وخاصة وجاهزة خلال دقيقة.',
     'sh.auth.resetHint': 'أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين.',
     'sh.auth.signinHint': 'سجّل الدخول لتكمل من حيث توقفت.',
+    'sh.auth.cloudUnreachable':
+      'لا يستطيع كنز الوصول إلى خدمته السحابية الآن. سيعمل تسجيل الدخول من جديد فور استجابتها، وما حفظته على هذا الجهاز لم يُمَسّ.',
     'sh.auth.openingGoogle': 'جارٍ فتح Google…',
     'sh.auth.continueGoogle': 'المتابعة باستخدام Google',
     'sh.auth.orEmail': 'أو بالبريد الإلكتروني',
@@ -403,9 +319,6 @@ export default defineDictionary({
     'sh.auth.haveAccount': 'لديك حساب بالفعل؟',
     'sh.auth.noAccount': 'ليس لديك حساب؟',
     'sh.auth.createOne': 'أنشئ حسابًا',
-    'sh.auth.keepBrowsing': 'متابعة التصفح دون حساب',
-    'sh.auth.questions': 'لديك أسئلة؟',
-    'sh.auth.message': 'راسل {handle}',
     'sh.auth.signedIn': 'تم تسجيل الدخول.',
 
     // Tag input

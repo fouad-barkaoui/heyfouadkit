@@ -35,7 +35,7 @@ export const KANZ_VIEWBOX = { width: 380, height: 100 } as const;
 
 export function KanzWordmark({
   height = 20,
-  gem = 'var(--color-accent, #e4f222)',
+  gem = 'var(--color-accent)',
   title = 'Kanz',
   className,
 }: {
@@ -65,15 +65,6 @@ export function KanzWordmark({
         <polygon points={Z} />
       </g>
       <polygon points={STAR} fill={gem} />
-    </svg>
-  );
-}
-
-/** The star alone, for tight spots (badges, a loading mark). */
-export function KanzStar({ size = 16, color = 'var(--color-accent, #e4f222)', className }: { size?: number; color?: string; className?: string }): JSX.Element {
-  return (
-    <svg viewBox="0 0 32 32" width={size} height={size} className={className} aria-hidden focusable="false">
-      <polygon points={khatam(16, 16, 15)} fill={color} />
     </svg>
   );
 }

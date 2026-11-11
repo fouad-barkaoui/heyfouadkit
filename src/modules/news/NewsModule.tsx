@@ -12,7 +12,6 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useRef, type ReactNode } from 'react';
-import { MenuButton } from '@/components/shell/MenuButton';
 import { cn } from '@/lib/utils';
 import type { ModuleId } from '@/lib/types';
 import { MODULE_MAP } from '@/modules/registry';
@@ -35,7 +34,6 @@ interface Tool {
 
 const FREE_TOOLS: Tool[] = [
   { module: 'home', desc: 'nf.free.home' },
-  { module: 'portfolio', desc: 'nf.free.portfolio' },
   { module: 'todo', desc: 'nf.free.todo' },
   { module: 'calendar', desc: 'nf.free.calendar' },
   { module: 'habits', desc: 'nf.free.habits' },
@@ -115,7 +113,6 @@ export function NewsModule(): JSX.Element {
   return (
     <div className="flex h-full min-h-0 w-full min-w-0 flex-col bg-void/78 backdrop-blur-2xl">
       <header className="flex items-center gap-3 border-b border-graphite px-4 py-3.5 md:px-7 md:py-4">
-        <MenuButton className="md:hidden" />
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-[19px] font-medium leading-tight tracking-[-0.016em] text-paper md:text-[21px]">
             {t('nav.news')}

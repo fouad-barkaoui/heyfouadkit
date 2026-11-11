@@ -3,19 +3,22 @@ import './lib/legacyStorageMigration';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import '@fontsource-variable/geist';
+import '@fontsource-variable/geist-mono';
 import './styles/index.css';
+import './styles/topbar.css';
+import './styles/auth.css';
+import './styles/home.css';
+import './styles/settings.css';
 import './styles/premium.css';
 import './styles/saveit.css';
-import './styles/theme.css';
-import './styles/nav.css';
 import './styles/habits.css';
 import './styles/notifications.css';
 import './styles/contact.css';
 import './styles/account-menu.css';
 import './styles/news.css';
 import './styles/salary.css';
-import './styles/tour.css';
-import './styles/cookie.css';
+import './styles/consent.css';
 import './styles/controls.css';
 
 /** Warm the connection to the cloud project as early as possible — a

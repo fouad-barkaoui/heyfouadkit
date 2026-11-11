@@ -167,7 +167,6 @@ export default defineDictionary({
     'core.module.reporting': 'Reporting',
     'core.module.analytics': 'Analytics',
     'core.module.trash': 'Trash',
-    'core.module.portfolio': 'Meet the Founder',
     'core.module.contact': 'Contact',
     'core.module.inbox': 'Inbox',
     'core.moduleShort.home': 'Home',
@@ -187,7 +186,6 @@ export default defineDictionary({
     'core.moduleShort.reporting': 'Reporting',
     'core.moduleShort.analytics': 'Analytics',
     'core.moduleShort.trash': 'Trash',
-    'core.moduleShort.portfolio': 'Founder',
     'core.moduleShort.contact': 'Contact',
     'core.moduleShort.inbox': 'Inbox',
 
@@ -356,7 +354,6 @@ export default defineDictionary({
     'core.module.reporting': 'التقارير',
     'core.module.analytics': 'التحليلات',
     'core.module.trash': 'سلة المحذوفات',
-    'core.module.portfolio': 'تعرّف على المؤسس',
     'core.module.contact': 'تواصل معي',
     'core.module.inbox': 'صندوق الرسائل',
     'core.moduleShort.home': 'الرئيسية',
@@ -376,7 +373,6 @@ export default defineDictionary({
     'core.moduleShort.reporting': 'التقارير',
     'core.moduleShort.analytics': 'التحليلات',
     'core.moduleShort.trash': 'السلة',
-    'core.moduleShort.portfolio': 'المؤسس',
     'core.moduleShort.contact': 'تواصل',
     'core.moduleShort.inbox': 'الرسائل',
 

@@ -2,7 +2,7 @@ import { AlertTriangle } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/state/languageStore';
-import type { Bucket, Category, Currency } from './salaryModel';
+import { parseMonth, type Bucket, type Category, type Currency } from './salaryModel';
 
 /* ── money formatting ────────────────────────────────────────────────── */
 
@@ -34,7 +34,7 @@ export function useMonthLabel(): (key: string) => string {
   const { locale } = useLanguage();
   const f = useMemo(() => new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }), [locale]);
   return useCallback((key: string) => {
-    const [y, m] = key.split('-').map(Number);
+    const [y, m] = parseMonth(key);
     return f.format(new Date(y, m - 1, 1));
   }, [f]);
 }
@@ -225,7 +225,7 @@ export function PaceChart({
     setHover(Math.min(days - 1, Math.max(0, d)));
   };
 
-  const hv = hover !== null && hover < shown.length ? shown[hover] : null;
+  const hv = hover !== null ? (shown[hover] ?? null) : null;
   const paceAt = (d: number): number => (budget * (d + 1)) / days;
 
   return (
@@ -257,7 +257,7 @@ export function PaceChart({
         {area ? <path d={area} className="sp-pace-area" /> : null}
         {line ? <path d={line} className="sp-actual-line" /> : null}
         {shown.length ? (
-          <circle cx={x(shown.length - 1)} cy={y(shown[shown.length - 1])} r={4.5} className="sp-actual-dot" />
+          <circle cx={x(shown.length - 1)} cy={y(shown[shown.length - 1] ?? 0)} r={4.5} className="sp-actual-dot" />
         ) : null}
         {hover !== null ? (
           <>

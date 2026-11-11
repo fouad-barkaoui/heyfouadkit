@@ -11,7 +11,7 @@ import {
   FileText,
   FolderTree,
   GraduationCap,
-  IdCard,
+  Settings,
   LayoutDashboard,
   ListChecks,
   Newspaper,
@@ -67,7 +67,7 @@ export const MODULES: ModuleMeta[] = [
   mod('reporting', LayoutDashboard),
   mod('analytics', BarChart3),
   mod('trash', Trash2),
-  mod('portfolio', IdCard),
+  mod('settings', Settings),
   mod('contact', MessageSquareHeart),
   mod('inbox', Inbox),
 ];
@@ -83,10 +83,6 @@ export interface NavGroup {
   children: ModuleId[];
 }
 
-/** Home sits on its own; everything else folds into four master sections,
- * so the sidebar stays short however many tools the app grows. */
-export const HOME_ID: ModuleId = 'home';
-
 export const NAV_GROUPS: NavGroup[] = [
   { id: 'plan', labelKey: 'nav.group.plan', icon: CalendarCheck2, children: ['todo', 'calendar', 'habits'] },
   {
@@ -98,15 +94,6 @@ export const NAV_GROUPS: NavGroup[] = [
   { id: 'workspace', labelKey: 'nav.group.workspace', icon: Briefcase, children: ['team', 'medications', 'salary'] },
   { id: 'insight', labelKey: 'nav.group.insight', icon: BarChart3, children: ['reporting', 'analytics', 'trash'] },
 ];
-
-/** Modules hidden from everyone but the admin (none right now — the Salary
- * Planner is visible to all and shows non-admins a beta preview). */
-export const ADMIN_ONLY: ModuleId[] = [];
-
-/** A group's children with the admin-only ones removed for everyone else. */
-export function visibleChildren(group: NavGroup, isAdmin: boolean): ModuleId[] {
-  return isAdmin ? group.children : group.children.filter((id) => !ADMIN_ONLY.includes(id));
-}
 
 export function groupOf(id: ModuleId): NavGroup | undefined {
   return NAV_GROUPS.find((g) => g.children.includes(id));

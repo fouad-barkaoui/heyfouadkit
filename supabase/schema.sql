@@ -324,6 +324,32 @@ insert into public.profiles (id, username, email, updated_at)
 select id, nullif(raw_user_meta_data ->> 'username', ''), email, now() from auth.users
 on conflict (id) do nothing;
 
+-- ── Every new account gets a private "Personal" team ────────────────────────
+-- (see migrations/20261104_personal_team_on_signup.sql). Never blocks a sign-up.
+create or replace function public.ensure_personal_team()
+returns trigger language plpgsql security definer set search_path = '' as $$
+declare
+  personal_id text := 'personal_' || replace(new.id::text, '-', '');
+begin
+  insert into public.teams (id, name, created_by)
+    values (personal_id, 'Personal', new.id)
+    on conflict (id) do nothing;
+  insert into public.team_members (team_id, user_id, role)
+    values (personal_id, new.id, 'owner')
+    on conflict (team_id, user_id) do nothing;
+  return new;
+exception when others then
+  raise warning 'ensure_personal_team failed for %: %', new.id, sqlerrm;
+  return new;
+end $$;
+
+revoke all on function public.ensure_personal_team() from public, anon, authenticated;
+
+drop trigger if exists ensure_personal_team_ins on auth.users;
+create trigger ensure_personal_team_ins
+  after insert on auth.users
+  for each row execute function public.ensure_personal_team();
+
 -- ── Team RPCs ────────────────────────────────────────────────────────────────
 -- Every custom enum is schema-qualified as `public.<type>` everywhere, even
 -- inside DECLARE blocks: with `set search_path = ''`, an unqualified type
@@ -1141,3 +1167,21 @@ grant execute on function public.set_member_role(text, uuid, public.team_role) t
 grant execute on function public.remove_member(text, uuid) to authenticated;
 grant execute on function public.delete_team(text) to authenticated;
 grant execute on function public.revoke_invite(text) to authenticated;
+
+-- Foreign keys used by the row-level security checks and joins.
+create index if not exists articles_team_id_idx on public.articles (team_id);
+create index if not exists attachments_team_id_idx on public.attachments (team_id);
+create index if not exists badges_team_id_idx on public.badges (team_id);
+create index if not exists courses_team_id_idx on public.courses (team_id);
+create index if not exists courses_badge_id_idx on public.courses (badge_id);
+create index if not exists docs_team_id_idx on public.docs (team_id);
+create index if not exists docs_badge_id_idx on public.docs (badge_id);
+create index if not exists notes_team_id_idx on public.notes (team_id);
+create index if not exists sticky_notes_team_id_idx on public.sticky_notes (team_id);
+create index if not exists todos_team_id_idx on public.todos (team_id);
+create index if not exists medicines_user_id_idx on public.medicines (user_id);
+create index if not exists news_user_id_idx on public.news (user_id);
+create index if not exists treatment_plans_user_id_idx on public.treatment_plans (user_id);
+create index if not exists contact_messages_user_id_idx on public.contact_messages (user_id);
+create index if not exists team_invites_created_by_idx on public.team_invites (created_by);
+create index if not exists teams_created_by_idx on public.teams (created_by);

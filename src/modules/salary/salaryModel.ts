@@ -61,6 +61,9 @@ export interface Rule {
   savings: number;
 }
 
+/** The split a new plan starts with. */
+export const DEFAULT_RULE: Rule = { needs: 50, wants: 30, savings: 20 };
+
 export const RULE_PRESETS: { id: string; rule: Rule }[] = [
   { id: '50-30-20', rule: { needs: 50, wants: 30, savings: 20 } },
   { id: '60-20-20', rule: { needs: 60, wants: 20, savings: 20 } },
@@ -99,20 +102,26 @@ export function dayKey(d: Date = new Date()): string {
   return `${monthKey(d)}-${pad(d.getDate())}`;
 }
 
-export function shiftMonth(key: string, delta: number): string {
+/** Year and month (1-12) out of a YYYY-MM or YYYY-MM-DD key. */
+export function parseMonth(key: string): [year: number, month: number] {
   const [y, m] = key.split('-').map(Number);
+  return [y ?? 0, m ?? 1];
+}
+
+export function shiftMonth(key: string, delta: number): string {
+  const [y, m] = parseMonth(key);
   return monthKey(new Date(y, m - 1 + delta, 1));
 }
 
 export function daysInMonth(key: string): number {
-  const [y, m] = key.split('-').map(Number);
+  const [y, m] = parseMonth(key);
   return new Date(y, m, 0).getDate();
 }
 
 /** Whole months from `from` (YYYY-MM) to `to` (YYYY-MM); 0 when the same month. */
 export function monthsBetween(from: string, to: string): number {
-  const [fy, fm] = from.split('-').map(Number);
-  const [ty, tm] = to.split('-').map(Number);
+  const [fy, fm] = parseMonth(from);
+  const [ty, tm] = parseMonth(to);
   return (ty - fy) * 12 + (tm - fm);
 }
 
@@ -180,7 +189,7 @@ export function emptyState(): SalaryState {
     version: 1,
     currency: 'MAD',
     payday: 1,
-    rule: { ...RULE_PRESETS[0].rule },
+    rule: { ...DEFAULT_RULE },
     months: {},
     txns: [],
     goals: [],
@@ -280,7 +289,7 @@ export function planFor(state: SalaryState, key: string): { plan: MonthPlan; inh
     .pop();
   const later = Object.keys(state.months).sort()[0];
   const src = earlier ?? later;
-  return { plan: src ? state.months[src] : { incomes: [], categories: [] }, inherited: true };
+  return { plan: (src ? state.months[src] : undefined) ?? { incomes: [], categories: [] }, inherited: true };
 }
 
 /* ── numbers ─────────────────────────────────────────────────────────── */
@@ -384,7 +393,7 @@ export function dailyCumulative(txns: Txn[], key: string): number[] {
   const perDay: number[] = Array.from({ length: days }, () => 0);
   for (const t of txnsInMonth(txns, key)) {
     const d = Number(t.date.slice(8, 10));
-    if (d >= 1 && d <= days) perDay[d - 1] += t.amount;
+    if (d >= 1 && d <= days) perDay[d - 1] = (perDay[d - 1] ?? 0) + t.amount;
   }
   let run = 0;
   return perDay.map((v) => (run += v));

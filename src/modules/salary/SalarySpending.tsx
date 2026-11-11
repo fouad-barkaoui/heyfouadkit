@@ -12,6 +12,7 @@ import {
   txnsInMonth,
   unassignedSpent,
   type Txn,
+  parseMonth,
 } from './salaryModel';
 import { AmountInput, BucketDot, Card, Meter, useCategoryName, type Money } from './parts';
 import type { SalaryApi } from './useSalary';
@@ -128,7 +129,8 @@ export function SalarySpending({ api, month, money }: { api: SalaryApi; month: s
         {byDay.length ? (
           <div className="sp-days">
             {byDay.map(([d, items]) => {
-              const [y, m, dd] = d.split('-').map(Number);
+              const [y, m] = parseMonth(d);
+              const dd = Number(d.slice(8, 10));
               return (
                 <div key={d}>
                   <p className="sp-day-head">

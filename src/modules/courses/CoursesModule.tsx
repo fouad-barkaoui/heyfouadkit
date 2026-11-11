@@ -224,7 +224,7 @@ export function CoursesModule(): JSX.Element {
                   className={cn(
                     'group relative flex flex-col rounded-[10px] bg-[rgb(var(--tint-rgb)/0.022)] p-4 shadow-[inset_0_0_0_1px_var(--color-graphite)]',
                     'transition-[background-color,box-shadow] duration-150 hover:bg-[rgb(var(--tint-rgb)/0.04)] hover:shadow-[inset_0_0_0_1px_var(--color-smoke)]',
-                    highlightId === course.id && 'shadow-[inset_0_0_0_1px_rgba(228,242,34,0.5)]',
+                    highlightId === course.id && 'shadow-[inset_0_0_0_1px_var(--color-fog)]',
                   )}
                 >
                   <div className="mb-2.5 flex items-start justify-between gap-2">

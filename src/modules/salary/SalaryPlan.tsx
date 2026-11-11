@@ -259,7 +259,7 @@ function BucketCard({
   planned: number;
   target: number;
   money: Money;
-  catName: (c: Category) => string;
+  catName: (c: Pick<Category, 'key' | 'name'>) => string;
   onSet: (id: string, patch: Partial<Category>) => void;
   onRemove: (id: string) => void;
   onAdd: () => void;

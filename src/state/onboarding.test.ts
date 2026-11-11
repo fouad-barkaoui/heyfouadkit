@@ -3,11 +3,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   consentDecision,
   consentMetaPatch,
-  hasSeenWhatsNew,
   rememberConsentLocally,
-  rememberWhatsNewLocally,
   unsyncedLocalConsents,
-  WHATS_NEW_RELEASE,
 } from './onboarding';
 
 const user = (meta: Record<string, unknown> = {}): User =>
@@ -36,12 +33,5 @@ describe('lifetime consents', () => {
     };
     expect(patch.consents.cookies?.v).toBe('accepted');
     expect(patch.consents.terms?.v).toBe('declined');
-  });
-
-  it("shows what's new once per release", () => {
-    expect(hasSeenWhatsNew(user())).toBe(false);
-    expect(hasSeenWhatsNew(user({ whats_new_seen: WHATS_NEW_RELEASE }))).toBe(true);
-    rememberWhatsNewLocally(user());
-    expect(hasSeenWhatsNew(user())).toBe(true);
   });
 });

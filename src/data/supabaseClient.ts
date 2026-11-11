@@ -34,16 +34,23 @@ export function getSupabase(): SupabaseClient | null {
  */
 export async function fetchEnabledProviders(signal?: AbortSignal): Promise<Record<string, boolean> | null> {
   if (!cloudConfigured) return null;
+  // Bounded, so a backend that never answers reads as "can't reach it"
+  // instead of leaving the sign-in screen waiting forever.
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 8000);
+  signal?.addEventListener('abort', () => ctl.abort(), { once: true });
   try {
     const res = await fetch(`${url as string}/auth/v1/settings`, {
       headers: { apikey: key as string },
-      signal,
+      signal: ctl.signal,
     });
     if (!res.ok) return null;
     const body = (await res.json()) as { external?: Record<string, boolean> };
     return body.external ?? null;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 

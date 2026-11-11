@@ -1,6 +1,6 @@
 import gsap from 'gsap';
 
-const COLORS = ['#e4f222', '#d0d6e0', '#27a644', '#8b5cf6'];
+const COLORS = ['#fafafa', '#a1a1a1', '#27a644', '#8b5cf6'];
 
 /**
  * Completion burst. Fired from the checkbox that was just ticked — a short,
@@ -46,7 +46,7 @@ export function completionBurst(origin: HTMLElement, count = 16): void {
     'height:10px',
     'margin:-5px 0 0 -5px',
     'border-radius:9999px',
-    'border:1px solid rgba(228,242,34,0.7)',
+    'border:1px solid rgba(160,160,160,0.7)',
   ].join(';');
   layer.appendChild(ring);
 

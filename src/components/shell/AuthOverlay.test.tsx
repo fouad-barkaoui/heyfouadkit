@@ -60,6 +60,17 @@ describe('AuthOverlay', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Google sign-in was cancelled.');
   });
 
+  it('says the cloud is unreachable when the provider check could not run', () => {
+    auth.googleStatus = 'unknown';
+    render(<AuthOverlay open onOpenChange={() => {}} />);
+    expect(screen.getByRole('status')).toHaveTextContent(/can't reach its cloud service/i);
+  });
+
+  it('stays quiet when the cloud answered', () => {
+    render(<AuthOverlay open onOpenChange={() => {}} />);
+    expect(screen.queryByRole('status')).toBeNull();
+  });
+
   it('keeps Google out of the password reset screen', async () => {
     render(<AuthOverlay open onOpenChange={() => {}} />);
     await userEvent.click(screen.getByRole('button', { name: 'Forgot?' }));

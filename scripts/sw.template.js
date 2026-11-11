@@ -5,7 +5,6 @@
  * - Page loads are network-first (a new deploy shows up immediately) and fall
  *   back to the cached shell when offline.
  * - Hashed /assets/* are immutable: served from cache, fetched once.
- * - Google Fonts are cached after first use.
  * - Supabase and /api/* are never touched here — data goes through the app's
  *   own offline queue instead.
  */
@@ -84,18 +83,8 @@ async function staleWhileRevalidate(request) {
       if (res.ok || res.type === 'opaque') cache.put(request, res.clone()).catch(() => {});
       return res;
     })
-    .catch(() => hit || offlineFallback(request));
+    .catch(() => hit || new Response('', { status: 504, statusText: 'Offline' }));
   return hit || network;
-}
-
-// Offline with nothing cached: an empty stylesheet (the system font stack
-// takes over) or an empty 504, rather than a hard network error.
-function offlineFallback(request) {
-  const url = new URL(request.url);
-  if (url.hostname === 'fonts.googleapis.com') {
-    return new Response('', { status: 200, headers: { 'Content-Type': 'text/css' } });
-  }
-  return new Response('', { status: 504, statusText: 'Offline' });
 }
 
 self.addEventListener('fetch', (event) => {
@@ -117,10 +106,6 @@ self.addEventListener('fetch', (event) => {
       event.respondWith(staleWhileRevalidate(request));
     }
     return;
-  }
-
-  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
-    event.respondWith(staleWhileRevalidate(request));
   }
 });
 

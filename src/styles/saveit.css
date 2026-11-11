@@ -401,12 +401,6 @@
   transform: rotate(180deg);
   transition: transform 400ms var(--ease-snap);
 }
-@keyframes save-twinkle {
-  50% {
-    transform: rotate(20deg) scale(1.2);
-    opacity: 0.6;
-  }
-}
 
 /* Empty state orbit */
 .save-empty-orb {

@@ -1324,13 +1324,13 @@
   font-size: 22px;
   font-weight: 700;
   color: #fff;
-  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, #e4f222 60%, transparent);
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--color-acid) 60%, transparent);
 }
 .spv-caret {
   width: 2px;
   height: 24px;
   margin-inline-start: 3px;
-  background: #e4f222;
+  background: var(--color-acid);
   animation: spv-blink 1s steps(1) infinite;
 }
 @keyframes spv-blink {
@@ -1348,8 +1348,8 @@
 }
 .spv-pill.is-on {
   color: #fff;
-  background: rgb(228 242 34 / 0.12);
-  box-shadow: inset 0 0 0 1.5px rgb(228 242 34 / 0.7);
+  background: rgb(var(--tint-rgb) / 0.12);
+  box-shadow: inset 0 0 0 1.5px rgb(var(--tint-rgb) / 0.7);
 }
 .spv-btn {
   align-self: flex-start;
@@ -1357,8 +1357,8 @@
   border-radius: 9px;
   font-size: 13px;
   font-weight: 700;
-  color: #08090a;
-  background: #e4f222;
+  color: var(--ink-fixed);
+  background: var(--color-acid);
 }
 .spv-stack {
   display: flex;
@@ -1380,7 +1380,7 @@
 }
 .spv-hero {
   background:
-    radial-gradient(120% 90% at 0% 0%, rgb(228 242 34 / 0.12), transparent 60%),
+    radial-gradient(120% 90% at 0% 0%, rgb(var(--tint-rgb) / 0.12), transparent 60%),
     rgb(255 255 255 / 0.035);
 }
 .spv-big {
@@ -1413,7 +1413,7 @@
 }
 .spv-line {
   fill: none;
-  stroke: #e4f222;
+  stroke: var(--color-acid);
   stroke-width: 2.5;
   stroke-linejoin: round;
   stroke-linecap: round;
@@ -1421,7 +1421,7 @@
 .spv-key {
   display: inline-block;
   width: 14px;
-  border-top: 2px solid #e4f222;
+  border-top: 2px solid var(--color-acid);
 }
 .spv-key.is-dash {
   border-top: 2px dashed #979eb0;
@@ -1597,7 +1597,7 @@
   inset-block: 0;
   inset-inline-start: 0;
   border-radius: 3px;
-  background: #e4f222;
+  background: var(--color-acid);
 }
 .spv-slider b {
   position: absolute;
@@ -1643,7 +1643,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  color: #08090a;
+  color: var(--ink-fixed);
   background: rgb(255 255 255 / 0.92);
   box-shadow: 0 6px 18px -6px rgb(0 0 0 / 0.6);
   transition: transform 150ms;

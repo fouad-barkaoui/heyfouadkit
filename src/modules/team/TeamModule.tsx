@@ -24,7 +24,6 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/state/authStore';
 import { useLanguage, type TranslateVars } from '@/state/languageStore';
 import { useTeam } from '@/state/teamStore';
-import { MenuButton } from '@/components/shell/MenuButton';
 import { ScrollIndex } from '@/components/motion/ScrollIndex';
 
 type T = (key: string, vars?: TranslateVars) => string;
@@ -517,7 +516,6 @@ export function TeamModule(): JSX.Element {
     return (
       <div className="flex h-full flex-col">
         <header className="flex items-center gap-3 border-b border-graphite px-4 py-3.5 md:hidden">
-          <MenuButton />
           <h1 className="text-[17px] font-medium text-paper">{t('nav.team')}</h1>
         </header>
         <div className="flex min-h-0 flex-1 items-center justify-center p-6">
@@ -541,7 +539,6 @@ export function TeamModule(): JSX.Element {
           )}
         >
           <div className="flex items-center gap-2 px-4 pb-2.5 pt-3.5">
-            <MenuButton className="md:hidden" />
             <h2 className="flex-1 truncate text-[13px] font-medium tracking-[-0.011em] text-paper">{t('team2.yourTeams')}</h2>
             <Button
               variant="primary"
@@ -573,7 +570,7 @@ export function TeamModule(): JSX.Element {
                     team.id === activeTeamId ? 'bg-[rgb(var(--tint-rgb)/0.05)]' : 'hover:bg-[rgb(var(--tint-rgb)/0.03)]',
                   )}
                 >
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] bg-gradient-to-br from-[#e4f222] to-[#9db300] text-[11px] font-semibold text-[#08090a]">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] bg-graphite text-[11px] font-semibold text-paper">
                     {team.name.trim()[0]?.toUpperCase() ?? '?'}
                   </span>
                   <span className="min-w-0 flex-1">
@@ -596,7 +593,6 @@ export function TeamModule(): JSX.Element {
           )}
         >
           <header className="flex flex-wrap items-center gap-x-3 gap-y-2.5 border-b border-graphite px-4 py-3.5 md:px-7 md:py-4">
-            <MenuButton className="md:hidden" />
             <div className="min-w-0 flex-1 basis-[160px]">
               <button
                 type="button"
@@ -708,7 +704,7 @@ export function TeamModule(): JSX.Element {
                             busyId === m.userId && 'opacity-60',
                           )}
                         >
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#e4f222] to-[#9db300] text-[12px] font-semibold text-[#08090a]">
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-graphite text-[12px] font-semibold text-paper">
                             {displayName.trim()[0]?.toUpperCase() ?? '?'}
                           </span>
                           <div className="min-w-0 flex-1 basis-[140px]">

@@ -121,7 +121,7 @@ export function CourseEditor({
           step={5}
           value={progress}
           onChange={(e) => setProgress(Number(e.target.value))}
-          className="h-[3px] w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-[#e4f222]"
+          className="h-[3px] w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-[var(--color-acid)]"
         />
       </FieldRow>
 

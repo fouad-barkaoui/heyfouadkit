@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo } from 'react';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { CircularLoader } from '@/components/motion/CircularLoader';
 import { ViewTransition } from '@/components/motion/ViewTransition';
@@ -10,19 +10,12 @@ import { useAuth } from '@/state/authStore';
 import { prefetchLikelyModules } from '@/modules/prefetch';
 import { useUI } from '@/state/uiStore';
 import { useWorkspace } from '@/state/workspaceStore';
-import { AccountPanel } from './AccountPanel';
 import { AuthOverlay } from './AuthOverlay';
 import { CommandPalette } from './CommandPalette';
-import { IconRail } from './IconRail';
-import { MobileMenu } from './MobileMenu';
 import { OfflinePill } from './OfflinePill';
-import { useMediaQuery } from './navShared';
+import { TopBar } from './TopBar';
 
-/**
- * Every module — and the WebGL field — is code-split, so a session only ever
- * downloads the panes it actually opens.
- */
-const SpatialField = lazy(async () => ({ default: (await import('@/three/SpatialField')).SpatialField }));
+/** Every module is code-split, so a session only downloads the panes it opens. */
 const HomeModule = lazy(async () => ({ default: (await import('@/modules/home/HomeModule')).HomeModule }));
 const NotebookModule = lazy(async () => ({
   default: (await import('@/modules/notebook/NotebookModule')).NotebookModule,
@@ -49,8 +42,8 @@ const VaultModule = lazy(async () => ({ default: (await import('@/modules/vault/
 const InboxModule = lazy(async () => ({
   default: (await import('@/modules/inbox/InboxModule')).InboxModule,
 }));
-const PortfolioModule = lazy(async () => ({
-  default: (await import('@/modules/portfolio/PortfolioModule')).PortfolioModule,
+const SettingsModule = lazy(async () => ({
+  default: (await import('@/modules/settings/SettingsModule')).SettingsModule,
 }));
 const ContactModule = lazy(async () => ({
   default: (await import('@/modules/contact/ContactModule')).ContactModule,
@@ -85,96 +78,12 @@ function PaneFallback(): JSX.Element {
 }
 
 export function AppShell(): JSX.Element {
-  const {
-    module,
-    mobileNavOpen,
-    paletteOpen,
-    railExpanded,
-    setRailExpanded,
-    accountOpen,
-    setAccountOpen,
-  } = useUI();
+  const { module, accountOpen, setAccountOpen } = useUI();
   const { t } = useI18n();
-
-  // Wide screens dock the labelled sidebar beside the content; laptops and
-  // tablets keep the icon rail and float the sidebar over the content when
-  // it's opened, so the panes never get squeezed.
-  const docked = useMediaQuery('(min-width: 1180px)');
-  const firstDock = useRef(true);
-  useEffect(() => {
-    if (firstDock.current) {
-      firstDock.current = false;
-      return;
-    }
-    setRailExpanded(docked);
-  }, [docked, setRailExpanded]);
-  const railOverlay = railExpanded && !docked;
   const { ready, error } = useWorkspace();
   const { user, configured } = useAuth();
-  const needsAuth = configured && !user;
   const canOpenMedications = hasMedicationsAccess(user);
   const isAdmin = isAdminUser(user);
-
-  // The WebGL field is the single heaviest chunk in the app (three.js) and
-  // is purely decorative, so it shouldn't compete for bandwidth/CPU with
-  // the workspace's first load. Mount it only once the workspace is ready
-  // and the browser has a spare moment — that's most of what "the app
-  // feels slow to load" was actually about.
-  const [fieldReady, setFieldReady] = useState(false);
-  useEffect(() => {
-    if (!ready) return;
-    const w = window as Window & {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-      cancelIdleCallback?: (id: number) => void;
-    };
-    if (w.requestIdleCallback) {
-      const id = w.requestIdleCallback(() => setFieldReady(true), { timeout: 1500 });
-      return () => w.cancelIdleCallback?.(id);
-    }
-    const t = window.setTimeout(() => setFieldReady(true), 250);
-    return () => window.clearTimeout(t);
-  }, [ready]);
-
-  // Pointer-tracked light on cards: one delegated listener for the whole app,
-  // throttled to a frame, so hundreds of cards cost nothing extra.
-  useEffect(() => {
-    if (window.matchMedia('(hover: none)').matches) return;
-    let lit: HTMLElement | null = null;
-    let raf = 0;
-    let last: PointerEvent | null = null;
-    const apply = (): void => {
-      raf = 0;
-      const e = last;
-      if (!e) return;
-      const card = (e.target instanceof Element ? e.target.closest<HTMLElement>('.surface-card') : null) ?? null;
-      if (card !== lit) {
-        lit?.removeAttribute('data-lit');
-        lit = card;
-        card?.setAttribute('data-lit', 'true');
-      }
-      if (card) {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--sx', `${e.clientX - r.left}px`);
-        card.style.setProperty('--sy', `${e.clientY - r.top}px`);
-      }
-    };
-    const onMove = (e: PointerEvent): void => {
-      last = e;
-      if (!raf) raf = requestAnimationFrame(apply);
-    };
-    const onLeave = (): void => {
-      lit?.removeAttribute('data-lit');
-      lit = null;
-    };
-    window.addEventListener('pointermove', onMove, { passive: true });
-    document.documentElement.addEventListener('pointerleave', onLeave);
-    return () => {
-      window.removeEventListener('pointermove', onMove);
-      document.documentElement.removeEventListener('pointerleave', onLeave);
-      if (raf) cancelAnimationFrame(raf);
-      onLeave();
-    };
-  }, []);
 
   // Once the workspace is on screen, warm the most-used modules in the background.
   useEffect(() => {
@@ -216,8 +125,8 @@ export function AppShell(): JSX.Element {
         return <NotebookModule />;
       case 'trash':
         return <TrashPage />;
-      case 'portfolio':
-        return <PortfolioModule />;
+      case 'settings':
+        return <SettingsModule />;
       case 'contact':
         return <ContactModule />;
       case 'inbox':
@@ -229,31 +138,10 @@ export function AppShell(): JSX.Element {
   }, [module, canOpenMedications, isAdmin]);
 
   return (
-    <div className="app-shell relative flex h-[100dvh] w-full overflow-hidden bg-void">
-      {fieldReady ? (
-        <Suspense fallback={null}>
-          <SpatialField module={module} energized={mobileNavOpen || paletteOpen} style="waves" />
-        </Suspense>
-      ) : null}
+    <div className="app-shell flex h-[100dvh] w-full flex-col overflow-hidden bg-void">
+      <TopBar />
 
-      {/* Rail slot: reserves the docked width; the rail itself floats in it. */}
-      <div
-        className="relative z-20 hidden h-full shrink-0 md:block"
-        style={{ width: railExpanded && docked ? 240 : 64, transition: 'width 300ms var(--ease-snap)' }}
-      >
-        <div className="absolute inset-y-0 start-0 h-full">
-          <IconRail overlay={railOverlay} />
-        </div>
-      </div>
-      {railOverlay ? (
-        <div
-          className="rail-scrim fixed inset-0 z-[15] hidden md:block"
-          aria-hidden
-          onClick={() => setRailExpanded(false)}
-        />
-      ) : null}
-
-      <main className="relative z-10 flex h-full min-w-0 flex-1 flex-col">
+      <main className="relative flex min-h-0 min-w-0 flex-1 flex-col">
         {!ready ? (
           <div className="flex h-full items-center justify-center">
             <CircularLoader title={t('sh.app.loading')} subtitle={t('sh.app.loadingHint')} />
@@ -277,13 +165,8 @@ export function AppShell(): JSX.Element {
         )}
       </main>
 
-      <MobileMenu />
       <CommandPalette />
-      {needsAuth ? (
-        <AuthOverlay open={accountOpen} onOpenChange={setAccountOpen} />
-      ) : (
-        <AccountPanel open={accountOpen} onOpenChange={setAccountOpen} />
-      )}
+      {configured && !user ? <AuthOverlay open={accountOpen} onOpenChange={setAccountOpen} /> : null}
       <OnboardingFlow />
       <OfflinePill />
       <CookieConsentModal />

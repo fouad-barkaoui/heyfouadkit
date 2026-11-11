@@ -23,7 +23,7 @@ export const MODULE_LOADERS: Record<ModuleId, () => Promise<unknown>> = {
   reporting: () => import('@/modules/reporting/ReportingModule'),
   analytics: () => import('@/modules/analytics/AnalyticsModule'),
   trash: () => import('@/modules/trash/TrashPage'),
-  portfolio: () => import('@/modules/portfolio/PortfolioModule'),
+  settings: () => import('@/modules/settings/SettingsModule'),
   contact: () => import('@/modules/contact/ContactModule'),
   inbox: () => import('@/modules/inbox/InboxModule'),
 };

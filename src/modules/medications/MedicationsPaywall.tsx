@@ -1,5 +1,4 @@
 import { Lock } from 'lucide-react';
-import { MenuButton } from '@/components/shell/MenuButton';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/state/authStore';
 import { useLanguage } from '@/state/languageStore';
@@ -19,7 +18,6 @@ export function MedicationsPaywall(): JSX.Element {
   return (
     <div className="flex h-full flex-col">
       <header className="flex items-center gap-3 border-b border-graphite px-4 py-3.5 md:px-7 md:py-4">
-        <MenuButton className="md:hidden" />
         <div className="min-w-0">
           <h1 className="text-[19px] font-medium leading-tight tracking-[-0.016em] text-paper">{t('nav.medications')}</h1>
           <p className="mt-1 text-[12.5px] text-ash">{t('med.paywall.subtitle')}</p>
