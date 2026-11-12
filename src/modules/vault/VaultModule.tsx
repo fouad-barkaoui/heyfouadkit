@@ -170,7 +170,7 @@ export function VaultModule(): JSX.Element {
       panelSearch={{ value: query, onChange: setQuery, placeholder: t('vlt.search') }}
       panel={
         <div>
-          <p className="mb-2 px-1 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash/70">{t('vlt.collections')}</p>
+          <p className="mb-2 px-1 text-[12px] font-medium uppercase tracking-[0.08em] text-ash/70">{t('vlt.collections')}</p>
           {FILTERS.map((f) => {
             const meta = f.id === 'all' ? null : TYPE_META[f.id];
             const Icon = meta?.icon ?? Star;
@@ -185,7 +185,7 @@ export function VaultModule(): JSX.Element {
               >
                 <Icon size={14} strokeWidth={1.7} aria-hidden style={meta ? { color: meta.color } : undefined} />
                 <span className="flex-1 truncate text-start">{t(f.label)}</span>
-                <span className="mono num text-[10.5px] text-ash">{count}</span>
+                <span className="mono num text-[12px] text-ash">{count}</span>
               </button>
             );
           })}
@@ -234,7 +234,7 @@ export function VaultModule(): JSX.Element {
                 {/* corner ribbon — the curated marker from the reference cards */}
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute -right-[34px] top-[14px] w-[124px] rotate-45 py-[3px] text-center text-[9.5px] font-medium uppercase tracking-[0.1em]"
+                  className="pointer-events-none absolute -right-[34px] top-[14px] w-[124px] rotate-45 py-[3px] text-center text-[11px] font-medium uppercase tracking-[0.1em]"
                   style={{
                     background: `linear-gradient(90deg, ${meta.color}22, ${meta.color}33)`,
                     color: meta.color,

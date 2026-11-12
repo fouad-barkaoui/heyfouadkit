@@ -101,7 +101,7 @@ export function CoursesModule(): JSX.Element {
     <div>
       <div className="mb-3">
         <div className="mb-2 flex items-center justify-between px-1">
-          <p className="text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash/70">{t('crs.badgeFilters')}</p>
+          <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-ash/70">{t('crs.badgeFilters')}</p>
           <IconButton label={t('crs.newBadge')} onClick={startNewBadge}>
             <Plus size={13.5} strokeWidth={1.9} />
           </IconButton>
@@ -143,7 +143,7 @@ export function CoursesModule(): JSX.Element {
       </div>
 
       <div className="border-t border-graphite pt-3">
-        <p className="mb-1.5 px-1 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash/70">
+        <p className="mb-1.5 px-1 text-[12px] font-medium uppercase tracking-[0.08em] text-ash/70">
           {t('crs.library')}
         </p>
         {filtered.map((course) => (

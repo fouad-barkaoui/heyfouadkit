@@ -168,7 +168,7 @@ export function ScrollIndex(): JSX.Element {
             onCloseAutoFocus={(e) => e.preventDefault()}
             className="scroll-index-menu z-[60]"
           >
-            <p className="px-2.5 pb-1.5 pt-1 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('sh.index.title')}</p>
+            <p className="px-2.5 pb-1.5 pt-1 text-[12px] font-medium uppercase tracking-[0.08em] text-ash">{t('sh.index.title')}</p>
             <DropdownMenu.Item className="scroll-index-item" onSelect={() => jump(0)}>
               <ArrowUp size={13} strokeWidth={2} className="shrink-0 text-ash" aria-hidden />
               <span className="min-w-0 flex-1 truncate">{t('sh.index.top')}</span>
@@ -193,7 +193,7 @@ export function ScrollIndex(): JSX.Element {
                     {i === active ? (
                       <Check size={12} strokeWidth={2.4} className="shrink-0 text-accent" aria-hidden />
                     ) : (
-                      <span className="mono num shrink-0 text-[10.5px] text-ash">{Math.round(h.at * 100)}%</span>
+                      <span className="mono num shrink-0 text-[12px] text-ash">{Math.round(h.at * 100)}%</span>
                     )}
                   </DropdownMenu.Item>
                 ))}

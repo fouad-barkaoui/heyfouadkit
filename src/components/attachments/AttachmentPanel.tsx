@@ -39,7 +39,7 @@ function Thumb({ attachment, onOpen }: { attachment: Attachment; onOpen: () => v
         </span>
         <span className="block px-2.5 py-2">
           <span className="block truncate text-[12px] text-mist">{attachment.name}</span>
-          <span className="mt-0.5 flex items-center gap-1.5 text-[10.5px] text-ash">
+          <span className="mt-0.5 flex items-center gap-1.5 text-[12px] text-ash">
             {attachment.storagePath ? (
               <Cloud size={10} strokeWidth={1.9} aria-hidden />
             ) : (
@@ -148,9 +148,9 @@ export function AttachmentPanel({
     >
       <header className="mb-2.5 flex items-center gap-2">
         <Paperclip size={12.5} strokeWidth={1.8} className="text-ash" aria-hidden />
-        <h3 className="text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('sh.files.title')}</h3>
+        <h3 className="text-[12px] font-medium uppercase tracking-[0.08em] text-ash">{t('sh.files.title')}</h3>
         {files.length > 0 ? (
-          <span className="mono num rounded-[4px] bg-[rgb(var(--tint-rgb)/0.05)] px-1.5 py-[1px] text-[10.5px] text-ash">
+          <span className="mono num rounded-[4px] bg-[rgb(var(--tint-rgb)/0.05)] px-1.5 py-[1px] text-[12px] text-ash">
             {files.length}
           </span>
         ) : null}

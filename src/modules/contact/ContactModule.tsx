@@ -282,7 +282,7 @@ function ContactForm(): JSX.Element {
           </label>
           <span
             className={cn(
-              'mono text-[10.5px]',
+              'mono text-[12px]',
               draft.message.length > CONTACT_LIMITS.message * 0.9 ? 'text-coral' : 'text-ash',
             )}
           >

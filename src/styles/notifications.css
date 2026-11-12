@@ -14,7 +14,7 @@
   height: 18px;
   padding: 0 5px;
   border-radius: 999px;
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 600;
   line-height: 1;
   color: #fff;
@@ -137,7 +137,7 @@
 }
 .notif-section-head {
   margin: 10px 8px 6px;
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 510;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -218,7 +218,7 @@
 .notif-item-time {
   flex-shrink: 0;
   padding-top: 2px;
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--color-ash);
 }
 .notif-item-x {

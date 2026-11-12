@@ -67,6 +67,8 @@ function SectionPill({ group, onSelect }: { group: NavGroup; onSelect: (id: Modu
 /**
  * The app's only navigation: logo, section pills, search, account and a menu.
  * Below 1024px the section pills fold into the menu so the bar never wraps.
+ * From 1024px the bar is a three-column grid, so the search can never sit on
+ * top of the pills however narrow the window gets.
  */
 export function TopBar(): JSX.Element {
   const { module, setModule, setPaletteOpen, setAccountOpen } = useUI();
@@ -160,10 +162,12 @@ export function TopBar(): JSX.Element {
                 ))}
                 <DropdownMenu.Separator className="tb-menu-sep" />
               </div>
-              {isAdmin ? <ModuleItem id="inbox" onSelect={setModule} /> : null}
-              {MENU_PAGES.map((id) => (
-                <ModuleItem key={id} id={id} onSelect={setModule} />
-              ))}
+              <div className="tb-menu-pages">
+                {isAdmin ? <ModuleItem id="inbox" onSelect={setModule} /> : null}
+                {MENU_PAGES.map((id) => (
+                  <ModuleItem key={id} id={id} onSelect={setModule} />
+                ))}
+              </div>
               <DropdownMenu.Separator className="tb-menu-sep" />
               <DropdownMenu.Item asChild className="tb-item">
                 <a href={PORTFOLIO_URL} target="_blank" rel="noopener noreferrer">

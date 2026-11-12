@@ -61,7 +61,7 @@ export function YearGrid({ habits, color }: { habits: Habit[]; color: string }):
         <div className="inline-grid gap-[3px]" style={{ gridTemplateColumns: `22px repeat(${cols.length}, 11px)` }}>
           <span />
           {monthLabels.map((m, i) => (
-            <span key={i} className="h-[14px] overflow-visible whitespace-nowrap text-[10px] leading-none text-ash">
+            <span key={i} className="h-[14px] overflow-visible whitespace-nowrap text-[11px] leading-none text-ash">
               {m}
             </span>
           ))}
@@ -101,7 +101,7 @@ function FragmentRow({
   const { t, locale, isArabic } = useLanguage();
   return (
     <>
-      <span className="pe-1 text-end text-[10px] leading-[11px] text-ash">{label}</span>
+      <span className="pe-1 text-end text-[11px] leading-[11px] text-ash">{label}</span>
       {cells.map((c, i) => (
         <span
           key={c.key}

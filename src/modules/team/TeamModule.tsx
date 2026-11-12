@@ -680,7 +680,7 @@ export function TeamModule(): JSX.Element {
               </div>
 
               <div>
-                <p className="mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('team2.membersHeading')}</p>
+                <p className="mb-2.5 text-[12px] font-medium uppercase tracking-[0.08em] text-ash">{t('team2.membersHeading')}</p>
                 {membersLoading ? (
                   <p className="py-4 text-[12.5px] text-ash">{t('team2.loadingMembers')}</p>
                 ) : sortedMembers.length === 0 ? (
@@ -759,7 +759,7 @@ export function TeamModule(): JSX.Element {
 
               {canManage ? (
                 <div>
-                  <p className="mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('team2.openInvitesHeading')}</p>
+                  <p className="mb-2.5 text-[12px] font-medium uppercase tracking-[0.08em] text-ash">{t('team2.openInvitesHeading')}</p>
                   {activeInvites.length === 0 ? (
                     <p className="py-2 text-[12.5px] text-ash">{t('team2.noOpenInvites')}</p>
                   ) : (

@@ -8,6 +8,7 @@ const BASE = `http://localhost:${PORT}`;
 const VIEWPORTS = [
   { name: 'phone', width: 390, height: 800 },
   { name: 'tablet', width: 820, height: 1100 },
+  { name: 'laptop', width: 1100, height: 800 },
   { name: 'desktop', width: 1440, height: 900 },
 ];
 const PAGES = ['home', 'todo', 'calendar', 'habits', 'saveit', 'notebook', 'articles', 'courses', 'docs', 'vault', 'team', 'medications', 'salary', 'reporting', 'analytics', 'trash', 'news', 'contact', 'settings'];
@@ -42,9 +43,35 @@ try {
       check(await fits(), `${vp.name}: ${id} fits the screen`);
     }
 
+    // Bar layout: on desktop every section pill is reachable (nothing sits on top of
+    // it) and the search never overlaps the pills; on phones the list panel opens.
+    await page.goto(`${BASE}/`);
+    await page.waitForSelector('.topbar');
+    if (vp.width >= 1024) {
+      const covered = await page.evaluate(() =>
+        [...document.querySelectorAll('.tb-nav .tb-navlink')].filter((el) => {
+          const r = el.getBoundingClientRect();
+          const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          return !top || !el.contains(top);
+        }).length,
+      );
+      check(covered === 0, `${vp.name}: every section pill is reachable`);
+      const gap = await page.evaluate(() => {
+        const nav = document.querySelector('.tb-nav').getBoundingClientRect();
+        const search = document.querySelector('.tb-searchpill').getBoundingClientRect();
+        return search.left - nav.right;
+      });
+      check(gap >= 8, `${vp.name}: search clears the section pills`);
+    } else if (vp.width < 600) {
+      await page.goto(`${BASE}/#/saveit`);
+      await page.click('button[aria-label="Show panel"]');
+      check(await page.locator('aside input').first().isVisible(), `${vp.name}: list panel opens over the page`);
+      await page.goto(`${BASE}/`);
+    }
+
     // Navigation: section pills on desktop, the menu everywhere else.
     await page.goto(`${BASE}/`);
-    if (vp.width >= 1100) {
+    if (vp.width >= 1024) {
       await page.click('.tb-nav .tb-navlink:nth-of-type(2)');
       await page.click('.tb-menu .tb-item:first-child');
     } else {

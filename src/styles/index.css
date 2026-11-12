@@ -308,6 +308,7 @@
 
   .btn-icon {
     display: inline-flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
     width: 28px;
@@ -472,7 +473,7 @@
   }
   .rail-kbd {
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 11px;
     line-height: 1;
     padding: 3px 5px;
     border-radius: 5px;

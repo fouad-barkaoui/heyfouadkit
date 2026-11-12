@@ -1,5 +1,5 @@
-import { ChevronLeft, PanelLeftClose, PanelLeftOpen, Search } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { ChevronLeft, PanelLeftClose, PanelLeftOpen, Search, X } from 'lucide-react';
+import { useEffect, useState, type MouseEvent, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { useUI } from '@/state/uiStore';
 import { ScrollIndex } from '@/components/motion/ScrollIndex';
@@ -9,6 +9,8 @@ import { useI18n } from '@/components/ui/useI18n';
  * A module's two panes: the list column and the content.
  * On narrow screens the two panes become one stack — the panel is the list
  * view, the content is the detail view, with a back affordance between them.
+ * Pages that open straight into their content get a header button that slides
+ * the panel over it, so filters, folders and collections stay reachable.
  */
 export function ModuleLayout({
   panelTitle,
@@ -43,17 +45,38 @@ export function ModuleLayout({
 }): JSX.Element {
   const { panelExpanded, togglePanel } = useUI();
   const { t } = useI18n();
+  const [mobilePanel, setMobilePanel] = useState(false);
+  const canOpenPanel = detailOpenOnMobile && !onMobileBack;
+
+  useEffect(() => {
+    if (!mobilePanel) return;
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') setMobilePanel(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [mobilePanel]);
+
+  /** Picking something in the open panel (a folder, a filter) returns to the content. */
+  const closeAfterPick = (e: MouseEvent<HTMLElement>): void => {
+    if (!mobilePanel) return;
+    const hit = (e.target as HTMLElement).closest('button, a, [role="button"], [role="option"], [role="tab"]');
+    if (!hit || hit.closest('form, [aria-haspopup]') || hit.getAttribute('aria-haspopup')) return;
+    setMobilePanel(false);
+  };
 
   return (
-    <div className="flex h-full min-h-0 w-full min-w-0">
+    <div className="relative flex h-full min-h-0 w-full min-w-0">
       {/* ── Context panel ─────────────────────────────────────────────── */}
       <aside
         className={cn(
           'flex h-full min-h-0 flex-col overflow-hidden border-graphite bg-void',
           'w-full shrink-0',
           panelExpanded ? 'border-r md:w-[248px] lg:w-[286px]' : 'md:w-0 md:border-r-0',
-          detailOpenOnMobile && 'hidden md:flex',
+          detailOpenOnMobile && !mobilePanel && 'hidden md:flex',
+          mobilePanel && 'max-md:absolute max-md:inset-0 max-md:z-20',
         )}
+        onClick={closeAfterPick}
         style={{ transition: 'width 220ms var(--ease-snap), border-color 220ms var(--ease-snap)' }}
       >
         <div className="flex items-center gap-2 px-4 pb-2.5 pt-3.5">
@@ -74,6 +97,16 @@ export function ModuleLayout({
           >
             <PanelLeftClose size={14} strokeWidth={1.7} className="rtl:-scale-x-100" />
           </button>
+          {mobilePanel ? (
+            <button
+              type="button"
+              onClick={() => setMobilePanel(false)}
+              aria-label={t('sh.panel.close')}
+              className="btn-icon shrink-0 md:hidden"
+            >
+              <X size={16} strokeWidth={1.8} />
+            </button>
+          ) : null}
         </div>
 
         {panelSearch ? (
@@ -106,10 +139,21 @@ export function ModuleLayout({
           !detailOpenOnMobile && 'hidden md:flex',
         )}
       >
-        <header className="flex flex-wrap items-start gap-x-3 gap-y-2.5 border-b border-graphite px-4 py-3.5 md:flex-nowrap md:px-7 md:py-4">
+        <header className="flex flex-wrap items-start gap-x-3 gap-y-2.5 border-b border-graphite px-4 py-3.5 md:min-h-[79px] md:flex-nowrap md:px-7 md:py-4">
           {onMobileBack ? (
             <button type="button" className="btn-icon md:hidden" aria-label={t('sh.panel.back')} onClick={onMobileBack}>
               <ChevronLeft size={17} strokeWidth={1.8} className="rtl:-scale-x-100" />
+            </button>
+          ) : null}
+          {canOpenPanel ? (
+            <button
+              type="button"
+              className="btn-icon shrink-0 md:hidden"
+              aria-label={t('sh.panel.show')}
+              aria-expanded={mobilePanel}
+              onClick={() => setMobilePanel(true)}
+            >
+              <PanelLeftOpen size={16} strokeWidth={1.7} className="rtl:-scale-x-100" />
             </button>
           ) : null}
           {!panelExpanded ? (

@@ -43,6 +43,7 @@ export default defineDictionary({
     'sh.panel.collapse': 'Collapse panel',
     'sh.panel.show': 'Show panel',
     'sh.panel.back': 'Back to list',
+    'sh.panel.close': 'Close panel',
 
     // Offline pill
     'sh.offline.savedOne': 'Offline · 1 change saved here',
@@ -236,6 +237,7 @@ export default defineDictionary({
     'sh.panel.collapse': 'طيّ اللوحة',
     'sh.panel.show': 'إظهار اللوحة',
     'sh.panel.back': 'العودة إلى القائمة',
+    'sh.panel.close': 'إغلاق اللوحة',
 
     // Offline pill
     'sh.offline.savedOne': 'غير متصل · تغيير واحد محفوظ هنا',

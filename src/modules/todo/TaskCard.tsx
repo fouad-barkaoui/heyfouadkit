@@ -107,7 +107,7 @@ export function TaskCard({
                 {t(`task.repeats.${todo.recurrence}`)}
               </span>
             ) : null}
-            <span className="mono ms-auto text-[10.5px] text-ash/70">{refCode('TSK', todo.id)}</span>
+            <span className="mono ms-auto text-[12px] text-ash/70">{refCode('TSK', todo.id)}</span>
           </div>
         </div>
       </div>

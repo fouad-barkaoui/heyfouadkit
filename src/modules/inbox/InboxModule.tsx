@@ -208,7 +208,7 @@ export function InboxModule(): JSX.Element {
                             </span>
                           </span>
                           <span className="contact-msg-topic">{TOPIC_LABEL[m.topic]}</span>
-                          <span className="mono text-[10.5px] text-ash">{m.createdAt ? agoLabel(m.createdAt, t, locale) : '—'}</span>
+                          <span className="mono text-[12px] text-ash">{m.createdAt ? agoLabel(m.createdAt, t, locale) : '—'}</span>
                         </button>
                         {open ? (
                           <div className="contact-msg-body">

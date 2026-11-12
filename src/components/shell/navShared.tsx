@@ -63,7 +63,7 @@ export function FlagPill({ flag, className }: { flag: RowFlag; className?: strin
   return (
     <span
       className={cn(
-        'flex shrink-0 items-center gap-1 rounded-full px-1.5 py-[1px] text-[9.5px] font-medium uppercase tracking-[0.04em]',
+        'flex shrink-0 items-center gap-1 rounded-full px-1.5 py-[1px] text-[11px] font-medium uppercase tracking-[0.04em]',
         className,
       )}
       style={{

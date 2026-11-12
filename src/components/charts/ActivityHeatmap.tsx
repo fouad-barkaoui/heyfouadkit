@@ -35,40 +35,41 @@ export function ActivityHeatmap({ cells, weeks = 18 }: { cells: HeatCell[]; week
     return () => ctx.revert();
   }, [cells]);
 
-  const columns: HeatCell[][] = [];
-  for (let w = 0; w < weeks; w += 1) columns.push(cells.slice(w * 7, w * 7 + 7));
-
   return (
     <div ref={root} className="relative">
-      <div className="flex gap-[3px] overflow-x-auto pb-1">
-        <div className="me-1 flex shrink-0 flex-col gap-[3px] pt-[1px]">
+      {/* Day labels fill the first column, then one column per week: cells grow with the card. */}
+      <div className="overflow-x-auto pb-1">
+        <div
+          className="grid gap-[3px]"
+          style={{
+            gridTemplateRows: 'repeat(7, auto)',
+            gridAutoFlow: 'column',
+            gridTemplateColumns: `auto repeat(${weeks}, minmax(12px, 26px))`,
+            justifyContent: 'start',
+          }}
+        >
           {DAY_LABELS.map((label, i) => (
             // eslint-disable-next-line react/no-array-index-key
-            <span key={i} className="h-[12px] text-[9px] leading-[12px] text-ash/70">
+            <span key={i} className="me-1.5 flex items-center text-[11px] leading-none text-ash/70">
               {label ? t(label) : ''}
             </span>
           ))}
+          {cells.slice(0, weeks * 7).map((cell) => (
+            <span
+              key={cell.date}
+              data-heat-cell
+              tabIndex={0}
+              role="img"
+              aria-label={`${fmtDate(cell.date, locale)}: ${items(cell.count)}`}
+              onMouseEnter={() => setHover(cell)}
+              onMouseLeave={() => setHover(null)}
+              onFocus={() => setHover(cell)}
+              onBlur={() => setHover(null)}
+              className="aspect-square w-full rounded-[3px] outline-offset-2 transition-[filter] duration-120 hover:brightness-150"
+              style={{ background: rampStep(cell.count, max) }}
+            />
+          ))}
         </div>
-        {columns.map((week, wi) => (
-          // eslint-disable-next-line react/no-array-index-key
-          <div key={wi} className="flex shrink-0 flex-col gap-[3px]">
-            {week.map((cell) => (
-              <span
-                key={cell.date}
-                data-heat-cell
-                tabIndex={0}
-                role="img"
-                aria-label={`${fmtDate(cell.date, locale)}: ${items(cell.count)}`}
-                onMouseEnter={() => setHover(cell)}
-                onMouseLeave={() => setHover(null)}
-                onFocus={() => setHover(cell)}
-                onBlur={() => setHover(null)}
-                className="h-[12px] w-[12px] rounded-[3px] outline-offset-2 transition-[filter] duration-120 hover:brightness-150"
-                style={{ background: rampStep(cell.count, max) }}
-              />
-            ))}
-          </div>
-        ))}
       </div>
 
       <div className="mt-3 flex items-center gap-2 text-[11px] text-ash">

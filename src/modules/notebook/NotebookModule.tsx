@@ -175,7 +175,7 @@ export function NotebookModule(): JSX.Element {
       ) : (
         grouped.map(([bucket, items]) => (
           <div key={bucket} className="mb-3">
-            <p className="px-2.5 pb-1.5 pt-1 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash/70">
+            <p className="px-2.5 pb-1.5 pt-1 text-[12px] font-medium uppercase tracking-[0.08em] text-ash/70">
               {bucket}
             </p>
             {items.map((note) => (
@@ -191,7 +191,7 @@ export function NotebookModule(): JSX.Element {
                 }}
                 meta={
                   <>
-                    <span className="mono text-[10.5px] text-ash/80">{refCode('NOTE', note.id)}</span>
+                    <span className="mono text-[12px] text-ash/80">{refCode('NOTE', note.id)}</span>
                     <span aria-hidden>·</span>
                     <span>{agoLabel(note.updatedAt, t, locale)}</span>
                   </>
@@ -202,7 +202,7 @@ export function NotebookModule(): JSX.Element {
                       {note.tags.slice(0, 3).map((tag) => (
                         <span
                           key={tag}
-                          className="rounded-[4px] bg-[rgb(var(--tint-rgb)/0.05)] px-1.5 py-[1px] text-[10.5px] text-fog"
+                          className="rounded-[4px] bg-[rgb(var(--tint-rgb)/0.05)] px-1.5 py-[1px] text-[12px] text-fog"
                         >
                           #{tag}
                         </span>

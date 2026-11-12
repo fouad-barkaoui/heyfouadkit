@@ -120,7 +120,7 @@ export function CommandPalette(): JSX.Element {
               aria-label={t('sh.search.everything')}
               className="w-full bg-transparent text-[14.5px] text-paper outline-none placeholder:text-ash"
             />
-            <kbd className="mono hidden rounded-[4px] bg-white/5 px-1.5 py-[2px] text-[10.5px] text-ash sm:block">
+            <kbd className="mono hidden rounded-[4px] bg-white/5 px-1.5 py-[2px] text-[12px] text-ash sm:block">
               ESC
             </kbd>
           </div>
@@ -166,7 +166,7 @@ export function CommandPalette(): JSX.Element {
                       <span className="block truncate text-[13.5px] text-paper">{hit.title}</span>
                       <span className="block truncate text-[11.5px] text-ash">{hit.excerpt}</span>
                     </span>
-                    <span className="mono hidden shrink-0 text-[10.5px] uppercase tracking-[0.06em] text-ash sm:block">
+                    <span className="mono hidden shrink-0 text-[12px] uppercase tracking-[0.06em] text-ash sm:block">
                       {isArabic && NAV_KEY[hit.module] ? t(NAV_KEY[hit.module]!) : MODULE_MAP[hit.module].short}
                     </span>
                     <span className="hidden shrink-0 text-[11px] text-ash/70 lg:block">

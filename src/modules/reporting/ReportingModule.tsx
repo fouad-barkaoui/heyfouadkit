@@ -189,7 +189,7 @@ export function ReportingModule(): JSX.Element {
       <div className="scroll-y min-h-0 flex-1 px-4 py-5 md:px-7 md:py-6">
         <ScrollIndex />
         <article className="mx-auto max-w-[720px] rounded-[10px] bg-[rgb(var(--tint-rgb)/0.02)] p-6 shadow-[inset_0_0_0_1px_var(--color-graphite)] md:p-8">
-          <p className="mono text-[10.5px] uppercase tracking-[0.08em] text-ash">
+          <p className="mono text-[12px] uppercase tracking-[0.08em] text-ash">
             {activeTeam?.name ?? t('rep.personalWorkspace')} · {fmtDate(new Date().toISOString())}
           </p>
           <h2 className="mt-1.5 text-[21px] font-medium tracking-[-0.017em] text-paper">

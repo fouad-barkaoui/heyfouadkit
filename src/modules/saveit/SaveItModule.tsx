@@ -342,7 +342,7 @@ export function SaveItModule(): JSX.Element {
         ].map((s) => (
           <div key={s.label} className="rounded-[10px] bg-[rgb(var(--tint-rgb)/0.03)] px-2.5 py-2 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
             <p className="num text-[17px] font-medium leading-none text-paper">{s.value}</p>
-            <p className="mt-1 text-[10.5px] uppercase tracking-[0.06em] text-ash">{s.label}</p>
+            <p className="mt-1 text-[12px] uppercase tracking-[0.06em] text-ash">{s.label}</p>
           </div>
         ))}
       </div>
@@ -358,7 +358,7 @@ export function SaveItModule(): JSX.Element {
       </nav>
 
       <div>
-        <p className="mb-1.5 px-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('si.types')}</p>
+        <p className="mb-1.5 px-2 text-[12px] font-medium uppercase tracking-[0.08em] text-ash">{t('si.types')}</p>
         <div className="space-y-[2px]">
           <button type="button" data-active={kind === 'all'} onClick={() => setKind('all')} className="save-side-row">
             <span className="save-dot" style={{ background: 'conic-gradient(#f25f5c, #f5a524, #2dd4a0, #38bdf8, #7c83ff, #b784ff, #f25f5c)' }} />
@@ -378,7 +378,7 @@ export function SaveItModule(): JSX.Element {
       </div>
 
       <div>
-        <p className="mb-1.5 px-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('si.collections')}</p>
+        <p className="mb-1.5 px-2 text-[12px] font-medium uppercase tracking-[0.08em] text-ash">{t('si.collections')}</p>
         <div className="space-y-[2px]">
           <button type="button" data-active={collection === 'all'} onClick={() => setCollection('all')} className="save-side-row">
             <FolderOpen size={14} strokeWidth={1.8} aria-hidden />
@@ -643,7 +643,7 @@ export function SaveItModule(): JSX.Element {
             <button type="button" className="flex w-full items-stretch text-start" onClick={() => open(rediscover)}>
               <LinkMedia link={rediscover} ratio="16 / 10" className="w-[38%] max-w-[260px] shrink-0" />
               <span className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-4">
-                <span className="flex items-center gap-1.5 text-[10.5px] font-medium uppercase tracking-[0.1em] text-accent">
+                <span className="flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.1em] text-accent">
                   <Shuffle size={12} strokeWidth={2} aria-hidden /> {t('si.rediscover')}
                 </span>
                 <span className="line-clamp-2 text-[15px] font-medium leading-[1.35] text-paper">{rediscover.title}</span>

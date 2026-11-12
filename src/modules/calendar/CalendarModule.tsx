@@ -384,7 +384,7 @@ export function CalendarModule(): JSX.Element {
               <button
                 type="button"
                 onClick={() => setViewStart(startOfDay(addDays(new Date(), -3)))}
-                className="px-2 text-[12px] text-ash hover:text-mist"
+                className="h-7 px-2.5 text-[12px] text-ash hover:text-mist"
               >
                 {t('cal.today')}
               </button>
@@ -434,7 +434,7 @@ export function CalendarModule(): JSX.Element {
                     <div
                       key={d.toISOString()}
                       className={cn(
-                        'sticky top-0 z-[3] flex flex-col items-center justify-center border-b border-r border-graphite text-[10.5px]',
+                        'sticky top-0 z-[3] flex flex-col items-center justify-center border-b border-r border-graphite text-[12px]',
                         weekend ? 'bg-[rgb(var(--tint-rgb)/0.025)]' : 'bg-void',
                         isToday && 'bg-acid/10',
                       )}
@@ -465,7 +465,7 @@ export function CalendarModule(): JSX.Element {
                         <span className={cn('block truncate text-[12px]', p.task.status === 'completed' ? 'text-ash line-through' : 'text-mist')}>
                           {p.task.title}
                         </span>
-                        {due ? <span className={cn('text-[10px]', due.overdue ? 'text-coral' : 'text-ash')}>{dueLabel(p.task, t, locale)}</span> : null}
+                        {due ? <span className={cn('text-[11px]', due.overdue ? 'text-coral' : 'text-ash')}>{dueLabel(p.task, t, locale)}</span> : null}
                       </span>
                     </div>
                   );
@@ -502,7 +502,7 @@ export function CalendarModule(): JSX.Element {
 
           {unscheduled.length > 0 ? (
             <div className="border-t border-graphite px-4 py-4 md:px-7">
-              <p className="mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">
+              <p className="mb-2.5 text-[12px] font-medium uppercase tracking-[0.08em] text-ash">
                 {t('cal.unscheduled', { count: unscheduled.length })}
               </p>
               <div className="flex flex-wrap gap-2">

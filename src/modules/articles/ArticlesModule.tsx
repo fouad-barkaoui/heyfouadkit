@@ -198,7 +198,7 @@ export function ArticlesModule(): JSX.Element {
       ) : (
         localGroupByDay(filtered, (a) => a.updatedAt).map(([bucket, items]) => (
           <div key={bucket} className="mb-3">
-            <p className="px-2.5 pb-1.5 pt-1 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash/70">
+            <p className="px-2.5 pb-1.5 pt-1 text-[12px] font-medium uppercase tracking-[0.08em] text-ash/70">
               {bucket}
             </p>
             {items.map((article) => {
@@ -234,7 +234,7 @@ export function ArticlesModule(): JSX.Element {
   const meta = active ? (
     <aside className="w-full shrink-0 lg:w-[224px]">
       <div className="rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
-        <p className="mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('art.meta.record')}</p>
+        <p className="mb-2.5 text-[12px] font-medium uppercase tracking-[0.08em] text-ash">{t('art.meta.record')}</p>
         <dl className="space-y-2 text-[12px]">
           <div className="flex justify-between gap-3">
             <dt className="text-ash">{t('art.meta.type')}</dt>
@@ -441,7 +441,7 @@ export function ArticlesModule(): JSX.Element {
 
               {active.kind !== 'written' ? (
                 <div className="mt-5">
-                  <p className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('art.notes')}</p>
+                  <p className="mb-2 text-[12px] font-medium uppercase tracking-[0.08em] text-ash">{t('art.notes')}</p>
                   <RichEditor
                     key={`${active.id}-notes`}
                     value={active.content}

@@ -220,7 +220,7 @@
   padding-bottom: 10px;
   margin-bottom: 10px;
   border-bottom: 1px solid rgb(90 70 40 / 0.18);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #8a7a5e;
@@ -243,7 +243,7 @@
   width: 34px;
   flex-shrink: 0;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 12px;
   line-height: 19px;
   text-transform: uppercase;
   color: #9a8a6c;
@@ -259,7 +259,7 @@
   margin-inline-start: 6px;
   padding: 0 7px;
   border-radius: 999px;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 17px;
   vertical-align: 1px;
   color: #6b5b40;
@@ -378,7 +378,7 @@
   font-family: inherit;
 }
 .inbox-count {
-  font-size: 10.5px;
+  font-size: 12px;
   opacity: 0.65;
 }
 .inbox-locked,
@@ -427,7 +427,7 @@
 @media (max-width: 639px) {
   .contact-msg-topic {
     display: inline-block;
-    font-size: 10px;
+    font-size: 11px;
     padding: 1px 6px;
   }
 }
@@ -440,7 +440,7 @@
   margin-inline-start: 6px;
   padding: 1px 7px;
   border-radius: 999px;
-  font-size: 10.5px;
+  font-size: 12px;
   color: #fff;
   background: var(--color-coral);
 }
@@ -515,7 +515,7 @@
   flex-shrink: 0;
   padding: 2px 8px;
   border-radius: 999px;
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--color-fog);
   box-shadow: inset 0 0 0 1px var(--color-graphite);
 }

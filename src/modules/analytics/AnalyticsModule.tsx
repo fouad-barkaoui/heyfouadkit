@@ -176,7 +176,7 @@ export function AnalyticsModule(): JSX.Element {
       panel={
         <div className="space-y-3">
           <div className="rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
-            <p className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('an.taskCompletion')}</p>
+            <p className="mb-3 text-[12px] font-medium uppercase tracking-[0.08em] text-ash">{t('an.taskCompletion')}</p>
             <div className="flex items-center gap-3">
               <ProgressRing value={stats.completion} size={52} label={t('an.taskCompletionRate')} />
               <div>
@@ -190,7 +190,7 @@ export function AnalyticsModule(): JSX.Element {
           </div>
 
           <div className="rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
-            <p className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('an.courseProgress')}</p>
+            <p className="mb-3 text-[12px] font-medium uppercase tracking-[0.08em] text-ash">{t('an.courseProgress')}</p>
             <div className="flex items-center gap-3">
               <ProgressRing value={stats.avgProgress} size={52} color="#12a3b0" label={t('an.avgCourseProgress')} />
               <div>
@@ -201,7 +201,7 @@ export function AnalyticsModule(): JSX.Element {
           </div>
 
           <div className="rounded-[8px] bg-[rgb(var(--tint-rgb)/0.02)] p-3 shadow-[inset_0_0_0_1px_var(--color-graphite)]">
-            <p className="mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('an.latestActivity')}</p>
+            <p className="mb-2.5 text-[12px] font-medium uppercase tracking-[0.08em] text-ash">{t('an.latestActivity')}</p>
             <Timeline entries={recent.slice(0, 4)} />
           </div>
         </div>
@@ -218,7 +218,7 @@ export function AnalyticsModule(): JSX.Element {
       detailOpenOnMobile
     >
       <div ref={gridRef} className="mx-auto max-w-[1080px] space-y-4">
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5 [&>*:last-child:nth-child(odd)]:col-span-2 lg:[&>*:last-child:nth-child(odd)]:col-span-1">
           <StatTile
             icon={<NotebookPen size={14} strokeWidth={1.7} />}
             label={t('an.stat.notes')}

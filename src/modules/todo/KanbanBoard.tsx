@@ -80,7 +80,7 @@ export function KanbanBoard({
             <header className="mb-2.5 flex items-center gap-2 px-1">
               <StatusDot tone={STATUS_TONE[status]} />
               <h3 className="text-[12.5px] font-medium tracking-[-0.011em] text-mist">{STATUS_LABEL[status]}</h3>
-              <span className="mono num ms-auto rounded-[4px] bg-[rgb(var(--tint-rgb)/0.05)] px-1.5 py-[1px] text-[10.5px] text-ash">
+              <span className="mono num ms-auto rounded-[4px] bg-[rgb(var(--tint-rgb)/0.05)] px-1.5 py-[1px] text-[12px] text-ash">
                 {column.length}
               </span>
             </header>

@@ -125,7 +125,7 @@ export function TreatmentPlanEditor({
       {plan ? (
         <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <p className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('med.plan.inThisPlan')}</p>
+            <p className="mb-2 text-[12px] font-medium uppercase tracking-[0.08em] text-ash">{t('med.plan.inThisPlan')}</p>
             <div className="space-y-1.5">
               {assignedMedicines.length === 0 ? (
                 <p className="py-3 text-[12px] text-ash">{t('med.plan.noneAssigned')}</p>
@@ -156,7 +156,7 @@ export function TreatmentPlanEditor({
           </div>
 
           <div>
-            <p className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('med.plan.available')}</p>
+            <p className="mb-2 text-[12px] font-medium uppercase tracking-[0.08em] text-ash">{t('med.plan.available')}</p>
             <div className="space-y-1.5">
               {unassignedMedicines.length === 0 ? (
                 <p className="py-3 text-[12px] text-ash">{t('med.plan.allAssigned')}</p>

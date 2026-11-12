@@ -31,7 +31,7 @@ export function KindBadge({ kind, className }: { kind: LinkKind; className?: str
   const meta = KIND_META[kind];
   return (
     <span
-      className={cn('save-kind inline-flex items-center gap-1 rounded-full px-2 py-[2px] text-[10.5px] font-medium', className)}
+      className={cn('save-kind inline-flex items-center gap-1 rounded-full px-2 py-[2px] text-[12px] font-medium', className)}
       style={{ ['--k' as string]: meta.color } as CSSProperties}
     >
       <Icon size={11} strokeWidth={2} aria-hidden />

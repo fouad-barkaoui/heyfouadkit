@@ -57,7 +57,11 @@ export function AreaTrend({ data, unit = '' }: { data: TrendPoint[]; unit?: stri
     return () => ctx.revert();
   }, [line]);
 
-  const ticks = [0, 0.5, 1].map((t) => ({ value: Math.round(max * t), y: PAD.top + innerH - t * innerH }));
+  // A peak of 1 has no whole-number midpoint, so the axis shows just 0 and 1.
+  const ticks = (max >= 2 ? [0, 0.5, 1] : [0, 1]).map((t) => ({
+    value: Math.round(max * t),
+    y: PAD.top + innerH - t * innerH,
+  }));
   const labelEvery = Math.max(1, Math.ceil(data.length / 7));
   const point = hover !== null ? points[hover] : null;
 
@@ -95,7 +99,7 @@ export function AreaTrend({ data, unit = '' }: { data: TrendPoint[]; unit?: stri
               stroke={CHART_INK.grid}
               strokeWidth={1}
             />
-            <text x={PAD.left - 6} y={tick.y + 3.5} textAnchor="end" fontSize="10" fill={CHART_INK.faint}>
+            <text x={PAD.left - 6} y={tick.y + 3.5} textAnchor="end" fontSize="11" fill={CHART_INK.faint}>
               {tick.value}
             </text>
           </g>
@@ -135,7 +139,7 @@ export function AreaTrend({ data, unit = '' }: { data: TrendPoint[]; unit?: stri
 
         {points.map((p, i) =>
           i % labelEvery === 0 ? (
-            <text key={p.label} x={p.x} y={H - 6} textAnchor="middle" fontSize="10" fill={CHART_INK.faint}>
+            <text key={p.label} x={p.x} y={H - 6} textAnchor="middle" fontSize="11" fill={CHART_INK.faint}>
               {p.label}
             </text>
           ) : null,

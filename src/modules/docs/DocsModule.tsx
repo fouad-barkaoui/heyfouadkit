@@ -182,7 +182,7 @@ export function DocsModule(): JSX.Element {
           >
             <FolderOpen size={14} strokeWidth={1.7} aria-hidden />
             <span className="flex-1 truncate text-start">{t('doc.allDocuments')}</span>
-            <span className="mono num text-[10.5px] text-ash">{docs.length}</span>
+            <span className="mono num text-[12px] text-ash">{docs.length}</span>
           </button>
 
           {folders.map(([name, count]) => (
@@ -201,7 +201,7 @@ export function DocsModule(): JSX.Element {
               />
               <Folder size={13.5} strokeWidth={1.7} aria-hidden />
               <span className="flex-1 truncate text-start">{folderLabel(name)}</span>
-              <span className="mono num text-[10.5px] text-ash">{count}</span>
+              <span className="mono num text-[12px] text-ash">{count}</span>
             </button>
           ))}
 
@@ -233,7 +233,7 @@ export function DocsModule(): JSX.Element {
       ) : (
         <div>
           <div className="mb-2 flex items-center justify-between px-1">
-            <p className="text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash/70">{t('doc.badgesHeading')}</p>
+            <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-ash/70">{t('doc.badgesHeading')}</p>
             <IconButton label={t('doc.newBadge')} onClick={startNewBadge}>
               <Plus size={13.5} strokeWidth={1.9} />
             </IconButton>

@@ -294,6 +294,7 @@
 }
 .home-foot a {
   display: inline-flex;
+  min-height: 28px;
   align-items: center;
   gap: 4px;
   color: var(--color-paper);

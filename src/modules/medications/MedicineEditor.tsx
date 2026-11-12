@@ -216,7 +216,7 @@ export function MedicineEditor({
           <div key={id} className="flex flex-1 items-center gap-1.5">
             <span
               className={cn(
-                'flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10.5px]',
+                'flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[12px]',
                 i === step
                   ? 'bg-acid text-void'
                   : i < step

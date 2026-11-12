@@ -178,7 +178,7 @@ export function HabitsModule(): JSX.Element {
       </div>
 
       <div>
-        <p className="mb-1.5 px-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('hab.habits')}</p>
+        <p className="mb-1.5 px-2 text-[12px] font-medium uppercase tracking-[0.08em] text-ash">{t('hab.habits')}</p>
         {habits.length === 0 ? <p className="px-2 text-[12px] text-ash">{t('hab.noHabits')}</p> : null}
         {habits.map((h) => {
           const streak = currentStreak(h);
@@ -206,7 +206,7 @@ export function HabitsModule(): JSX.Element {
       </div>
 
       <div>
-        <p className="mb-1.5 px-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ash">{t('hab.goals')}</p>
+        <p className="mb-1.5 px-2 text-[12px] font-medium uppercase tracking-[0.08em] text-ash">{t('hab.goals')}</p>
         {goals.length === 0 ? <p className="px-2 text-[12px] text-ash">{t('hab.noGoals')}</p> : null}
         {goals.map((g) => {
           const p = goalProgress(g, todos);
@@ -303,7 +303,7 @@ export function HabitsModule(): JSX.Element {
                         })}
                         className={cn('hb-dot flex flex-col items-center gap-1', k === 6 && 'is-today')}
                       >
-                        <span className="text-[10px] text-ash">{weekdayInitial(d.getDay(), locale)}</span>
+                        <span className="text-[11px] text-ash">{weekdayInitial(d.getDay(), locale)}</span>
                         <span className={cn('hb-dot-ball h-6 w-6 rounded-full', on && 'is-on', !sched && 'is-off')} />
                       </button>
                     );

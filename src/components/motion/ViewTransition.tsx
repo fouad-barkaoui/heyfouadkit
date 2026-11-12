@@ -44,7 +44,7 @@ export function ViewTransition({
   }, [id]);
 
   return (
-    <div ref={ref} className={cn('flex h-full min-h-0 min-w-0 flex-1', className)}>
+    <div ref={ref} className={cn('flex h-full min-h-0 min-w-0 flex-1 [&>*]:min-w-0 [&>*]:flex-1', className)}>
       {children}
     </div>
   );

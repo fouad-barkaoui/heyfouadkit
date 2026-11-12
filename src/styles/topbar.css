@@ -143,7 +143,7 @@ button.tb-pill[data-state='open'] {
   display: flex;
   min-width: 210px;
   max-width: calc(100vw - 24px);
-  max-height: min(var(--radix-dropdown-menu-content-available-height), 620px);
+  max-height: min(var(--radix-dropdown-menu-content-available-height), 700px);
   flex-direction: column;
   gap: 2px;
   overflow-y: auto;
@@ -187,17 +187,18 @@ button.tb-pill[data-state='open'] {
   background: rgb(var(--tint-rgb) / 0.06);
 }
 .tb-menu-label {
-  padding: 10px 14px 4px;
+  padding: 8px 14px 2px;
   color: var(--color-ash);
   font-size: 12px;
 }
 .tb-menu-sep {
   height: 1px;
   flex-shrink: 0;
-  margin: 6px 12px;
+  margin: 4px 12px;
   background: rgb(var(--tint-rgb) / 0.08);
 }
-.tb-menu-sections {
+.tb-menu-sections,
+.tb-menu-pages {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -242,10 +243,49 @@ button.tb-pill[data-state='open'] {
   }
 }
 
-/* Desktop: section pills in the bar, search centred on the page. */
-@media (min-width: 1100px) {
+/* Tablets: the folded menu uses two columns so it fits without scrolling. */
+@media (min-width: 600px) and (max-width: 1023px) {
+  .tb-menu-more {
+    width: 500px;
+  }
+  .tb-menu-sections {
+    display: block;
+    column-count: 2;
+    column-gap: 8px;
+  }
+  .tb-menu-sections > .tb-item,
+  .tb-menu-sections > .tb-menu-sep {
+    column-span: all;
+  }
+  .tb-menu-sections > [role='group'] {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 4px;
+    break-inside: avoid;
+  }
+  .tb-menu-pages {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 8px;
+  }
+}
+
+/* Desktop: pills | search | account. The side columns never shrink below their
+   content, so the search sits on the page's centre line when there is room and
+   slides right, next to the pills, when there is not. It can never overlap them. */
+@media (min-width: 1024px) {
   .topbar {
+    display: grid;
+    grid-template-columns: 1fr minmax(220px, 300px) 1fr;
+    column-gap: 16px;
     padding-inline: 32px;
+  }
+  .topbar-group {
+    min-width: auto;
+  }
+  .topbar-group:last-child {
+    justify-self: end;
   }
   .tb-nav {
     display: inline-flex;
@@ -254,14 +294,8 @@ button.tb-pill[data-state='open'] {
     display: none;
   }
   .tb-search {
-    position: absolute;
-    inset-inline-start: 50%;
-    width: 300px;
     max-width: none;
-    transform: translateX(-50%);
-  }
-  :root[dir='rtl'] .tb-search {
-    transform: translateX(50%);
+    margin-inline: 0;
   }
   .tb-kbd {
     display: block;
