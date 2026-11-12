@@ -243,6 +243,135 @@ button.tb-pill[data-state='open'] {
   }
 }
 
+/* Phones: the menu is a card in the middle of the screen over a frosted backdrop.
+   Radix positions its popper wrapper next to the button, so the wrapper is turned
+   into a full-screen flex box that centres the card instead. */
+.tb-menu-head {
+  display: none;
+}
+@media (max-width: 599px) {
+  [data-radix-popper-content-wrapper]:has(> .tb-menu-more) {
+    position: fixed !important;
+    inset: 0 !important;
+    min-width: 0 !important;
+    transform: none !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+  [data-radix-popper-content-wrapper]:has(> .tb-menu-more)::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--color-void) 58%, transparent);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    animation: tb-backdrop-in 280ms ease-out both;
+  }
+  [data-radix-popper-content-wrapper]:has(> .tb-menu-more[data-state='closed'])::before {
+    animation: tb-backdrop-out 180ms ease-in both;
+  }
+
+  .tb-menu.tb-menu-more {
+    position: relative;
+    width: min(100%, 380px);
+    min-width: 0;
+    max-height: min(100%, 640px, 82dvh);
+    border-radius: 28px;
+    padding: 8px;
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--tint-rgb) / 0.08),
+      0 24px 70px rgb(0 0 0 / 0.45);
+    transform-origin: 85% 0%;
+    animation: tb-pop-in 440ms cubic-bezier(0.34, 1.32, 0.64, 1) both;
+  }
+  .tb-menu.tb-menu-more[data-state='closed'] {
+    animation: tb-pop-out 190ms cubic-bezier(0.4, 0, 1, 1) both;
+  }
+  .tb-menu-more .tb-menu-head {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 6px 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-ash);
+  }
+  :root[dir='rtl'] .tb-menu-more .tb-menu-head {
+    padding: 6px 14px 6px 6px;
+  }
+  .tb-menu-more .tb-item {
+    height: 46px;
+    font-size: 16px;
+  }
+  .tb-menu-more .tb-menu-label {
+    padding: 12px 14px 4px;
+  }
+
+  /* Rows rise in one after another once the card has landed. */
+  .tb-menu-more[data-state='open'] .tb-menu-head,
+  .tb-menu-more[data-state='open'] .tb-menu-sections > *,
+  .tb-menu-more[data-state='open'] .tb-menu-pages > *,
+  .tb-menu-more[data-state='open'] > .tb-menu-sep,
+  .tb-menu-more[data-state='open'] > .tb-item {
+    animation: tb-rise 420ms var(--ease-out-quint) both;
+    animation-delay: calc(70ms + var(--n, 0) * 26ms);
+  }
+  .tb-menu-sections > :nth-child(1) { --n: 0; }
+  .tb-menu-sections > :nth-child(2) { --n: 1; }
+  .tb-menu-sections > :nth-child(3) { --n: 2; }
+  .tb-menu-sections > :nth-child(4) { --n: 3; }
+  .tb-menu-sections > :nth-child(5) { --n: 4; }
+  .tb-menu-sections > :nth-child(n + 6) { --n: 5; }
+  .tb-menu-pages > :nth-child(1) { --n: 6; }
+  .tb-menu-pages > :nth-child(2) { --n: 7; }
+  .tb-menu-pages > :nth-child(3) { --n: 8; }
+  .tb-menu-pages > :nth-child(n + 4) { --n: 9; }
+  .tb-menu-more > .tb-menu-sep { --n: 9; }
+  .tb-menu-more > .tb-item { --n: 10; }
+}
+
+@keyframes tb-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes tb-backdrop-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes tb-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(32px) scale(0.86);
+  }
+  45% {
+    opacity: 1;
+  }
+}
+@keyframes tb-pop-out {
+  to {
+    opacity: 0;
+    transform: translateY(14px) scale(0.95);
+  }
+}
+@keyframes tb-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tb-menu-more *,
+  .tb-menu-more {
+    animation-delay: 0ms !important;
+  }
+}
+
 /* Tablets: the folded menu uses two columns so it fits without scrolling. */
 @media (min-width: 600px) and (max-width: 1023px) {
   .tb-menu-more {

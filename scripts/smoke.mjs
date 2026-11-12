@@ -67,6 +67,16 @@ try {
       await page.click('button[aria-label="Show panel"]');
       check(await page.locator('aside input').first().isVisible(), `${vp.name}: list panel opens over the page`);
       await page.goto(`${BASE}/`);
+      await page.click('.tb-more');
+      await page.waitForTimeout(700);
+      const off = await page.evaluate(() => {
+        const r = document.querySelector('.tb-menu-more').getBoundingClientRect();
+        return Math.abs((r.left + r.right) / 2 - innerWidth / 2);
+      });
+      check(off <= 2, `${vp.name}: menu opens in the middle of the screen`);
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(400);
+      check((await page.locator('.tb-menu-more').count()) === 0, `${vp.name}: menu closes with Escape`);
     }
 
     // Navigation: section pills on desktop, the menu everywhere else.

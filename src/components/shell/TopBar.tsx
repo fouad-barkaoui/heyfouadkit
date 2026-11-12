@@ -1,5 +1,6 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { ArrowUpRight, ChevronDown, Search } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, Search, X } from 'lucide-react';
+import { useState } from 'react';
 import { BrandMark, BRAND_NAME } from '@/components/ui/BrandMark';
 import { Avatar } from '@/components/ui/Avatar';
 import { useI18n } from '@/components/ui/useI18n';
@@ -76,6 +77,7 @@ export function TopBar(): JSX.Element {
   const { live, syncState } = useWorkspace();
   const { inboxNew } = useNotifications();
   const { t } = useI18n();
+  const [menuOpen, setMenuOpen] = useState(false);
   const isAdmin = isAdminUser(user);
   const sync = SYNC_LOOK[live ? syncState : 'offline'];
   const SyncIcon = sync.icon;
@@ -140,7 +142,7 @@ export function TopBar(): JSX.Element {
           </button>
         ) : null}
 
-        <DropdownMenu.Root modal={false}>
+        <DropdownMenu.Root modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
           <DropdownMenu.Trigger className="tb-pill tb-circle tb-more" aria-label={t('sh.nav.open')}>
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
               <path d="M4 8h14M4 14h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -149,6 +151,18 @@ export function TopBar(): JSX.Element {
           </DropdownMenu.Trigger>
           <DropdownMenu.Portal>
             <DropdownMenu.Content className="tb-menu tb-menu-more" align="end" sideOffset={12} collisionPadding={12}>
+              {/* Phones: the menu is a centred card, so it carries its own close button. */}
+              <div className="tb-menu-head">
+                <span>{BRAND_NAME}</span>
+                <button
+                  type="button"
+                  className="btn-icon"
+                  aria-label={t('sh.panel.close')}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <X size={16} strokeWidth={1.8} aria-hidden />
+                </button>
+              </div>
               {/* Phones and tablets: the sections live here instead of the bar. */}
               <div className="tb-menu-sections">
                 <ModuleItem id="home" onSelect={setModule} />
