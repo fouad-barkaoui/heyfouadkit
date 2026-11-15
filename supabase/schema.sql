@@ -359,85 +359,102 @@ create trigger ensure_personal_team_ins
 -- against the function's own — empty — configured search_path).
 
 create or replace function public.create_team(team_name text)
-returns text language plpgsql security definer set search_path = '' as $$
-declare
-  new_id text;
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare new_id text;
 begin
-  if team_name is null or length(trim(team_name)) < 2 then
-    raise exception 'Give the team a name of at least 2 characters.';
+  if auth.uid() is null then raise exception 'Sign in first.'; end if;
+  if (select count(*) from public.teams where created_by = auth.uid()) >= 50 then
+    raise exception 'You have reached the limit of 50 teams.';
   end if;
-  new_id := 'team_' || replace(gen_random_uuid()::text, '-', '');
-  insert into public.teams (id, name, created_by) values (new_id, trim(team_name), auth.uid());
+  new_id := 'team_' || substr(replace(gen_random_uuid()::text, '-', ''), 1, 20);
+  insert into public.teams (id, name, created_by)
+    values (new_id, coalesce(nullif(left(trim(team_name), 80), ''), 'New team'), auth.uid());
   insert into public.team_members (team_id, user_id, role) values (new_id, auth.uid(), 'owner');
   return new_id;
 end $$;
 
 create or replace function public.rename_team(p_team_id text, p_name text)
-returns void language plpgsql security definer set search_path = '' as $$
-declare
-  my_role public.team_role;
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
 begin
-  select role into my_role from public.team_members where team_id = p_team_id and user_id = auth.uid();
-  if my_role is null or my_role not in ('owner', 'admin') then
-    raise exception 'Only an owner or admin can rename this team.';
-  end if;
-  if p_name is null or length(trim(p_name)) < 2 then
-    raise exception 'Give the team a name of at least 2 characters.';
-  end if;
-  update public.teams set name = trim(p_name) where id = p_team_id;
+  if not exists (
+    select 1 from public.team_members m
+    where m.team_id = p_team_id and m.user_id = auth.uid() and m.role in ('owner', 'admin')
+  ) then raise exception 'Not allowed.'; end if;
+  update public.teams set name = coalesce(nullif(left(trim(p_name), 80), ''), name) where id = p_team_id;
 end $$;
 
 create or replace function public.create_invite(
   p_team_id text,
   p_role public.team_role default 'editor',
-  p_expires_hours int default 168,
-  p_max_uses int default 0
+  p_expires_hours integer default 168,
+  p_max_uses integer default 0
 )
-returns text language plpgsql security definer set search_path = '' as $$
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
 declare
-  my_role public.team_role;
-  new_id text;
+  token text;
+  caller_role public.team_role;
 begin
-  select role into my_role from public.team_members where team_id = p_team_id and user_id = auth.uid();
-  if my_role is null or my_role not in ('owner', 'admin') then
+  select m.role into caller_role
+  from public.team_members m
+  where m.team_id = p_team_id and m.user_id = auth.uid();
+
+  if caller_role is null or caller_role not in ('owner', 'admin') then
     raise exception 'Only an owner or admin can invite people.';
   end if;
   if p_role = 'owner' then
     raise exception 'Invites cannot grant ownership directly.';
   end if;
-  new_id := 'inv_' || replace(gen_random_uuid()::text, '-', '');
+  if coalesce(p_max_uses, 0) < 0 or coalesce(p_max_uses, 0) > 1000 then
+    raise exception 'Invalid use limit.';
+  end if;
+  if coalesce(p_expires_hours, 0) < 0 or coalesce(p_expires_hours, 0) > 8760 then
+    raise exception 'Invalid expiry.';
+  end if;
+
+  token := 'inv_' || replace(gen_random_uuid()::text, '-', '');
   insert into public.team_invites (id, team_id, role, created_by, expires_at, max_uses)
   values (
-    new_id,
-    p_team_id,
-    p_role,
-    auth.uid(),
-    case when p_expires_hours > 0 then now() + (p_expires_hours || ' hours')::interval else null end,
-    greatest(p_max_uses, 0)
+    token, p_team_id, p_role, auth.uid(),
+    case when coalesce(p_expires_hours, 0) > 0 then now() + (p_expires_hours || ' hours')::interval else null end,
+    coalesce(p_max_uses, 0)
   );
-  return new_id;
+  return token;
 end $$;
 
 create or replace function public.redeem_invite(p_token text)
-returns text language plpgsql security definer set search_path = '' as $$
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
 declare
   inv record;
+  uid uuid := auth.uid();
 begin
+  if uid is null then raise exception 'Sign in to join a team.'; end if;
+
   select * into inv from public.team_invites where id = p_token for update;
-  if inv is null then
-    raise exception 'That invite link is no longer valid.';
-  end if;
-  if inv.expires_at is not null and inv.expires_at < now() then
-    raise exception 'That invite link has expired.';
-  end if;
-  if inv.max_uses > 0 and inv.use_count >= inv.max_uses then
-    raise exception 'That invite link has already been used.';
+  if inv is null then raise exception 'That invite link is not valid.'; end if;
+  if inv.expires_at is not null and inv.expires_at < now() then raise exception 'That invite link has expired.'; end if;
+  if inv.max_uses > 0 and inv.use_count >= inv.max_uses then raise exception 'That invite link has already been used.'; end if;
+
+  if exists (select 1 from public.team_members where team_id = inv.team_id and user_id = uid) then
+    return inv.team_id;
   end if;
 
-  insert into public.team_members (team_id, user_id, role)
-  values (inv.team_id, auth.uid(), inv.role)
-  on conflict (team_id, user_id) do nothing;
-
+  insert into public.team_members (team_id, user_id, role) values (inv.team_id, uid, inv.role);
   update public.team_invites set use_count = use_count + 1 where id = p_token;
   return inv.team_id;
 end $$;
@@ -1185,3 +1202,19 @@ create index if not exists treatment_plans_user_id_idx on public.treatment_plans
 create index if not exists contact_messages_user_id_idx on public.contact_messages (user_id);
 create index if not exists team_invites_created_by_idx on public.team_invites (created_by);
 create index if not exists teams_created_by_idx on public.teams (created_by);
+
+-- ============================================================================
+-- Least-privilege grants (see migrations/20261115a_security_hardening.sql).
+-- Row-level security is the primary guard; these remove everything the app
+-- does not need. The contact inbox (contact_messages, private.is_app_admin)
+-- is created by migrations/20260929_contact_messages.sql and tightened by the
+-- hardening migration, so run the migrations after this file on a new project.
+-- ============================================================================
+revoke all on all tables in schema public from anon;
+revoke truncate, trigger, references on all tables in schema public from authenticated;
+revoke insert, update, delete on public.teams, public.team_members, public.team_invites from authenticated;
+revoke insert, update, delete on public.profiles from authenticated;
+grant update (username) on public.profiles to authenticated;
+alter default privileges for role postgres in schema public revoke all on tables from anon;
+alter default privileges for role postgres in schema public revoke truncate, trigger, references on tables from authenticated;
+revoke execute on function public.touch_updated_at() from public, anon, authenticated;

@@ -85,4 +85,4 @@ are set under Project Settings, Environment Variables.
   connection returns. The service worker caches the app shell for offline use.
 - The admin account is listed in `src/lib/access.ts`.
 
-To set up a new Supabase project, run `supabase/schema.sql` in the SQL editor.
+To set up a new Supabase project, run `supabase/schema.sql` in the SQL editor. Then run the files in `supabase/migrations/` from `20260929_contact_messages.sql` onward (the contact inbox, the admin check and the least-privilege grants live there).
